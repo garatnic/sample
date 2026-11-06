@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>自動探索ダンジョン v0.1</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#101820;color:#e8edf4;font-family:system-ui,sans-serif}.wrap{max-width:540px;margin:auto;padding:16px}h1{font-size:22px}canvas{width:100%;display:block;border-radius:10px;background:#0d131b}.stats,.party,.controls{display:grid;gap:8px}.stats,.controls{grid-template-columns:repeat(3,1fr)}.party{grid-template-columns:repeat(2,1fr)}.panel{background:#202c39;border:1px solid #35475b;border-radius:10px;padding:10px;margin:10px 0}.stats div{text-align:center}.stats strong{display:block;font-size:21px}small{color:#a9b9c9}button{background:#344b64;color:white;border:1px solid #66829c;border-radius:8px;padding:12px 5px;font-weight:bold}.member{background:#293a4a;border-radius:8px;padding:9px;font-size:13px}.hp{height:6px;background:#57616d;border-radius:5px;margin-top:7px;overflow:hidden}.hp div{height:100%;background:#42ca84}.log{height:105px;overflow:auto;white-space:pre-line;font-size:12px;line-height:1.7;color:#c6d5e4}.legend{font-size:12px;color:#c4d0dc;margin:8px 0}.board{position:relative}.message{position:absolute;top:12px;left:12px;right:12px;text-align:center;background:#111c2be8;padding:10px;border-radius:8px;font-size:13px}</style></head>
+<body><main class="wrap"><h1>⚔️ 自動探索ダンジョン</h1><div class="stats"><div class="panel"><strong id="floor">1F</strong><small>フロア</small></div><div class="panel"><strong id="gold">0</strong><small>ゴールド</small></div><div class="panel"><strong id="kills">0</strong><small>討伐数</small></div></div><div class="board"><canvas id="canvas" width="440" height="440"></canvas><div id="message" class="message">探索を開始してください</div></div><p class="legend">🔵 冒険者　🔴 敵　🟨 宝箱　🟩 階段</p><div class="controls"><button id="start">▶ 開始</button><button id="speed">速度 ×1</button><button id="reset">↻ リセット</button></div><section class="panel"><b>冒険者パーティー</b><div class="party" id="party" style="margin-top:8px"></div></section><section class="panel"><b>探索ログ</b><div class="log" id="log"></div></section></main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id),ctx=$('canvas').getContext('2d'),N=22,S=20,dirs=[[1,0],[-1,0],[0,1],[0,-1]],rand=n=>Math.floor(Math.random()*n),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),key=(x,y)=>y*N+x;
+let map,seen,heroes,enemies,chests,stairs,goal,route,run=false,speed=1,floor=1,gold=0,kills=0,tick=0,logs=[],last=0,acc=0;
+function log(s){logs.unshift('• '+s);logs=logs.slice(0,35);$('log').textContent=logs.join('\n')}
+function generate(){
+map=Array.from({length:N},()=>Array(N).fill(1));let x=2,y=2;map[y][x]=0;
+for(let i=0;i<2400;i++){let d=dirs[rand(4)];x=Math.max(1,Math.min(N-2,x+d[0]));y=Math.max(1,Math.min(N-2,y+d[1]));map[y][x]=0;if(Math.random()<.45)for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(x+a>0&&x+a<N-1&&y+b>0&&y+b<N-1)map[y+b][x+a]=0}
+seen=Array.from({length:N},()=>Array(N).fill(false));
+const free=[];for(let y=1;y<N-1;y++)for(let x=1;x<N-1;x++)if(!map[y][x]&&Math.hypot(x-2,y-2)>5)free.push({x:x+.5,y:y+.5});
+function pick(){return free.splice(rand(free.length),1)[0]}
+enemies=Array.from({length:9+floor*2},()=>({...pick(),hp:17+floor*5,max:17+floor*5,atk:2+floor,alive:true,cool:rand(10),flash:0}));
+chests=Array.from({length:6},()=>({...pick(),open:false}));stairs=pick();goal=null;route=[];tick=0;
+heroes=[{name:'ナイト',icon:'🛡️',color:'#60a5fa',hp:95,max:95,atk:9,range:.95},{name:'ファイター',icon:'⚔️',color:'#fbbf24',hp:75,max:75,atk:12,range:1},{name:'アーチャー',icon:'🏹',color:'#4ade80',hp:57,max:57,atk:7,range:3.7},{name:'ヒーラー',icon:'✨',color:'#d8a4ff',hp:60,max:60,atk:4,range:3}].map((h,i)=>({...h,x:2.5+i%2*.32,y:2.5+Math.floor(i/2)*.32,cd:0}));
+reveal();log(floor+'階の探索を開始');update()}
+function reveal(){for(let h of heroes)if(h.hp>0)for(let y=Math.max(0,Math.floor(h.y)-3);y<=Math.min(N-1,Math.floor(h.y)+3);y++)for(let x=Math.max(0,Math.floor(h.x)-3);x<=Math.min(N-1,Math.floor(h.x)+3);x++)if(Math.hypot(h.x-x-.5,h.y-y-.5)<3.6)seen[y][x]=true}
+function path(start,end){const sx=Math.floor(start.x),sy=Math.floor(start.y),ex=Math.floor(end.x),ey=Math.floor(end.y),q=[[sx,sy]],prev=new Int32Array(N*N).fill(-1),v=new Uint8Array(N*N);v[key(sx,sy)]=1;
+for(let i=0;i<q.length;i++){let [x,y]=q[i];if(x===ex&&y===ey){let out=[],k=key(x,y);while(k!==key(sx,sy)){out.unshift({x:k%N+.5,y:Math.floor(k/N)+.5});k=prev[k]}return out}
+for(let [dx,dy] of dirs){let nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=N||ny>=N||map[ny][nx]||v[key(nx,ny)])continue;v[key(nx,ny)]=1;prev[key(nx,ny)]=key(x,y);q.push([nx,ny])}}return []}
+function choose(){const lead=heroes.find(h=>h.hp>0);if(!lead)return;let targets=[];for(let c of chests)if(!c.open)targets.push({p:c,priority:0});for(let e of enemies)if(e.alive)targets.push({p:e,priority:1});for(let y=1;y<N-1;y++)for(let x=1;x<N-1;x++)if(!map[y][x]&&!seen[y][x])targets.push({p:{x:x+.5,y:y+.5},priority:2});if(!targets.length)targets.push({p:stairs,priority:3});
+let best=null,score=Infinity;for(let t of targets){let p=path(lead,t.p);if(!p.length&&dist(lead,t.p)>.8)continue;let s=p.length+[ -2,0,3,8][t.priority]+Math.random()*.4;if(s<score){best=t.p;score=s;route=p}}goal=best||stairs}
+function move(h,p,step){let dx=p.x-h.x,dy=p.y-h.y,d=Math.hypot(dx,dy);if(d>.001){let m=Math.min(step,d);h.x+=dx/d*m;h.y+=dy/d*m}}
+function update(){$('floor').textContent=floor+'F';$('gold').textContent=gold;$('kills').textContent=kills;$('start').textContent=run?'Ⅱ 一時停止':'▶ '+(tick?'再開':'開始');$('party').innerHTML=heroes.map(h=>'<div class="member">'+h.icon+' '+h.name+' <span style="float:right">'+Math.ceil(h.hp)+'/'+h.max+'</span><div class="hp"><div style="width:'+Math.max(0,100*h.hp/h.max)+'%;background:'+(h.hp/h.max<.3?'#ef4444':'#42ca84')+'"></div></div></div>').join('')}
+function step(){tick++;let alive=heroes.filter(h=>h.hp>0);if(!alive.length){run=false;$('message').textContent='全滅！ リセットで再挑戦';$('message').hidden=false;log('パーティーは全滅した');update();return}
+if(!goal||tick%35===0||dist(alive[0],goal)<.45)choose();let fighting=false;
+for(let h of alive){h.cd=Math.max(0,h.cd-1);let target=enemies.filter(e=>e.alive&&dist(h,e)<h.range).sort((a,b)=>dist(h,a)-dist(h,b))[0];if(target){fighting=true;if(h.cd===0){target.hp-=h.atk;target.flash=5;h.cd=h.name==='ファイター'?7:11;if(target.hp<=0){target.alive=false;kills++;gold+=2+floor;log(h.name+'が敵を倒した')}}}
+if(h.name==='ヒーラー'&&h.cd===0){let wounded=heroes.filter(z=>z.hp>0&&z.hp<z.max-5).sort((a,b)=>a.hp/a.max-b.hp/b.max)[0];if(wounded){wounded.hp=Math.min(wounded.max,wounded.hp+9);h.cd=18}}}
+for(let e of enemies)if(e.alive){e.cool--;let near=alive.filter(h=>dist(h,e)<1.15).sort((a,b)=>dist(a,e)-dist(b,e))[0];if(near&&e.cool<=0){near.hp=Math.max(0,near.hp-e.atk);e.cool=16;e.flash=4;if(!near.hp)log(near.name+'が倒れた')}}
+const lead=heroes.find(h=>h.hp>0);if(lead&&!fighting&&goal){if(route.length&&dist(lead,route[0])<.22)route.shift();move(lead,route[0]||goal,.085)}
+for(let h of heroes){if(h===lead||h.hp<=0||!lead)continue;let i=heroes.indexOf(h),a=i*2.4,p={x:lead.x+Math.cos(a)*.55,y:lead.y+Math.sin(a)*.55};if(dist(h,lead)>1.5){let r=path(h,lead);move(h,r[0]||lead,.095)}else if(dist(h,p)>.18&&map[Math.floor(p.y)]?.[Math.floor(p.x)]===0)move(h,p,.075)}
+for(let c of chests)if(!c.open&&alive.some(h=>dist(h,c)<.75)){c.open=true;let g=10+rand(21)+floor*3;gold+=g;log('宝箱から '+g+'G を獲得')}
+if(lead&&dist(lead,stairs)<.65&&chests.every(c=>c.open)&&enemies.every(e=>!e.alive)){floor++;log('次の階へ');generate()}reveal();if(tick%5===0)update()}
+function draw(){ctx.fillStyle='#0d131b';ctx.fillRect(0,0,440,440);for(let y=0;y<N;y++)for(let x=0;x<N;x++){ctx.fillStyle=!seen[y][x]?'#101820':map[y][x]?'#35404b':'#68717b';ctx.fillRect(x*S+.5,y*S+.5,S-1,S-1)}
+const vis=p=>seen[Math.floor(p.y)]?.[Math.floor(p.x)];function circle(p,r,color){ctx.beginPath();ctx.arc(p.x*S,p.y*S,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
+if(vis(stairs)){ctx.fillStyle='#44c98b';ctx.fillRect(stairs.x*S-7,stairs.y*S-7,14,14);ctx.fillStyle='#183e31';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('↓',stairs.x*S,stairs.y*S+5)}
+for(let c of chests)if(!c.open&&vis(c)){ctx.fillStyle='#eab94e';ctx.fillRect(c.x*S-6,c.y*S-5,12,10);ctx.fillStyle='#67471b';ctx.fillRect(c.x*S-1,c.y*S-5,3,10)}
+for(let e of enemies)if(e.alive&&vis(e)){circle(e,7,e.flash>0?'#fff':'#f06b6b');e.flash=Math.max(0,e.flash-1);ctx.fillStyle='#300';ctx.fillRect(e.x*S-8,e.y*S-11,16,3);ctx.fillStyle='#f76';ctx.fillRect(e.x*S-8,e.y*S-11,16*e.hp/e.max,3)}
+for(let h of heroes)if(h.hp>0){circle(h,8,h.color);ctx.strokeStyle='#142334';ctx.lineWidth=2;ctx.beginPath();ctx.arc(h.x*S,h.y*S,8,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#142334';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(h.name==='ナイト'?'N':h.name==='ファイター'?'F':h.name==='アーチャー'?'A':'H',h.x*S,h.y*S+3)}}
+function loop(t){let dt=Math.min(100,t-last||16);last=t;if(run){acc+=dt*speed;let n=0;while(acc>=45&&n++<20){step();acc-=45}}draw();requestAnimationFrame(loop)}
+$('start').onclick=()=>{if(heroes.every(h=>h.hp<=0))return;run=!run;$('message').hidden=run;$('message').textContent='一時停止中';update()};
+$('speed').onclick=()=>{speed=speed===1?2:speed===2?4:1;$('speed').textContent='速度 ×'+speed};
+$('reset').onclick=()=>{run=false;floor=1;gold=0;kills=0;logs=[];generate();$('message').textContent='探索を開始してください';$('message').hidden=false;update()};
+generate();requestAnimationFrame(loop);
+})();
+</script></body></html>
