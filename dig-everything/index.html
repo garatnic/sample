@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>地底全部掘る v0.2</title>
+<title>地底全部掘る v0.3</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#141b24;color:#edf3f5;font-family:system-ui,sans-serif}
 main{max-width:760px;margin:auto;padding:12px}h1{font-size:23px;margin:8px 0 4px}p{color:#b8c8ce;font-size:13px;line-height:1.6}
@@ -34,13 +34,13 @@ button:disabled{opacity:.4}.meter{height:13px;background:#43515a;border-radius:8
 <div class="upgrades" style="margin-top:9px"><button id="drill"></button><button id="transport"></button><button id="hire"></button></div>
 <p class="hint">ドリルで掘削速度を、搬送設備で鉱石売却額を強化。ロボットも増設できます。</p></div>
 <div class="panel"><b>採掘ログ</b><div class="log" id="log"></div></div>
-<p class="hint">固定画面 600×480px、1ブロック 2.4×2.4px（元の24×24pxの縦横1/10）。全250×200＝50,000ブロック。元の「地底採掘」とは独立したゲームです。</p>
+<p class="hint">固定画面 600×480px、1ブロック 2.4×2.4px（元の24×24pxの縦横1/10）。全250×200マス（基地周辺の空白を除く）。元の「地底採掘」とは独立したゲームです。</p>
 </main>
 <script>
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d');
-const COLS=250,ROWS=200,TOTAL=COLS*ROWS,TILE=2.4;
+const COLS=250,ROWS=200,TILE=2.4,BASE_X=125,BASE_Y=5,BASE_RADIUS=5;\nlet total=0;
 const terrain=document.createElement('canvas');terrain.width=COLS;terrain.height=ROWS;
 const tctx=terrain.getContext('2d',{alpha:false});
 const palette=['#392d29','#6a5140','#424044','#597f8b','#b39a6b','#f2c55d'];
@@ -48,101 +48,123 @@ const worth=[0,1,2,4,8,16];
 let cells,workers,coins,dug,drill,transport,elapsed,playing,won,speed,last,acc,logs,workerId;
 function log(message){logs.unshift('• '+message);logs=logs.slice(0,30);$('log').textContent=logs.join('\n')}
 function makeCells(){
- cells=new Uint8Array(TOTAL);
+ cells=new Uint8Array(COLS*ROWS);total=0;
  const img=tctx.createImageData(COLS,ROWS);
- const rgb=[[57,45,41],[106,81,64],[66,64,68],[89,127,139],[179,154,107],[242,197,93]];
+ const rgb=[[25,38,49],[106,81,64],[66,64,68],[89,127,139],[179,154,107],[242,197,93]];
  for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
-  const r=Math.random(),depth=y/ROWS,v=r<.01+depth*.02?5:r<.045+depth*.05?4:r<.11+depth*.07?3:r<.24+depth*.09?2:1;
-  const i=y*COLS+x;cells[i]=v;const k=i*4;img.data[k]=rgb[v][0];img.data[k+1]=rgb[v][1];img.data[k+2]=rgb[v][2];img.data[k+3]=255;
+  const i=y*COLS+x,k=i*4;
+  const r=Math.random(),depth=y/ROWS;
+  const blank=Math.hypot(x-BASE_X,y-BASE_Y)*TILE<=12;
+  const v=blank?0:r<.01+depth*.02?5:r<.045+depth*.05?4:r<.11+depth*.07?3:r<.24+depth*.09?2:1;
+  cells[i]=v;if(v)total++;
+  for(let c=0;c<3;c++)img.data[k+c]=rgb[v][c];img.data[k+3]=255;
  }
  tctx.putImageData(img,0,0);
 }
 function newWorker(){
- const w={id:workerId++,index:0,progress:0,done:false,assigned:0,span:0,x:COLS/2,y:-4,mode:'out',ore:0};
- workers.push(w);repartition();return w;
+ const w={id:workerId++,x:BASE_X,y:BASE_Y,mode:'choose',path:[],target:-1,ore:0,progress:0};
+ workers.push(w);return w;
 }
-function repartition(){
- // Every worker owns a disjoint vertical strip. Reassignment preserves already excavated tiles.
- workers.forEach((w,i)=>{
-  const begin=Math.floor(COLS*i/workers.length),end=Math.floor(COLS*(i+1)/workers.length);
-  w.assigned=begin;w.span=end-begin;
-  // Find the first undug cell in the strip, following a serpentine column traversal.
-  let first=0;while(first<w.span*ROWS){const p=cellFor(w,first);if(cells[p.y*COLS+p.x]!==0)break;first++}
-  w.index=first;w.done=first>=w.span*ROWS;
-  w.x=COLS/2;w.y=-4;w.mode='out';w.progress=0;w.ore=0;
- });
+function neighbors(i){
+ const x=i%COLS,y=(i/COLS)|0,arr=[];
+ if(x>0)arr.push(i-1);if(x<COLS-1)arr.push(i+1);
+ if(y>0)arr.push(i-COLS);if(y<ROWS-1)arr.push(i+COLS);
+ return arr;
 }
-function cellFor(w,index){
- const col=Math.floor(index/ROWS),r=index%ROWS;
- return {x:w.assigned+col,y:col%2===0?r:ROWS-1-r};
+function findRoute(){
+ // Breadth-first search through empty cells only: the first solid neighbor is the nearest mineable block.
+ const start=BASE_Y*COLS+BASE_X,q=new Int32Array(COLS*ROWS),prev=new Int32Array(COLS*ROWS);
+ prev.fill(-1);let head=0,tail=1;q[0]=start;prev[start]=start;
+ const reserved=new Set(workers.filter(w=>w.target>=0).map(w=>w.target));
+ while(head<tail){
+  const cur=q[head++];
+  for(const n of neighbors(cur)){
+   if(cells[n]!==0&&!reserved.has(n)){
+    const path=[];let p=cur;
+    while(p!==start){path.push(p);p=prev[p]}
+    path.push(start);path.reverse();
+    return {path,target:n};
+   }
+  }
+  for(const n of neighbors(cur)){
+   if(cells[n]===0&&prev[n]<0){prev[n]=cur;q[tail++]=n}
+  }
+ }
+ return null;
 }
 function reset(){
  coins=0;dug=0;drill=1;transport=1;elapsed=0;playing=false;won=false;speed=1;last=0;acc=0;logs=[];workers=[];workerId=1;
  makeCells();newWorker();
- $('speed').textContent='速度 ×1';$('overlay').hidden=false;$('overlay').textContent='▶ 開始を押すと25台のロボが自動採掘します';
- log('採掘エリア 50,000 ブロックを生成');update();
+ $('speed').textContent='速度 ×1';$('overlay').hidden=false;$('overlay').textContent='▶ 開始を押すと1台のロボが基地から近い順に掘ります';
+ log('基地周囲12pxを空洞にしました。採掘対象 '+total.toLocaleString('ja-JP')+' マス');update();
 }
-function excavate(w){
- if(w.done)return;
- let p=cellFor(w,w.index);
- let idx=p.y*COLS+p.x;
- if(cells[idx]!==0){
-  const ore=cells[idx];cells[idx]=0;tctx.fillStyle='#192631';tctx.fillRect(p.x,p.y,1,1);
-  dug++;w.ore=worth[ore];
-  if(ore===5&&dug%73===0)log('金鉱石を採掘！');
- }
- w.x=p.x;w.y=p.y;
- w.index++;
- while(w.index<w.span*ROWS){
-  const next=cellFor(w,w.index);
-  if(cells[next.y*COLS+next.x]!==0)break;
-  w.index++;
- }
- if(w.index>=w.span*ROWS)w.done=true;
+function advance(w,dt){
+ if(!w.path.length)return true;
+ const p=w.path[0],tx=p%COLS,ty=(p/COLS)|0;
+ const dx=tx-w.x,dy=ty-w.y,d=Math.hypot(dx,dy),step=dt*24;
+ if(d<=step){w.x=tx;w.y=ty;w.path.shift();return w.path.length===0}
+ w.x+=dx/d*step;w.y+=dy/d*step;return false;
 }
 function tick(dt){
- if(won)return;
- elapsed+=dt;
+ if(won)return;elapsed+=dt;
  for(const w of workers){
-  if(w.done)continue;
-  const baseX=COLS/2,baseY=-4;
-  if(w.mode==='return'){
-   const dx=baseX-w.x,dy=baseY-w.y,d=Math.hypot(dx,dy),step=dt*(75+drill*5);
-   if(d<=step){w.x=baseX;w.y=baseY;coins+=w.ore*transport;w.ore=0;w.mode='out';}
-   else{w.x+=dx/d*step;w.y+=dy/d*step}
-   continue;
+  if(w.mode==='choose'){
+   const result=findRoute();
+   if(!result){w.mode='idle';continue}
+   w.target=result.target;w.path=result.path.slice(1);w.mode='out';
   }
-  if(w.index>=w.span*ROWS){w.done=true;continue}
-  const p=cellFor(w,w.index);
-  const dx=p.x-w.x,dy=p.y-w.y,d=Math.hypot(dx,dy),step=dt*(75+drill*5);
-  if(d>0.2){
-   if(d<=step){w.x=p.x;w.y=p.y}
-   else{w.x+=dx/d*step;w.y+=dy/d*step}
-   continue;
-  }
-  w.progress+=dt*(1.5+drill*.7);
-  if(w.progress>=1){
-   w.progress=0;
-   excavate(w);
-   // Exactly one block per trip, including for upgraded drills.
-   w.mode='return';
-  }
+  if(w.mode==='out'){
+   if(advance(w,dt))w.mode='mine';
+  }else if(w.mode==='mine'){
+   w.progress+=dt*(1.5+drill*.7);
+   if(w.progress>=1){
+    w.progress=0;
+    const i=w.target,ore=cells[i];
+    if(ore){
+     cells[i]=0;const x=i%COLS,y=(i/COLS)|0;
+     tctx.fillStyle='#192631';tctx.fillRect(x,y,1,1);
+     dug++;w.ore=worth[ore];
+     if(ore===5&&dug%73===0)log('金鉱石を採掘！');
+    }
+    // Return along the exact traversable path, never through intact blocks.
+    const result=findReturnPath(w);
+    w.path=result;w.mode='return';w.target=-1;
+   }
+  }else if(w.mode==='return'){
+   if(advance(w,dt)){
+    coins+=w.ore*transport;w.ore=0;w.mode='choose';
+   }
+  }else if(w.mode==='idle'&&dug<total){w.mode='choose'}
  }
- if(dug>=TOTAL&&workers.every(w=>w.mode!=='return')){
-  dug=TOTAL;won=true;playing=false;
-  $('overlay').hidden=false;$('overlay').textContent='🎉 地底全部掘った！ 50,000ブロック完全採掘！';
-  log('完全採掘達成！ おめでとう！');
+ if(dug>=total&&workers.every(w=>w.mode==='choose'||w.mode==='idle')){
+  won=true;playing=false;$('overlay').hidden=false;
+  $('overlay').textContent='🎉 地底全部掘った！ 全'+total.toLocaleString('ja-JP')+'マス完全採掘！';
+  log('完全採掘達成！');
  }
  update();
 }
+function findReturnPath(w){
+ // Reconstruct shortest route through empty cells from the worker's current position to base.
+ const start=Math.round(w.y)*COLS+Math.round(w.x),end=BASE_Y*COLS+BASE_X;
+ const q=new Int32Array(COLS*ROWS),prev=new Int32Array(COLS*ROWS);
+ prev.fill(-1);let head=0,tail=1;q[0]=start;prev[start]=start;
+ while(head<tail&&prev[end]<0){
+  const cur=q[head++];
+  for(const n of neighbors(cur))if(cells[n]===0&&prev[n]<0){prev[n]=cur;q[tail++]=n}
+ }
+ if(prev[end]<0)return [];
+ const path=[];let p=end;
+ while(p!==start){path.push(p);p=prev[p]}
+ return path.reverse();
+}
 function update(){
  $('coins').textContent=Math.floor(coins).toLocaleString('ja-JP');
- $('done').textContent=dug.toLocaleString('ja-JP')+'/'+TOTAL.toLocaleString('ja-JP');
+ $('done').textContent=dug.toLocaleString('ja-JP')+'/'+total.toLocaleString('ja-JP');
  $('bots').textContent=workers.length;
  $('time').textContent=Math.floor(elapsed/60)+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
- const pct=dug/TOTAL*100;
+ const pct=dug/total*100;
  $('pct').textContent=pct.toFixed(2)+'%';$('bar').style.width=pct+'%';
- $('remaining').textContent='残り '+(TOTAL-dug).toLocaleString('ja-JP')+' ブロック';
+ $('remaining').textContent='残り '+(total-dug).toLocaleString('ja-JP')+' ブロック';
  $('start').textContent=playing?'Ⅱ 一時停止':'▶ '+(elapsed?'再開':'開始');
  $('start').disabled=won;
  const costs=[200*drill,350*transport,800+workers.length*60];
@@ -154,14 +176,14 @@ function update(){
 function draw(){
  ctx.imageSmoothingEnabled=false;
  ctx.drawImage(terrain,0,0,canvas.width,canvas.height);
- ctx.fillStyle='#f2d081';ctx.fillRect(286,0,28,8);ctx.fillStyle='#152631';ctx.font='10px sans-serif';ctx.fillText('基地',289,7);
+ ctx.fillStyle='#f2d081';ctx.fillRect((BASE_X-4)*TILE,(BASE_Y-3)*TILE,8*TILE,6*TILE);ctx.fillStyle='#152631';ctx.font='10px sans-serif';ctx.fillText('基地',(BASE_X-4)*TILE,(BASE_Y-3)*TILE-2);
  // Worker markers remain readable despite the 2.4px terrain cells.
  for(const w of workers){
-  if(w.done&&w.mode!=='return')continue;
+  if(w.mode==='idle')continue;
   const x=(w.x+.5)*TILE,y=(w.y+.5)*TILE;
-  ctx.fillStyle='#111c27';ctx.fillRect(x-3,y-3,6,6);
+  ctx.fillStyle='#111c27';ctx.fillRect(x-1.5,y-1.5,3,3);
   ctx.fillStyle=w.id%3===0?'#7bd7ff':w.id%3===1?'#ffdd72':'#b7f59b';
-  ctx.fillRect(x-2,y-2,4,4);
+  ctx.fillRect(x-1,y-1,2,2);
   if(w.ore){ctx.fillStyle='#ffe58d';ctx.fillRect(x-1,y-6,3,3)}
  }
 }
