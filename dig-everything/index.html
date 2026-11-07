@@ -40,7 +40,8 @@ button:disabled{opacity:.4}.meter{height:13px;background:#43515a;border-radius:8
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d');
-const COLS=250,ROWS=200,TILE=2.4,BASE_X=125,BASE_Y=5,BASE_RADIUS=5;\nlet total=0;
+const COLS=250,ROWS=200,TILE=2.4,BASE_X=125,BASE_Y=5,BASE_RADIUS=5;
+let total=0;
 const terrain=document.createElement('canvas');terrain.width=COLS;terrain.height=ROWS;
 const tctx=terrain.getContext('2d',{alpha:false});
 const palette=['#392d29','#6a5140','#424044','#597f8b','#b39a6b','#f2c55d'];
