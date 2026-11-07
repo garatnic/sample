@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>地底全部掘る v0.1</title>
+<title>地底全部掘る v0.2</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#141b24;color:#edf3f5;font-family:system-ui,sans-serif}
 main{max-width:760px;margin:auto;padding:12px}h1{font-size:23px;margin:8px 0 4px}p{color:#b8c8ce;font-size:13px;line-height:1.6}
@@ -18,15 +18,15 @@ button:disabled{opacity:.4}.meter{height:13px;background:#43515a;border-radius:8
 </style></head>
 <body><main>
 <h1>⛏️ 地底全部掘る</h1>
-<p>画面内の地下をすべて掘り尽くそう！ 小さなブロックを採掘ロボが自動で掘り、鉱石を売って設備を強化します。</p>
+<p>画面内の地下をすべて掘り尽くそう！ 小さなブロックを採掘ロボが1マス掘るたび拠点へ戻り、鉱石を売って設備を強化します。</p>
 <div class="stats">
 <div class="panel"><strong id="coins">0</strong><small>💰 コイン</small></div>
 <div class="panel"><strong id="done">0</strong><small>採掘済み</small></div>
-<div class="panel"><strong id="bots">25</strong><small>採掘ロボ</small></div>
+<div class="panel"><strong id="bots">1</strong><small>採掘ロボ</small></div>
 <div class="panel"><strong id="time">0:00</strong><small>経過時間</small></div>
 </div>
 <div class="board"><canvas id="map" width="600" height="480" aria-label="固定画面の地底採掘フィールド"></canvas>
-<div id="overlay" class="overlay">▶ 開始を押すと25台のロボが自動採掘します</div></div>
+<div id="overlay" class="overlay">▶ 開始を押すと1台のロボが1マスずつ採掘・帰還します</div></div>
 <div class="panel"><b>地底の採掘率</b> <span id="pct">0.00%</span>
 <div class="meter"><div id="bar"></div></div><div class="hint" id="remaining"></div></div>
 <div class="buttons"><button id="start">▶ 開始</button><button id="speed">速度 ×1</button><button id="reset">↻ リセット</button></div>
@@ -58,7 +58,7 @@ function makeCells(){
  tctx.putImageData(img,0,0);
 }
 function newWorker(){
- const w={id:workerId++,index:0,progress:0,done:false,assigned:0,span:0,x:0,y:0};
+ const w={id:workerId++,index:0,progress:0,done:false,assigned:0,span:0,x:COLS/2,y:-4,mode:'out',ore:0};
  workers.push(w);repartition();return w;
 }
 function repartition(){
@@ -69,7 +69,7 @@ function repartition(){
   // Find the first undug cell in the strip, following a serpentine column traversal.
   let first=0;while(first<w.span*ROWS){const p=cellFor(w,first);if(cells[p.y*COLS+p.x]!==0)break;first++}
   w.index=first;w.done=first>=w.span*ROWS;
-  if(!w.done){const p=cellFor(w,first);w.x=p.x;w.y=p.y}
+  w.x=COLS/2;w.y=-4;w.mode='out';w.progress=0;w.ore=0;
  });
 }
 function cellFor(w,index){
@@ -78,7 +78,7 @@ function cellFor(w,index){
 }
 function reset(){
  coins=0;dug=0;drill=1;transport=1;elapsed=0;playing=false;won=false;speed=1;last=0;acc=0;logs=[];workers=[];workerId=1;
- makeCells();for(let i=0;i<25;i++)newWorker();
+ makeCells();newWorker();
  $('speed').textContent='速度 ×1';$('overlay').hidden=false;$('overlay').textContent='▶ 開始を押すと25台のロボが自動採掘します';
  log('採掘エリア 50,000 ブロックを生成');update();
 }
@@ -88,7 +88,7 @@ function excavate(w){
  let idx=p.y*COLS+p.x;
  if(cells[idx]!==0){
   const ore=cells[idx];cells[idx]=0;tctx.fillStyle='#192631';tctx.fillRect(p.x,p.y,1,1);
-  dug++;coins+=worth[ore]*transport;
+  dug++;w.ore=worth[ore];
   if(ore===5&&dug%73===0)log('金鉱石を採掘！');
  }
  w.x=p.x;w.y=p.y;
@@ -105,11 +105,30 @@ function tick(dt){
  elapsed+=dt;
  for(const w of workers){
   if(w.done)continue;
-  w.progress+=dt*(23+drill*13);
-  let count=Math.min(100,Math.floor(w.progress));w.progress-=count;
-  for(let i=0;i<count&&!w.done;i++)excavate(w);
+  const baseX=COLS/2,baseY=-4;
+  if(w.mode==='return'){
+   const dx=baseX-w.x,dy=baseY-w.y,d=Math.hypot(dx,dy),step=dt*(75+drill*5);
+   if(d<=step){w.x=baseX;w.y=baseY;coins+=w.ore*transport;w.ore=0;w.mode='out';}
+   else{w.x+=dx/d*step;w.y+=dy/d*step}
+   continue;
+  }
+  if(w.index>=w.span*ROWS){w.done=true;continue}
+  const p=cellFor(w,w.index);
+  const dx=p.x-w.x,dy=p.y-w.y,d=Math.hypot(dx,dy),step=dt*(75+drill*5);
+  if(d>0.2){
+   if(d<=step){w.x=p.x;w.y=p.y}
+   else{w.x+=dx/d*step;w.y+=dy/d*step}
+   continue;
+  }
+  w.progress+=dt*(1.5+drill*.7);
+  if(w.progress>=1){
+   w.progress=0;
+   excavate(w);
+   // Exactly one block per trip, including for upgraded drills.
+   w.mode='return';
+  }
  }
- if(dug>=TOTAL){
+ if(dug>=TOTAL&&workers.every(w=>w.mode!=='return')){
   dug=TOTAL;won=true;playing=false;
   $('overlay').hidden=false;$('overlay').textContent='🎉 地底全部掘った！ 50,000ブロック完全採掘！';
   log('完全採掘達成！ おめでとう！');
@@ -135,13 +154,15 @@ function update(){
 function draw(){
  ctx.imageSmoothingEnabled=false;
  ctx.drawImage(terrain,0,0,canvas.width,canvas.height);
+ ctx.fillStyle='#f2d081';ctx.fillRect(286,0,28,8);ctx.fillStyle='#152631';ctx.font='10px sans-serif';ctx.fillText('基地',289,7);
  // Worker markers remain readable despite the 2.4px terrain cells.
  for(const w of workers){
-  if(w.done)continue;
+  if(w.done&&w.mode!=='return')continue;
   const x=(w.x+.5)*TILE,y=(w.y+.5)*TILE;
   ctx.fillStyle='#111c27';ctx.fillRect(x-3,y-3,6,6);
   ctx.fillStyle=w.id%3===0?'#7bd7ff':w.id%3===1?'#ffdd72':'#b7f59b';
   ctx.fillRect(x-2,y-2,4,4);
+  if(w.ore){ctx.fillStyle='#ffe58d';ctx.fillRect(x-1,y-6,3,3)}
  }
 }
 function frame(t){
