@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>地底全部掘る v0.3</title>
+<title>地底全部掘る v6</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#141b24;color:#edf3f5;font-family:system-ui,sans-serif}
 main{max-width:760px;margin:auto;padding:12px}h1{font-size:23px;margin:8px 0 4px}p{color:#b8c8ce;font-size:13px;line-height:1.6}
@@ -17,7 +17,7 @@ button:disabled{opacity:.4}.meter{height:13px;background:#43515a;border-radius:8
 .overlay{position:absolute;top:12px;left:12px;right:12px;text-align:center;background:#111b25e8;padding:10px;border-radius:8px}
 </style></head>
 <body><main>
-<h1>⛏️ 地底全部掘る</h1>
+<h1>⛏️ 地底全部掘る v6</h1>
 <p>画面内の地下をすべて掘り尽くそう！ 小さなブロックを採掘ロボが1マス掘るたび拠点へ戻り、鉱石を売って設備を強化します。</p>
 <div class="stats">
 <div class="panel"><strong id="coins">0</strong><small>💰 コイン</small></div>
@@ -40,13 +40,14 @@ button:disabled{opacity:.4}.meter{height:13px;background:#43515a;border-radius:8
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d');
-const COLS=250,ROWS=200,TILE=2.4,BASE_X=125,BASE_Y=5,BASE_RADIUS=5;
+const COLS=250,ROWS=200,TILE=2.4,BASE_X=125,BASE_Y=5,MAX_WORKERS=100;
+const BASE=BASE_Y*COLS+BASE_X, ROUTES_PER_FRAME=12;
 let total=0;
 const terrain=document.createElement('canvas');terrain.width=COLS;terrain.height=ROWS;
 const tctx=terrain.getContext('2d',{alpha:false});
-const palette=['#392d29','#6a5140','#424044','#597f8b','#b39a6b','#f2c55d'];
 const worth=[0,1,2,4,8,16];
-let cells,workers,coins,dug,drill,transport,elapsed,playing,won,speed,last,acc,logs,workerId;
+let cells,workers,coins,dug,drill,transport,elapsed,playing,won,speed,last,acc,logs,workerId,dispatchCursor;
+let parent,distance,frontier,frontierSlot;
 function log(message){logs.unshift('• '+message);logs=logs.slice(0,30);$('log').textContent=logs.join('\n')}
 function makeCells(){
  cells=new Uint8Array(COLS*ROWS);total=0;
@@ -63,7 +64,7 @@ function makeCells(){
  tctx.putImageData(img,0,0);
 }
 function newWorker(){
- const w={id:workerId++,x:BASE_X,y:BASE_Y,mode:'choose',path:[],target:-1,ore:0,progress:0};
+ const w={id:workerId++,x:BASE_X,y:BASE_Y,mode:'choose',path:[],pathIndex:0,target:-1,lastMined:-1,ore:0,progress:0};
  workers.push(w);return w;
 }
 function neighbors(i){
@@ -72,91 +73,138 @@ function neighbors(i){
  if(y>0)arr.push(i-COLS);if(y<ROWS-1)arr.push(i+COLS);
  return arr;
 }
-function findRoute(){
- // Breadth-first search through empty cells only: the first solid neighbor is the nearest mineable block.
- const start=BASE_Y*COLS+BASE_X,q=new Int32Array(COLS*ROWS),prev=new Int32Array(COLS*ROWS);
- prev.fill(-1);let head=0,tail=1;q[0]=start;prev[start]=start;
- const reserved=new Set(workers.filter(w=>w.target>=0).map(w=>w.target));
- while(head<tail){
-  const cur=q[head++];
-  for(const n of neighbors(cur)){
-   if(cells[n]!==0&&!reserved.has(n)){
-    const path=[];let p=cur;
-    while(p!==start){path.push(p);p=prev[p]}
-    path.push(start);path.reverse();
-    return {path,target:n};
+// The dense frontier holds only unreserved solid cells touching reachable air.
+function addFrontier(i){
+ if(frontierSlot[i]>=0)return;
+ frontierSlot[i]=frontier.length;
+ frontier.push(i);
+}
+function reserve(i){
+ const slot=frontierSlot[i],lastCell=frontier.pop();
+ if(slot<frontier.length){
+  frontier[slot]=lastCell;
+  frontierSlot[lastCell]=slot;
+ }
+ frontierSlot[i]=-2;
+}
+function initRoutes(){
+ parent=new Int32Array(cells.length).fill(-1);
+ distance=new Int32Array(cells.length);
+ frontier=[];
+ frontierSlot=new Int32Array(cells.length).fill(-1);
+ const queue=[BASE];
+ parent[BASE]=BASE;
+ for(let head=0;head<queue.length;head++){
+  const cur=queue[head];
+  for(const next of neighbors(cur)){
+   if(cells[next])addFrontier(next);
+   else if(parent[next]<0){
+    parent[next]=cur;
+    distance[next]=distance[cur]+1;
+    queue.push(next);
    }
   }
-  for(const n of neighbors(cur)){
-   if(cells[n]===0&&prev[n]<0){prev[n]=cur;q[tail++]=n}
-  }
  }
- return null;
+}
+function randomFrontier(){
+ return frontier[Math.floor(Math.random()*frontier.length)];
+}
+function firstTarget(){
+ // Sample a bounded number of candidates and maximize separation from active work.
+ const active=workers.filter(w=>w.target>=0||w.lastMined>=0)
+  .map(w=>w.target>=0?w.target:w.lastMined);
+ let best=randomFrontier(),bestDistance=-1;
+ for(let i=0;i<Math.min(24,frontier.length)&&active.length;i++){
+  const candidate=i===0?best:randomFrontier();
+  const x=candidate%COLS,y=(candidate/COLS)|0;
+  let separation=Infinity;
+  for(const other of active){
+   const dx=x-other%COLS,dy=y-((other/COLS)|0);
+   separation=Math.min(separation,dx*dx+dy*dy);
+  }
+  if(separation>bestDistance){best=candidate;bestDistance=separation}
+ }
+ return best;
+}
+function dispatch(w){
+ const nearby=w.lastMined<0?[]:neighbors(w.lastMined).filter(i=>frontierSlot[i]>=0);
+ const target=nearby.length?nearby[Math.floor(Math.random()*nearby.length)]:
+  w.lastMined<0?firstTarget():randomFrontier();
+ let stand=-1;
+ for(const next of neighbors(target)){
+  if(parent[next]>=0&&(stand<0||distance[next]<distance[stand]))stand=next;
+ }
+ // Each open cell has a permanent link to an earlier reachable cell.
+ // Store the path once and traverse it in opposite directions on the two legs.
+ const path=[stand];
+ for(let cur=stand;cur!==BASE;){cur=parent[cur];path.push(cur)}
+ reserve(target);
+ w.target=target;w.path=path;w.pathIndex=path.length-2;w.mode='out';
+}
+function dispatchWorkers(){
+ let budget=ROUTES_PER_FRAME;
+ for(let checked=0;checked<workers.length&&budget>0&&frontier.length;checked++){
+  const w=workers[dispatchCursor];
+  dispatchCursor=(dispatchCursor+1)%workers.length;
+  if(w.mode==='choose'){dispatch(w);budget--}
+ }
+}
+function openCell(i){
+ // Use the closest connected neighbor in the current tree.
+ let link=-1;
+ for(const next of neighbors(i)){
+  if(parent[next]>=0&&(link<0||distance[next]<distance[link]))link=next;
+ }
+ cells[i]=0;
+ parent[i]=link;
+ distance[i]=distance[link]+1;
+ for(const next of neighbors(i)){
+  if(cells[next]&&frontierSlot[next]===-1)addFrontier(next);
+ }
 }
 function reset(){
- coins=0;dug=0;drill=1;transport=1;elapsed=0;playing=false;won=false;speed=1;last=0;acc=0;logs=[];workers=[];workerId=1;
- makeCells();newWorker();
- $('speed').textContent='速度 ×1';$('overlay').hidden=false;$('overlay').textContent='▶ 開始を押すと1台のロボが基地から近い順に掘ります';
- log('基地周囲12pxを空洞にしました。採掘対象 '+total.toLocaleString('ja-JP')+' マス');update();
+ coins=0;dug=0;drill=1;transport=1;elapsed=0;playing=false;won=false;speed=1;last=0;acc=0;logs=[];workers=[];workerId=1;dispatchCursor=0;
+ makeCells();initRoutes();newWorker();
+ $('speed').textContent='速度 ×1';$('overlay').hidden=false;$('overlay').textContent='▶ 開始を押すと1台のロボが1マスずつ採掘・帰還します';
+ log('基地周囲12pxを空洞にしました。採掘対象 '+total.toLocaleString('ja-JP')+' マス');update();draw();
 }
-function advance(w,dt){
- if(!w.path.length)return true;
- const p=w.path[0],tx=p%COLS,ty=(p/COLS)|0;
+function advance(w,direction,dt){
+ if(w.pathIndex<0||w.pathIndex>=w.path.length)return true;
+ const p=w.path[w.pathIndex],tx=p%COLS,ty=(p/COLS)|0;
  const dx=tx-w.x,dy=ty-w.y,d=Math.hypot(dx,dy),step=dt*24;
- if(d<=step){w.x=tx;w.y=ty;w.path.shift();return w.path.length===0}
+ if(d<=step){
+  w.x=tx;w.y=ty;w.pathIndex+=direction;
+  return w.pathIndex<0||w.pathIndex>=w.path.length;
+ }
  w.x+=dx/d*step;w.y+=dy/d*step;return false;
 }
 function tick(dt){
  if(won)return;elapsed+=dt;
  for(const w of workers){
-  if(w.mode==='choose'){
-   const result=findRoute();
-   if(!result){w.mode='idle';continue}
-   w.target=result.target;w.path=result.path.slice(1);w.mode='out';
-  }
   if(w.mode==='out'){
-   if(advance(w,dt))w.mode='mine';
+   if(advance(w,-1,dt))w.mode='mine';
   }else if(w.mode==='mine'){
    w.progress+=dt*(1.5+drill*.7);
    if(w.progress>=1){
     w.progress=0;
     const i=w.target,ore=cells[i];
-    if(ore){
-     cells[i]=0;const x=i%COLS,y=(i/COLS)|0;
-     tctx.fillStyle='#192631';tctx.fillRect(x,y,1,1);
-     dug++;w.ore=worth[ore];
-     if(ore===5&&dug%73===0)log('金鉱石を採掘！');
-    }
-    // Return along the exact traversable path, never through intact blocks.
-    const result=findReturnPath(w);
-    w.path=result;w.mode='return';w.target=-1;
+    openCell(i);
+    tctx.fillStyle='#192631';tctx.fillRect(i%COLS,(i/COLS)|0,1,1);
+    dug++;w.ore=worth[ore];
+    if(ore===5&&dug%73===0)log('金鉱石を採掘！');
+    w.lastMined=i;w.target=-1;w.pathIndex=1;w.mode='return';
    }
   }else if(w.mode==='return'){
-   if(advance(w,dt)){
-    coins+=w.ore*transport;w.ore=0;w.mode='choose';
+   if(advance(w,1,dt)){
+    coins+=w.ore*transport;w.ore=0;w.path=[];w.mode='choose';
    }
-  }else if(w.mode==='idle'&&dug<total){w.mode='choose'}
+  }
  }
- if(dug>=total&&workers.every(w=>w.mode==='choose'||w.mode==='idle')){
+ if(dug>=total&&workers.every(w=>w.mode==='choose')){
   won=true;playing=false;$('overlay').hidden=false;
   $('overlay').textContent='🎉 地底全部掘った！ 全'+total.toLocaleString('ja-JP')+'マス完全採掘！';
   log('完全採掘達成！');
  }
- update();
-}
-function findReturnPath(w){
- // Reconstruct shortest route through empty cells from the worker's current position to base.
- const start=Math.round(w.y)*COLS+Math.round(w.x),end=BASE_Y*COLS+BASE_X;
- const q=new Int32Array(COLS*ROWS),prev=new Int32Array(COLS*ROWS);
- prev.fill(-1);let head=0,tail=1;q[0]=start;prev[start]=start;
- while(head<tail&&prev[end]<0){
-  const cur=q[head++];
-  for(const n of neighbors(cur))if(cells[n]===0&&prev[n]<0){prev[n]=cur;q[tail++]=n}
- }
- if(prev[end]<0)return [];
- const path=[];let p=end;
- while(p!==start){path.push(p);p=prev[p]}
- return path.reverse();
 }
 const drillCost=()=>20*drill;
 const transportCost=()=>35*transport;
@@ -175,7 +223,7 @@ function update(){
  $('drill').textContent='⚙️ ドリル Lv.'+drill+'\n'+costs[0]+'G';
  $('transport').textContent='📦 搬送 Lv.'+transport+'\n'+costs[1]+'G';
  $('hire').textContent='🤖 ロボ追加 ('+workers.length+')\n'+costs[2]+'G';
- ['drill','transport','hire'].forEach((id,i)=>$(id).disabled=won||coins<costs[i]||(i===2&&workers.length>=50));
+ ['drill','transport','hire'].forEach((id,i)=>$(id).disabled=won||coins<costs[i]||(i===2&&workers.length>=MAX_WORKERS));
 }
 function draw(){
  ctx.imageSmoothingEnabled=false;
@@ -183,25 +231,29 @@ function draw(){
  ctx.fillStyle='#f2d081';ctx.fillRect((BASE_X-4)*TILE,(BASE_Y-3)*TILE,8*TILE,6*TILE);ctx.fillStyle='#152631';ctx.font='10px sans-serif';ctx.fillText('基地',(BASE_X-4)*TILE,(BASE_Y-3)*TILE-2);
  // Worker markers remain readable despite the 2.4px terrain cells.
  for(const w of workers){
-  if(w.mode==='idle')continue;
   const x=(w.x+.5)*TILE,y=(w.y+.5)*TILE;
-  ctx.fillStyle='#111c27';ctx.fillRect(x-1.5,y-1.5,3,3);
-  ctx.fillStyle=w.id%3===0?'#7bd7ff':w.id%3===1?'#ffdd72':'#b7f59b';
+  ctx.fillStyle=w.ore?'#ffe58d':w.id%3===0?'#7bd7ff':w.id%3===1?'#ffdd72':'#b7f59b';
   ctx.fillRect(x-1,y-1,2,2);
-  if(w.ore){ctx.fillStyle='#ffe58d';ctx.fillRect(x-1,y-6,3,3)}
  }
 }
+let lastUpdate=0;
 function frame(t){
  const dt=Math.min(.08,(t-last)/1000||.016);last=t;
- if(playing){acc+=dt*speed;let n=0;while(acc>=.04&&n++<30){tick(.04);acc-=.04}}
- draw();requestAnimationFrame(frame);
+ if(playing){
+  dispatchWorkers();
+  acc+=dt*speed;
+  while(acc>=.04&&playing){tick(.04);acc-=.04}
+  if(!playing||t-lastUpdate>=100){update();lastUpdate=t}
+  draw();
+ }
+ requestAnimationFrame(frame);
 }
 $('start').onclick=()=>{if(won)return;playing=!playing;$('overlay').hidden=playing;$('overlay').textContent='一時停止中';update()};
 $('speed').onclick=()=>{speed=speed===1?2:speed===2?4:1;$('speed').textContent='速度 ×'+speed};
 $('reset').onclick=reset;
 $('drill').onclick=()=>{const cost=drillCost();if(coins>=cost&&!won){coins-=cost;drill++;log('ドリル Lv.'+drill+' に強化');update()}};
 $('transport').onclick=()=>{const cost=transportCost();if(coins>=cost&&!won){coins-=cost;transport++;log('搬送設備 Lv.'+transport+' に強化');update()}};
-$('hire').onclick=()=>{const cost=hireCost();if(coins>=cost&&workers.length<50&&!won){coins-=cost;newWorker();log('ロボット '+workers.length+'台に増設');update()}};
+$('hire').onclick=()=>{const cost=hireCost();if(coins>=cost&&workers.length<MAX_WORKERS&&!won){coins-=cost;newWorker();log('ロボット '+workers.length+'台に増設');update()}};
 reset();requestAnimationFrame(frame);
 })();
 </script></body></html>
