@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>地底全部掘る v0.1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#141b24;color:#edf3f5;font-family:system-ui,sans-serif}
+main{max-width:760px;margin:auto;padding:12px}h1{font-size:23px;margin:8px 0 4px}p{color:#b8c8ce;font-size:13px;line-height:1.6}
+.panel{background:#22313d;border:1px solid #405362;border-radius:11px;padding:10px;margin:9px 0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;text-align:center}
+.stats strong{font-size:21px;display:block}.stats small{font-size:11px;color:#bacbd3}
+canvas{width:100%;display:block;background:#322a28;border-radius:8px;image-rendering:pixelated}
+.buttons,.upgrades{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+button{padding:11px 5px;border-radius:8px;background:#3d6177;border:1px solid #7393a5;color:white;font-weight:700}
+button:disabled{opacity:.4}.meter{height:13px;background:#43515a;border-radius:8px;overflow:hidden;margin:7px 0}
+.meter>div{background:#6ce2a0;height:100%;width:0}
+.log{white-space:pre-line;height:96px;overflow:auto;font-size:12px;line-height:1.7;color:#c2d2d9}
+.hint{font-size:12px;color:#b8c8ce}.board{position:relative}
+.overlay{position:absolute;top:12px;left:12px;right:12px;text-align:center;background:#111b25e8;padding:10px;border-radius:8px}
+</style></head>
+<body><main>
+<h1>⛏️ 地底全部掘る</h1>
+<p>画面内の地下をすべて掘り尽くそう！ 小さなブロックを採掘ロボが自動で掘り、鉱石を売って設備を強化します。</p>
+<div class="stats">
+<div class="panel"><strong id="coins">0</strong><small>💰 コイン</small></div>
+<div class="panel"><strong id="done">0</strong><small>採掘済み</small></div>
+<div class="panel"><strong id="bots">25</strong><small>採掘ロボ</small></div>
+<div class="panel"><strong id="time">0:00</strong><small>経過時間</small></div>
+</div>
+<div class="board"><canvas id="map" width="600" height="480" aria-label="固定画面の地底採掘フィールド"></canvas>
+<div id="overlay" class="overlay">▶ 開始を押すと25台のロボが自動採掘します</div></div>
+<div class="panel"><b>地底の採掘率</b> <span id="pct">0.00%</span>
+<div class="meter"><div id="bar"></div></div><div class="hint" id="remaining"></div></div>
+<div class="buttons"><button id="start">▶ 開始</button><button id="speed">速度 ×1</button><button id="reset">↻ リセット</button></div>
+<div class="panel"><b>設備アップグレード</b>
+<div class="upgrades" style="margin-top:9px"><button id="drill"></button><button id="transport"></button><button id="hire"></button></div>
+<p class="hint">ドリルで掘削速度を、搬送設備で鉱石売却額を強化。ロボットも増設できます。</p></div>
+<div class="panel"><b>採掘ログ</b><div class="log" id="log"></div></div>
+<p class="hint">固定画面 600×480px、1ブロック 2.4×2.4px（元の24×24pxの縦横1/10）。全250×200＝50,000ブロック。元の「地底採掘」とは独立したゲームです。</p>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d');
+const COLS=250,ROWS=200,TOTAL=COLS*ROWS,TILE=2.4;
+const terrain=document.createElement('canvas');terrain.width=COLS;terrain.height=ROWS;
+const tctx=terrain.getContext('2d',{alpha:false});
+const palette=['#392d29','#6a5140','#424044','#597f8b','#b39a6b','#f2c55d'];
+const worth=[0,1,2,4,8,16];
+let cells,workers,coins,dug,drill,transport,elapsed,playing,won,speed,last,acc,logs,workerId;
+function log(message){logs.unshift('• '+message);logs=logs.slice(0,30);$('log').textContent=logs.join('\n')}
+function makeCells(){
+ cells=new Uint8Array(TOTAL);
+ const img=tctx.createImageData(COLS,ROWS);
+ const rgb=[[57,45,41],[106,81,64],[66,64,68],[89,127,139],[179,154,107],[242,197,93]];
+ for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+  const r=Math.random(),depth=y/ROWS,v=r<.01+depth*.02?5:r<.045+depth*.05?4:r<.11+depth*.07?3:r<.24+depth*.09?2:1;
+  const i=y*COLS+x;cells[i]=v;const k=i*4;img.data[k]=rgb[v][0];img.data[k+1]=rgb[v][1];img.data[k+2]=rgb[v][2];img.data[k+3]=255;
+ }
+ tctx.putImageData(img,0,0);
+}
+function newWorker(){
+ const w={id:workerId++,index:0,progress:0,done:false,assigned:0,span:0,x:0,y:0};
+ workers.push(w);repartition();return w;
+}
+function repartition(){
+ // Every worker owns a disjoint vertical strip. Reassignment preserves already excavated tiles.
+ workers.forEach((w,i)=>{
+  const begin=Math.floor(COLS*i/workers.length),end=Math.floor(COLS*(i+1)/workers.length);
+  w.assigned=begin;w.span=end-begin;
+  // Find the first undug cell in the strip, following a serpentine column traversal.
+  let first=0;while(first<w.span*ROWS){const p=cellFor(w,first);if(cells[p.y*COLS+p.x]!==0)break;first++}
+  w.index=first;w.done=first>=w.span*ROWS;
+  if(!w.done){const p=cellFor(w,first);w.x=p.x;w.y=p.y}
+ });
+}
+function cellFor(w,index){
+ const col=Math.floor(index/ROWS),r=index%ROWS;
+ return {x:w.assigned+col,y:col%2===0?r:ROWS-1-r};
+}
+function reset(){
+ coins=0;dug=0;drill=1;transport=1;elapsed=0;playing=false;won=false;speed=1;last=0;acc=0;logs=[];workers=[];workerId=1;
+ makeCells();for(let i=0;i<25;i++)newWorker();
+ $('speed').textContent='速度 ×1';$('overlay').hidden=false;$('overlay').textContent='▶ 開始を押すと25台のロボが自動採掘します';
+ log('採掘エリア 50,000 ブロックを生成');update();
+}
+function excavate(w){
+ if(w.done)return;
+ let p=cellFor(w,w.index);
+ let idx=p.y*COLS+p.x;
+ if(cells[idx]!==0){
+  const ore=cells[idx];cells[idx]=0;tctx.fillStyle='#192631';tctx.fillRect(p.x,p.y,1,1);
+  dug++;coins+=worth[ore]*transport;
+  if(ore===5&&dug%73===0)log('金鉱石を採掘！');
+ }
+ w.x=p.x;w.y=p.y;
+ w.index++;
+ while(w.index<w.span*ROWS){
+  const next=cellFor(w,w.index);
+  if(cells[next.y*COLS+next.x]!==0)break;
+  w.index++;
+ }
+ if(w.index>=w.span*ROWS)w.done=true;
+}
+function tick(dt){
+ if(won)return;
+ elapsed+=dt;
+ for(const w of workers){
+  if(w.done)continue;
+  w.progress+=dt*(23+drill*13);
+  let count=Math.min(100,Math.floor(w.progress));w.progress-=count;
+  for(let i=0;i<count&&!w.done;i++)excavate(w);
+ }
+ if(dug>=TOTAL){
+  dug=TOTAL;won=true;playing=false;
+  $('overlay').hidden=false;$('overlay').textContent='🎉 地底全部掘った！ 50,000ブロック完全採掘！';
+  log('完全採掘達成！ おめでとう！');
+ }
+ update();
+}
+function update(){
+ $('coins').textContent=Math.floor(coins).toLocaleString('ja-JP');
+ $('done').textContent=dug.toLocaleString('ja-JP')+'/'+TOTAL.toLocaleString('ja-JP');
+ $('bots').textContent=workers.length;
+ $('time').textContent=Math.floor(elapsed/60)+':'+String(Math.floor(elapsed%60)).padStart(2,'0');
+ const pct=dug/TOTAL*100;
+ $('pct').textContent=pct.toFixed(2)+'%';$('bar').style.width=pct+'%';
+ $('remaining').textContent='残り '+(TOTAL-dug).toLocaleString('ja-JP')+' ブロック';
+ $('start').textContent=playing?'Ⅱ 一時停止':'▶ '+(elapsed?'再開':'開始');
+ $('start').disabled=won;
+ const costs=[200*drill,350*transport,800+workers.length*60];
+ $('drill').textContent='⚙️ ドリル Lv.'+drill+'\n'+costs[0]+'G';
+ $('transport').textContent='📦 搬送 Lv.'+transport+'\n'+costs[1]+'G';
+ $('hire').textContent='🤖 ロボ追加 ('+workers.length+')\n'+costs[2]+'G';
+ ['drill','transport','hire'].forEach((id,i)=>$(id).disabled=won||coins<costs[i]||(i===2&&workers.length>=50));
+}
+function draw(){
+ ctx.imageSmoothingEnabled=false;
+ ctx.drawImage(terrain,0,0,canvas.width,canvas.height);
+ // Worker markers remain readable despite the 2.4px terrain cells.
+ for(const w of workers){
+  if(w.done)continue;
+  const x=(w.x+.5)*TILE,y=(w.y+.5)*TILE;
+  ctx.fillStyle='#111c27';ctx.fillRect(x-3,y-3,6,6);
+  ctx.fillStyle=w.id%3===0?'#7bd7ff':w.id%3===1?'#ffdd72':'#b7f59b';
+  ctx.fillRect(x-2,y-2,4,4);
+ }
+}
+function frame(t){
+ const dt=Math.min(.08,(t-last)/1000||.016);last=t;
+ if(playing){acc+=dt*speed;let n=0;while(acc>=.04&&n++<30){tick(.04);acc-=.04}}
+ draw();requestAnimationFrame(frame);
+}
+$('start').onclick=()=>{if(won)return;playing=!playing;$('overlay').hidden=playing;$('overlay').textContent='一時停止中';update()};
+$('speed').onclick=()=>{speed=speed===1?2:speed===2?4:1;$('speed').textContent='速度 ×'+speed};
+$('reset').onclick=reset;
+$('drill').onclick=()=>{let cost=200*drill;if(coins>=cost&&!won){coins-=cost;drill++;log('ドリル Lv.'+drill+' に強化');update()}};
+$('transport').onclick=()=>{let cost=350*transport;if(coins>=cost&&!won){coins-=cost;transport++;log('搬送設備 Lv.'+transport+' に強化');update()}};
+$('hire').onclick=()=>{let cost=800+workers.length*60;if(coins>=cost&&workers.length<50&&!won){coins-=cost;newWorker();log('ロボット '+workers.length+'台に増設');update()}};
+reset();requestAnimationFrame(frame);
+})();
+</script></body></html>
