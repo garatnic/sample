@@ -1,0 +1,90 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>算数ブロック防衛戦 v1</title><style>
+*{box-sizing:border-box}body{margin:0;background:#121b29;color:#f0f5ff;font-family:system-ui,sans-serif}main{max-width:740px;margin:auto;padding:12px}h1{font-size:23px;margin:5px 0}p{font-size:13px;color:#b9c8d7;line-height:1.5}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.stat,.panel{background:#223347;border:1px solid #425872;border-radius:10px;padding:9px}.stat{text-align:center}.stat b{display:block;font-size:20px}.stat small{font-size:10px;color:#b6c7d9}.board{position:relative;margin:10px 0}canvas{width:100%;display:block;border:1px solid #435871;border-radius:8px;background:#0e1724;image-rendering:pixelated}.banner{position:absolute;top:12px;left:12px;right:12px;padding:10px;border-radius:8px;background:#0d1a2cde;text-align:center;font-weight:bold}.panel{margin:9px 0}#question{font-size:26px;text-align:center;margin:10px 0;font-weight:800}.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}button{background:#365e85;color:white;border:1px solid #789ab9;border-radius:9px;padding:12px 5px;font-weight:bold;font-size:16px;touch-action:manipulation}button:disabled{opacity:.45}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0}.controls button{font-size:13px}.message{font-size:13px;text-align:center;min-height:23px;color:#cde3ef}.upgrade{display:none;border:2px solid #f0d17d;background:#2c3648}.upgrade.show{display:block}.upgrade .choices button{background:#496c57}.hint{font-size:12px;color:#b9c8d7}.footer{font-size:12px;color:#b9c8d7}
+</style></head><body><main><h1>🧮 算数ブロック防衛戦 <small style="font-size:13px">v1</small></h1><p>上から押し寄せるブロックを、下から出撃する味方で迎え撃とう。算数に正解して味方を強化！</p>
+<div class="stats"><div class="stat"><b id="seconds">0:00</b><small>経過時間</small></div><div class="stat"><b id="spawn">1</b><small>毎秒の出撃数</small></div><div class="stat"><b id="power">1</b><small>1体の破壊数</small></div><div class="stat"><b id="destroyed">0</b><small>破壊したブロック</small></div></div>
+<div class="board"><canvas id="field" width="600" height="408" aria-label="250列170行の防衛フィールド"></canvas><div class="banner" id="banner">▶ 開始を押してゲームスタート</div></div>
+<div class="controls"><button id="toggle">▶ 開始</button><button id="speed">速度 ×1</button><button id="restart">↻ 最初から</button></div>
+<div class="panel" id="math"><b>算数クイズ</b><div id="question">準備中</div><div class="choices" id="answers"><button disabled>—</button><button disabled>—</button><button disabled>—</button><button disabled>—</button></div><div class="message" id="feedback">ゲームを開始すると問題が出るよ</div></div>
+<div class="panel upgrade" id="upgrade"><b>✨ せいかい！ どちらを強化する？</b><p>強化を選ぶまでゲームは止まります。</p><div class="choices"><button id="addSpawn">🚀 毎秒の出撃数<br>＋1体</button><button id="addPower">💥 1体の破壊数<br>＋1個</button></div></div>
+<p class="footer">ブロックと味方はともに2.4×2.4px。ブロックは10秒ごとに250個の横一列が追加され、全体が1マス下がります。最下段にブロックが到達すると敗北です。</p></main>
+<script>(()=>{'use strict';
+const $=id=>document.getElementById(id),canvas=$('field'),ctx=canvas.getContext('2d'),COLS=250,ROWS=170,TILE=2.4,COUNT=COLS*ROWS;
+const layer=document.createElement('canvas');layer.width=COLS;layer.height=ROWS;const lg=layer.getContext('2d');
+let blocks,soldiers,time,spawnRate,power,destroyed,spawnClock,rowClock,playing,gameOver,upgradePending,speed,last,question,answers,correct,quizNumber;
+function rand(n){return Math.floor(Math.random()*n)}
+function makeQuestion(){
+ let a,b,op,result;
+ const kind=rand(4);
+ if(kind===0){a=rand(90)+10;b=rand(90)+10;op='＋';result=a+b}
+ else if(kind===1){a=rand(90)+10;b=rand(a+1);op='－';result=a-b}
+ else if(kind===2){a=rand(9)+2;b=rand(9)+2;op='×';result=a*b}
+ else{b=rand(9)+2;result=rand(9)+2;a=b*result;op='÷'}
+ correct=result;question=a+' '+op+' '+b+' ＝ ？';
+ const set=new Set([result]);
+ while(set.size<4){const delta=(rand(12)+1)*(Math.random()<.5?-1:1);const value=result+delta;if(value>=0)set.add(value)}
+ answers=[...set].sort(()=>Math.random()-.5);
+ $('question').textContent=question;
+ $('answers').innerHTML='';
+ for(const value of answers){const btn=document.createElement('button');btn.textContent=value;btn.onclick=()=>answer(value);$('answers').appendChild(btn)}
+}
+function answer(value){
+ if(!playing||upgradePending||gameOver)return;
+ if(value===correct){upgradePending=true;playing=false;$('upgrade').classList.add('show');$('feedback').textContent='正解！ 強化をひとつ選ぼう';$('banner').textContent='✨ 強化を選択中';$('banner').hidden=false}
+ else{$('feedback').textContent='ちがうよ！ もう一度考えてみよう';}
+ update();
+}
+function upgrade(which){if(!upgradePending)return;if(which==='spawn')spawnRate++;else power++;upgradePending=false;$('upgrade').classList.remove('show');$('feedback').textContent='強化完了！ 次の問題に挑戦';makeQuestion();playing=true;$('banner').hidden=true;update()}
+function reset(){
+ blocks=new Uint8Array(COUNT);soldiers=[];time=0;spawnRate=1;power=1;destroyed=0;spawnClock=0;rowClock=0;playing=false;gameOver=false;upgradePending=false;speed=1;last=0;quizNumber=0;
+ $('upgrade').classList.remove('show');$('banner').hidden=false;$('banner').textContent='▶ 開始を押してゲームスタート';$('speed').textContent='速度 ×1';$('feedback').textContent='開始すると四択問題に答えられるよ';makeQuestion();draw();update();
+}
+function addRow(){
+ for(let y=ROWS-1;y>=1;y--)blocks.copyWithin(y*COLS,(y-1)*COLS,y*COLS);
+ blocks.fill(1,0,COLS);
+ // If any occupied block is pushed off the bottom, the defense fails.
+ for(let x=0;x<COLS;x++)if(blocks[(ROWS-1)*COLS+x]){lose();break}
+}
+function lose(){gameOver=true;playing=false;upgradePending=false;$('upgrade').classList.remove('show');$('banner').hidden=false;$('banner').textContent='💀 ゲームオーバー！ 生き残った時間 '+Math.floor(time)+'秒';update()}
+function step(dt){
+ if(gameOver)return;
+ time+=dt;rowClock+=dt;spawnClock+=dt*spawnRate;
+ while(rowClock>=10&&!gameOver){rowClock-=10;addRow()}
+ let made=0;while(spawnClock>=1&&made++<200){spawnClock--;soldiers.push({x:rand(COLS),y:ROWS-1,capacity:power})}
+ const dy=dt*32;
+ for(const u of soldiers){
+  if(u.capacity<=0)continue;
+  // Walk in fractional tile steps, so a unit never tunnels through intact blocks.
+  const dest=Math.max(-1,u.y-dy);let next=Math.floor(u.y);
+  while(next>=Math.ceil(dest)&&u.capacity>0){
+   if(next>=0&&next<ROWS){const index=next*COLS+u.x;
+    if(blocks[index]){blocks[index]=0;destroyed++;u.capacity--;if(u.capacity<=0){u.y=next;break}}
+   }
+   next--;
+  }
+  if(u.capacity>0)u.y=dest;
+ }
+ soldiers=soldiers.filter(u=>u.capacity>0&&u.y>=0);
+ update();
+}
+function update(){
+ $('seconds').textContent=Math.floor(time/60)+':'+String(Math.floor(time%60)).padStart(2,'0');
+ $('spawn').textContent=spawnRate;$('power').textContent=power;$('destroyed').textContent=destroyed.toLocaleString('ja-JP');
+ $('toggle').textContent=playing?'Ⅱ 一時停止':'▶ '+(time?'再開':'開始');
+ $('toggle').disabled=gameOver||upgradePending;
+ for(const b of $('answers').children)b.disabled=!playing;
+}
+function draw(){
+ const img=lg.createImageData(COLS,ROWS);
+ for(let i=0;i<COUNT;i++){const k=i*4;if(blocks[i]){img.data[k]=195;img.data[k+1]=113+(Math.floor(i/COLS)%3)*14;img.data[k+2]=88;img.data[k+3]=255}else{img.data[k]=14;img.data[k+1]=23;img.data[k+2]=36;img.data[k+3]=255}}
+ lg.putImageData(img,0,0);
+ ctx.imageSmoothingEnabled=false;ctx.drawImage(layer,0,0,600,408);
+ ctx.fillStyle='#75f6bb';
+ for(const u of soldiers)ctx.fillRect(u.x*TILE,u.y*TILE,TILE,TILE);
+ ctx.fillStyle='#f4d276';ctx.fillRect(0,405,600,3);
+}
+function frame(t){const dt=Math.min(.08,(t-last)/1000||.016);last=t;if(playing){let remaining=dt*speed;while(remaining>0&&playing){const part=Math.min(.025,remaining);step(part);remaining-=part}}draw();requestAnimationFrame(frame)}
+$('toggle').onclick=()=>{if(gameOver||upgradePending)return;playing=!playing;$('banner').hidden=playing;if(!playing)$('banner').textContent='Ⅱ 一時停止中';update()};
+$('speed').onclick=()=>{speed=speed===1?2:speed===2?4:1;$('speed').textContent='速度 ×'+speed};
+$('restart').onclick=reset;$('addSpawn').onclick=()=>upgrade('spawn');$('addPower').onclick=()=>upgrade('power');
+reset();requestAnimationFrame(frame);
+})();</script></body></html>
