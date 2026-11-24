@@ -239,3 +239,45 @@ v6.3の5設問はユーザー判断により保留。実装時に判断を要す
 
 - 関連仕様 [SOCIETY-009](../specifications/13_population_society.md#society-009)
 - 原資料 [v3.3.md](../history/v3.3.md#当時の要件懸念検討の経緯)
+
+## OPEN-035 初期値と出身・経歴の補正
+
+初期能力値や出身・経歴ごとの具体的な補正・初期所持品は未確定。
+
+- 関連仕様 [GROWTH-005](../specifications/05_character_growth.md#growth-005)
+- 原資料 [v1.7.md](../history/v1.7.md)
+
+## OPEN-036 主人公の財産相続と国家の継承
+
+v3.3で財産は継承し地位は失う。財産相続の競合や国家の継承法が並行する場合の詳細は未確定。
+
+- 関連仕様 [SYSTEM-010](../specifications/15_game_system.md#system-010)
+- 原資料 [v1.9.md](../history/v1.9.md)
+
+## OPEN-037 難易度設定が及ぶ範囲
+
+プレイヤー向け補正の対象と、NPC同士の戦争・経済シミュレーションとの分離をどの範囲まで行うかは要確認。
+
+- 関連仕様 [COMBAT-003](../specifications/04_combat.md#combat-003)
+- 原資料 [v2.4.md](../history/v2.4.md)
+
+## OPEN-038 会話画面の表示と台詞
+
+状況に応じた選択肢式は決定済み。具体的な画面・台詞は未確定。
+
+- 関連仕様 [NPC-010](../specifications/07_npc_ai.md#npc-010)
+- 原資料 [v2.8.md](../history/v2.8.md)
+
+## OPEN-039 開戦のしきい値と例外
+
+外交関係の悪化を主条件とする。具体的なしきい値と例外は未決定。
+
+- 関連仕様 [NATION-021](../specifications/12_nations_warfare.md#nation-021)
+- 原資料 [v4.0.md](../history/v4.0.md)
+
+## OPEN-040 和平条件と外交交渉画面
+
+外交は友好・敵対の関係値のみで管理する。暫定占領から最終帰属を確定する和平、領土・賠償・停戦条件の決定と外交画面をどう両立するかは要確認。
+
+- 関連仕様 [NATION-022](../specifications/12_nations_warfare.md#nation-022)・[NATION-011](../specifications/12_nations_warfare.md#nation-011)・[NATION-013](../specifications/12_nations_warfare.md#nation-013)
+- 原資料 [v4.0.md Q5](../history/v4.0.md#q5)・[v4.2.md Q5](../history/v4.2.md#q5)・[v4.4.md Q1](../history/v4.4.md#q1)
