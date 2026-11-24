@@ -1,0 +1,153 @@
+# キャラクター成長
+
+## 実装・変更時の原資料確認義務
+
+本資料は、historyフォルダに保存された仕様検討履歴を分野別に整理・統合したものであり、原資料を代替するものではない。
+
+本資料に記載された仕様について、新規実装、既存実装の変更、修正、拡張、設計判断を行う場合は、作業着手前に、対象仕様の出典として記載されたhistory内の原資料を必ず全文確認すること。
+
+統合仕様書のみを参照して実装することは禁止する。
+
+原資料に記載された要件、採用理由、ユーザーの補足、適用条件、例外、後続の変更内容を確認し、仕様の意図を損なわないようにすること。
+
+統合仕様書と原資料の内容に相違がある場合は、原資料におけるユーザーの最新の明示的な決定を優先すること。
+
+ただし、原資料同士に矛盾があり、最新の有効な仕様を明確に判断できない場合は、独自判断で解決せず、要確認事項として記録すること。
+
+この確認義務は、人間の開発者とAIによる自律開発の双方に適用する。
+
+[仕様書索引](README.md) · [網羅性確認](coverage-index.md) · [要確認事項](../development/OPEN_QUESTIONS.md)
+
+関連分野 [冒険・探索](03_exploration.md) · [戦闘](04_combat.md) · [装備・アイテム](06_items_equipment.md) · [仲間・組織](08_companions_guilds.md) · [社会・人口](13_population_society.md) · [ゲーム基盤](15_game_system.md)
+
+<a id="growth-001"></a>
+
+## GROWTH-001 成長方式
+
+- レベル＋スキル熟練度。
+- レベル＋技能別熟練度。
+- レベルで基礎能力、熟練度で専門能力が成長。
+
+**出典**
+
+- [v0.1.md Q2](../history/v0.1.md#q2) 成長方式 ／ 採用「レベル＋スキル熟練度」
+- [v2.3.md Q1](../history/v2.3.md#q1) キャラクターの成長方式 ／ 採用「レベル＋技能別熟練度」
+- [v3.4.md Q2](../history/v3.4.md#q2) レベルと技能の役割 ／ 採用「レベルで基礎能力、熟練度で専門能力が成長」
+
+**関連仕様** [WORLD-001](02_world.md#world-001) · [SYSTEM-001](15_game_system.md#system-001) · [GROUP-001](08_companions_guilds.md#group-001) · [COMBAT-004](04_combat.md#combat-004) · [COMBAT-005](04_combat.md#combat-005) · [COMBAT-002](04_combat.md#combat-002)
+
+<a id="growth-002"></a>
+
+## GROWTH-002 キャラクターの成長
+
+- 職業固定なし・自由なスキル成長。
+- 固定職業なし。技能の組み合わせで自由育成。
+
+**出典**
+
+- [v0.6.md Q5](../history/v0.6.md#q5) キャラクターの成長 ／ 採用「職業固定なし・自由なスキル成長」
+- [v3.4.md Q1](../history/v3.4.md#q1) 職業システム ／ 採用「固定職業なし。技能の組み合わせで自由育成」
+
+**関連仕様** [EXPLORE-001](03_exploration.md#explore-001) · [COMBAT-001](04_combat.md#combat-001) · [EXPLORE-002](03_exploration.md#explore-002) · [ITEM-001](06_items_equipment.md#item-001)
+
+<a id="growth-003"></a>
+
+## GROWTH-003 外見のカスタマイズ
+
+- 髪型・顔・体格・服装など詳細。
+
+**出典**
+
+- [v1.7.md Q1](../history/v1.7.md#q1) 外見のカスタマイズ ／ 採用「髪型・顔・体格・服装など詳細」
+
+**関連仕様** [WORLD-004](02_world.md#world-004) · [SYSTEM-010](15_game_system.md#system-010)
+
+<a id="growth-004"></a>
+
+## GROWTH-004 プレイヤーの種族
+
+- 人間・エルフ・ドワーフなど複数。
+
+**出典**
+
+- [v1.7.md Q2](../history/v1.7.md#q2) プレイヤーの種族 ／ 採用「人間・エルフ・ドワーフなど複数」
+
+**関連仕様** [WORLD-004](02_world.md#world-004) · [SYSTEM-010](15_game_system.md#system-010)
+
+<a id="growth-005"></a>
+
+## GROWTH-005 出身・経歴の影響
+
+- 初期能力・人間関係・所持品に影響。
+
+**出典**
+
+- [v1.7.md Q3](../history/v1.7.md#q3) 出身・経歴の影響 ／ 採用「初期能力・人間関係・所持品に影響」
+
+**関連仕様** [WORLD-004](02_world.md#world-004) · [SYSTEM-010](15_game_system.md#system-010)
+
+<a id="growth-006"></a>
+
+## GROWTH-006 技能の成長方法
+
+- 使用経験＋訓練・教育。
+
+**出典**
+
+- [v2.3.md Q2](../history/v2.3.md#q2) 技能の成長方法 ／ 採用「使用経験＋訓練・教育」
+
+**関連仕様** [COMBAT-004](04_combat.md#combat-004) · [COMBAT-005](04_combat.md#combat-005) · [COMBAT-002](04_combat.md#combat-002)
+
+<a id="growth-007"></a>
+
+## GROWTH-007 次世代への技能継承
+
+- 親・師匠・学校・仕事を通じて学習。
+
+**出典**
+
+- [v3.2.md Q5](../history/v3.2.md#q5) 次世代への技能継承 ／ 採用「親・師匠・学校・仕事を通じて学習」
+
+**関連仕様** [NPC-003](07_npc_ai.md#npc-003) · [SOCIETY-009](13_population_society.md#society-009) · [SOCIETY-010](13_population_society.md#society-010) · [SOCIETY-011](13_population_society.md#society-011)
+
+<a id="growth-008"></a>
+
+## GROWTH-008 技能の習得制限
+
+- すべての技能を習得・成長可能。
+
+**出典**
+
+- [v3.4.md Q3](../history/v3.4.md#q3) 技能の習得制限 ／ 採用「すべての技能を習得・成長可能」
+
+<a id="growth-009"></a>
+
+## GROWTH-009 魔法の習得方法
+
+- 魔法書・教師・研究・実践などで習得。
+
+**出典**
+
+- [v3.4.md Q4](../history/v3.4.md#q4) 魔法の習得方法 ／ 採用「魔法書・教師・研究・実践などで習得」
+
+<a id="growth-010"></a>
+
+## GROWTH-010 技能の成長速度
+
+- 初期は伸びやすく、高熟練度ほど成長が緩やか。
+
+**出典**
+
+- [v3.4.md Q5](../history/v3.4.md#q5) 技能の成長速度 ／ 採用「初期は伸びやすく、高熟練度ほど成長が緩やか」
+
+<a id="growth-011"></a>
+
+## GROWTH-011 冒険者としての成長の幅
+
+- 戦闘以外の探索・採集・製作・交易・交渉などの活動でも、それぞれの能力や選択肢が成長する。
+
+**出典**
+
+- [v6.9.md Q3](../history/v6.9.md#q3) 冒険者としての成長の幅 ／ 採用「戦闘以外の探索・採集・製作・交易・交渉などの活動でも、それぞれの能力や選択肢が成長する」
+
+**関連仕様** [COMBAT-002](04_combat.md#combat-002) · [EXPLORE-011](03_exploration.md#explore-011)
