@@ -69,9 +69,11 @@
 ## SOCIETY-004 評判の管理
 
 - 個人・集落・国家・組織ごと。
+同一の行為でも、その評判や犯罪の影響は集落・国家・組織などによって異なる。
 
 **出典**
 
+- [v1.4.md](../history/v1.4.md#当時の要件懸念検討の経緯) 評判・犯罪の影響範囲
 - [v1.3.md Q3](../history/v1.3.md#q3) 評判の管理 ／ 採用「個人・集落・国家・組織ごと」
 
 **関連仕様** [NATION-007](12_nations_warfare.md#nation-007) · [NATION-008](12_nations_warfare.md#nation-008) · [NATION-009](12_nations_warfare.md#nation-009) · [NPC-005](07_npc_ai.md#npc-005)

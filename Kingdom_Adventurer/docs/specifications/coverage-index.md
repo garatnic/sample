@@ -362,3 +362,8 @@
 - [v3.2.md](../history/v3.2.md#当時の要件懸念検討の経緯) 雇用費用の支払時期 → [GROUP-009](08_companions_guilds.md#group-009)
 - [v2.7.md](../history/v2.7.md#関連する決定と未確定事項) 再補充の未確定条件 → [EXPLORE-006](03_exploration.md#explore-006)
 - [v3.3.md](../history/v3.3.md#当時の要件懸念検討の経緯) 成人年齢の未確定条件 → [SOCIETY-009](13_population_society.md#society-009)
+- [v1.1.md](../history/v1.1.md#1-v10で確定した仕様) 保護の解除 → [GROUP-002](08_companions_guilds.md#group-002)
+- [v1.1.md](../history/v1.1.md#1-v10で確定した仕様) 同行人数と描画負荷 → [GROUP-004](08_companions_guilds.md#group-004)
+- [v1.2.md](../history/v1.2.md#1-v11で確定した仕様) 未所有地の定義 → [HOUSING-003](11_building_housing.md#housing-003)
+- [v1.4.md](../history/v1.4.md#1-v13で確定した仕様) 共通法の範囲 → [NATION-008](12_nations_warfare.md#nation-008)
+- [v1.4.md](../history/v1.4.md#当時の要件懸念検討の経緯) 評判・犯罪の影響範囲 → [SOCIETY-004](13_population_society.md#society-004)
