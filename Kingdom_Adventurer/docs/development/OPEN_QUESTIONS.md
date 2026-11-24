@@ -60,10 +60,10 @@ v6.3の5設問はユーザー判断により保留。実装時に判断を要す
 
 ## OPEN-009 国家の変化
 
-初期版には国家分裂がある。後続版は反乱・独立を除外したため、それ以外の分裂経路を扱うか確認が必要。
+解決済み。v4.2で反乱・独立を除外し、v4.5「整合性と懸念」で国家の増減を建国・統合・征服・滅亡で表現すると明記した。
 
 - 関連仕様 [NATION-002](../specifications/12_nations_warfare.md#nation-002)・[NATION-006](../specifications/12_nations_warfare.md#nation-006)・[NATION-006](../specifications/12_nations_warfare.md#nation-006)・[NATION-031](../specifications/12_nations_warfare.md#nation-031)
-- 原資料 [v1.2.md Q1](../history/v1.2.md#q1)・[v1.2.md Q5](../history/v1.2.md#q5)・[v4.2.md Q4](../history/v4.2.md#q4)・[v4.4.md Q5](../history/v4.4.md#q5)
+- 原資料 [v1.2.md Q1](../history/v1.2.md#q1)・[v1.2.md Q5](../history/v1.2.md#q5)・[v4.2.md Q4](../history/v4.2.md#q4)・[v4.4.md Q5](../history/v4.4.md#q5)・[v4.5.md](../history/v4.5.md#整合性と懸念)
 
 ## OPEN-010 兵士の募集・補充
 

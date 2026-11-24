@@ -56,7 +56,7 @@
 | [v1.1.md Q3](../history/v1.1.md#q3) | 集落の自律発展 | NPCが自律的に建築・移住・発展 | 社会・人口 [SOCIETY-003](13_population_society.md#society-003) | 統合先あり | [v4.7.md Q2](../history/v4.7.md#q2) | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
 | [v1.1.md Q4](../history/v1.1.md#q4) | 領地の管理方法 | NPCに委任＋直接管理も可能 | 建築・領地・住宅 [HOUSING-004](11_building_housing.md#housing-004) | 統合先あり | [v3.0.md Q3](../history/v3.0.md#q3) | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
 | [v1.1.md Q5](../history/v1.1.md#q5) | 建築物の損傷・破壊 | 損傷・破壊・修復あり | 建築・領地・住宅 [HOUSING-005](11_building_housing.md#housing-005) | 統合先あり | — | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
-| [v1.2.md Q1](../history/v1.2.md#q1) | 国家の変化 | 成立・滅亡・分裂・統合あり | 国家・政治・戦争 [NATION-002](12_nations_warfare.md#nation-002) | 統合先あり | — | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
+| [v1.2.md Q1](../history/v1.2.md#q1) | 国家の変化 | 成立・滅亡・分裂・統合あり | 国家・政治・戦争 [NATION-002](12_nations_warfare.md#nation-002) | 後続決定を反映 | [v4.2.md Q4](../history/v4.2.md#q4)・[v4.5.md 整合性と懸念](../history/v4.5.md#整合性と懸念) | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
 | [v1.2.md Q2](../history/v1.2.md#q2) | 戦争の進行 | 宣戦・侵攻・包囲・占領・和平まで自律進行 | 国家・政治・戦争 [NATION-003](12_nations_warfare.md#nation-003) | 統合先あり | — | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
 | [v1.2.md Q3](../history/v1.2.md#q3) | プレイヤーの建国 | 独立国家を建国可能 | 国家・政治・戦争 [NATION-004](12_nations_warfare.md#nation-004) | 統合先あり | [v4.4.md Q4](../history/v4.4.md#q4) | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
 | [v1.2.md Q4](../history/v1.2.md#q4) | 軍隊の指揮 | 直接指揮・NPC委任の両方 | 国家・政治・戦争 [NATION-005](12_nations_warfare.md#nation-005) | 統合先あり | — | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
@@ -383,3 +383,25 @@
 - [v4.0.md](../history/v4.0.md) 兵士数と総合戦力 → [NATION-020](12_nations_warfare.md#nation-020)
 - [v4.7.md](../history/v4.7.md) NPCの移住判断 → [SOCIETY-008](13_population_society.md#society-008)
 - [v5.9.md](../history/v5.9.md) 取引で移る権利の区別 → [HOUSING-026](11_building_housing.md#housing-026)
+
+- [v2.6.md](../history/v2.6.md#1-v25で確定した仕様) 1. v2.5で確定した仕様 → [ITEM-009](06_items_equipment.md#item-009)
+- [v2.5.md](../history/v2.5.md#4-戦利品と世界経済の関係) 4. 戦利品と世界経済の関係 → [ITEM-006](06_items_equipment.md#item-006)
+- [v2.5.md](../history/v2.5.md#1-v24で確定した仕様) 1. v2.4で確定した仕様 → [COMBAT-007](04_combat.md#combat-007)
+- [v2.8.md](../history/v2.8.md#1-v27で確定した仕様) 1. v2.7で確定した仕様 → [NPC-009](07_npc_ai.md#npc-009)
+- [v3.0.md](../history/v3.0.md#1-v29で確定した仕様) 1. v2.9で確定した仕様 → [NATION-012](12_nations_warfare.md#nation-012)
+- [v3.2.md](../history/v3.2.md#1-v31で確定した仕様) 1. v3.1で確定した仕様 → [GROUP-009](08_companions_guilds.md#group-009)
+- [v3.3.md](../history/v3.3.md#1-v32で確定した仕様) 1. v3.2で確定した仕様 → [SOCIETY-009](13_population_society.md#society-009)
+- [v3.4.md](../history/v3.4.md#1-v33で確定した仕様) 1. v3.3で確定した仕様 → [SYSTEM-010](15_game_system.md#system-010)
+- [v3.7.md](../history/v3.7.md#1-v36で確定した仕様) 1. v3.6で確定した仕様 → [ECO-009](09_ecosystem.md#eco-009)
+- [v3.8.md](../history/v3.8.md#1-v37で確定した仕様) 1. v3.7で確定した仕様 → [ECONOMY-004](10_economy.md#economy-004)
+- [v3.8.md](../history/v3.8.md#4-v38で確定したい5項目) 4. v3.8で確定したい5項目 → [ECONOMY-014](10_economy.md#economy-014)
+- [v3.9.md](../history/v3.9.md#確定内容の補足) 確定内容の補足 → [NATION-016](12_nations_warfare.md#nation-016)
+- [v3.9.md](../history/v3.9.md#確定内容の補足) 確定内容の補足 → [NATION-018](12_nations_warfare.md#nation-018)
+- [v4.1.md](../history/v4.1.md#確定内容の補足) 確定内容の補足 → [NATION-024](12_nations_warfare.md#nation-024)
+- [v5.3.md](../history/v5.3.md#確定内容の補足) 確定内容の補足 → [HOUSING-011](11_building_housing.md#housing-011)
+- [v5.8.md](../history/v5.8.md#確定内容の補足) 確定内容の補足 → [HOUSING-027](11_building_housing.md#housing-027)
+- [v6.7.md](../history/v6.7.md#確定方針の解釈) 確定方針の解釈 → [EXPLORE-003](03_exploration.md#explore-003)
+- [v7.0.md](../history/v7.0.md#確定方針の解釈) 確定方針の解釈 → [EXPLORE-012](03_exploration.md#explore-012)
+- [v7.2.md](../history/v7.2.md#確定方針と再開地点) 確定方針と再開地点 → [SOCIETY-016](13_population_society.md#society-016)
+- [v3.1.md](../history/v3.1.md#3-仲間と雇用についての既存仕様) 3. 仲間と雇用についての既存仕様 → [GROUP-003](08_companions_guilds.md#group-003)
+- [v3.1.md](../history/v3.1.md#1-v30で確定した仕様) 1. v3.0で確定した仕様 → [HOUSING-004](11_building_housing.md#housing-004)
