@@ -8,7 +8,7 @@ v0.1〜v7.2の72版と履歴索引2件を基準コミット `e7eefefa63175eb1f88
 
 - [15分野の仕様書と索引](../specifications/README.md)（211項目）
 - [原資料と統合仕様の対応表](../specifications/coverage-index.md)
-- [矛盾・保留・要確認事項](OPEN_QUESTIONS.md)（33件）
+- [矛盾・保留・要確認事項](OPEN_QUESTIONS.md)（34件）
 
 未着手の分野は0。15分野の仕様書は一次統合まで完了し、全文の意味照合が継続中。
 

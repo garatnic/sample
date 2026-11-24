@@ -184,56 +184,56 @@ v6.3の5設問はユーザー判断により保留。実装時に判断を要す
 - 関連仕様 [QUEST-005](../specifications/14_quests_history.md#quest-005)・[QUEST-002](../specifications/14_quests_history.md#quest-002)
 - 原資料 [v1.4.md Q4](../history/v1.4.md#q4)・[v6.8.md Q1](../history/v6.8.md#q1)
 
-## OPEN-026 戦闘中の回復薬
+## OPEN-027 戦闘中の回復薬
 
 回復薬は手動使用。自動化の有無と設定条件は別途検討。
 
 - 関連仕様 [COMBAT-001](../specifications/04_combat.md#combat-001)
 - 原資料 [v0.7.md](../history/v0.7.md#2-半自動戦闘の基本構造)
 
-## OPEN-027 仲間の戦闘不能からの復帰
+## OPEN-028 仲間の戦闘不能からの復帰
 
 永久死亡保護は同行・雇用中に適用する。戦闘不能からの復帰方法は未確定。
 
 - 関連仕様 [GROUP-002](../specifications/08_companions_guilds.md#group-002)
 - 原資料 [v0.8.md](../history/v0.8.md#1-v07で確定した戦闘仕様)
 
-## OPEN-028 装備の品質段階と性能数値
+## OPEN-029 装備の品質段階と性能数値
 
 品質・性能差は確定。装備の品質段階と具体的な性能値は未確定。
 
 - 関連仕様 [ITEM-001](../specifications/06_items_equipment.md#item-001)
 - 原資料 [v0.9.md](../history/v0.9.md#3-アイテムの品質とランダム性能)
 
-## OPEN-029 国家ごとの法律運用
+## OPEN-030 国家ごとの法律運用
 
 法律は世界共通。運用にどの程度国家差を許すか未確定。
 
 - 関連仕様 [NATION-008](../specifications/12_nations_warfare.md#nation-008)
 - 原資料 [v1.4.md](../history/v1.4.md#当時の要件懸念検討の経緯)
 
-## OPEN-030 早送り・高速移動中の戦闘
+## OPEN-031 早送り・高速移動中の戦闘
 
 高速移動中の襲撃の有無と早送り中の戦闘処理は未確定。
 
 - 関連仕様 [SYSTEM-004](../specifications/15_game_system.md#system-004)
 - 原資料 [v1.6.md](../history/v1.6.md#当時の要件懸念検討の経緯)
 
-## OPEN-031 種族ごとの差異
+## OPEN-032 種族ごとの差異
 
 種族ごとの具体的な寿命、能力差、文化およびNPCとの関係は未確定。
 
 - 関連仕様 [GROWTH-004](../specifications/05_character_growth.md#growth-004)
 - 原資料 [v1.8.md](../history/v1.8.md#当時の要件懸念検討の経緯)
 
-## OPEN-032 定額雇用費の支払周期
+## OPEN-033 定額雇用費の支払周期
 
 雇用費の定額制は確定。契約時一括か定期払いかが未確定。
 
 - 関連仕様 [GROUP-009](../specifications/08_companions_guilds.md#group-009)
 - 原資料 [v3.2.md](../history/v3.2.md#当時の要件懸念検討の経緯)
 
-## OPEN-033 成人へ移行する年齢
+## OPEN-034 成人へ移行する年齢
 
 一定年齢で成人へ移行する方針は確定。具体的な年齢は未確定。
 
