@@ -37,9 +37,11 @@
 ## SOCIETY-002 NPCの死亡
 
 - 永久死亡あり。
+雇用・同行中の仲間については [GROUP-002](08_companions_guilds.md#group-002) の永久死亡保護を適用する。
 
 **出典**
 
+- [v1.0.md Q5](../history/v1.0.md#q5) 同行・雇用中のみ永久死亡を保護
 - [v0.3.md Q3](../history/v0.3.md#q3) NPCの死亡 ／ 採用「永久死亡あり」
 
 **関連仕様** [NPC-001](07_npc_ai.md#npc-001) · [SYSTEM-002](15_game_system.md#system-002) · [NPC-002](07_npc_ai.md#npc-002)

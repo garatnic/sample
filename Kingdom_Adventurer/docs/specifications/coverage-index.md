@@ -343,3 +343,8 @@
 | [v7.2.md Q1](../history/v7.2.md#q1) | NPC冒険者とプレイヤーの競争・協力 | NPC冒険者は常に競争相手で、協力することはない | 冒険・探索 [EXPLORE-014](03_exploration.md#explore-014) | 統合先あり | — | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
 | [v7.2.md Q2](../history/v7.2.md#q2) | 探索で得た知識の活用 | 発見した記録・知識は、新たな製作・探索方法・施設・行動の解放などに利用できる | 冒険・探索 [EXPLORE-017](03_exploration.md#explore-017) | 統合先あり | — | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
 | [v7.2.md Q3](../history/v7.2.md#q3) | 冒険者としての名声 | 探索や討伐などの実績が冒険者としての名声に反映され、依頼や取引などの機会に影響する | 社会・人口 [SOCIETY-016](13_population_society.md#society-016) | 統合先あり | — | [個別論点](../development/OPEN_QUESTIONS.md)を参照 |
+
+## 設問外の明示事項
+
+- [v0.1.md 構想の出発点](../history/v0.1.md#構想の出発点) と [v0.2.md 確定した基本仕様](../history/v0.2.md#1-確定した基本仕様) の2D俯瞰・一人の冒険者・自律世界は [GAME-001](01_game_overview.md#game-001)、半自動リアルタイムは [COMBAT-001](04_combat.md#combat-001) に反映。
+- [v0.3.md 今回確定した世界構造](../history/v0.3.md#1-今回確定した世界構造) の地形・建物・住民・歴史の保存は [WORLD-001](02_world.md#world-001) に反映。
