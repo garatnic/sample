@@ -348,3 +348,17 @@
 
 - [v0.1.md 構想の出発点](../history/v0.1.md#構想の出発点) と [v0.2.md 確定した基本仕様](../history/v0.2.md#1-確定した基本仕様) の2D俯瞰・一人の冒険者・自律世界は [GAME-001](01_game_overview.md#game-001)、半自動リアルタイムは [COMBAT-001](04_combat.md#combat-001) に反映。
 - [v0.3.md 今回確定した世界構造](../history/v0.3.md#1-今回確定した世界構造) の地形・建物・住民・歴史の保存は [WORLD-001](02_world.md#world-001) に反映。
+
+### 本文から反映した追加条件
+
+- [v0.4.md](../history/v0.4.md#6-世代交代の問題) 世代交代と時間経過 → [SYSTEM-003](15_game_system.md#system-003)
+- [v0.5.md](../history/v0.5.md#3-npcの処理をどう成立させるか) 距離による処理切替の整合性 → [SYSTEM-012](15_game_system.md#system-012)
+- [v0.6.md](../history/v0.6.md#q1) 地図表示の開示条件 → [EXPLORE-001](03_exploration.md#explore-001)
+- [v0.7.md](../history/v0.7.md#2-半自動戦闘の基本構造) 半自動戦闘の基本構造 → [COMBAT-001](04_combat.md#combat-001)
+- [v0.9.md](../history/v0.9.md#1-v08で確定した仕様) 巣の復活と攻略結果の保存 → [EXPLORE-003](03_exploration.md#explore-003)
+- [v1.0.md](../history/v1.0.md#1-v09で確定した仕様) 確定した耐久度仕様 → [ITEM-002](06_items_equipment.md#item-002)
+- [v0.9.md](../history/v0.9.md#4-製作と経済の接続) 製作と経済の接続 → [ITEM-004](06_items_equipment.md#item-004)
+- [v1.2.md](../history/v1.2.md#当時の要件懸念検討の経緯) 統治に就いた後の冒険 → [NATION-004](12_nations_warfare.md#nation-004)
+- [v3.2.md](../history/v3.2.md#当時の要件懸念検討の経緯) 雇用費用の支払時期 → [GROUP-009](08_companions_guilds.md#group-009)
+- [v2.7.md](../history/v2.7.md#関連する決定と未確定事項) 再補充の未確定条件 → [EXPLORE-006](03_exploration.md#explore-006)
+- [v3.3.md](../history/v3.3.md#当時の要件懸念検討の経緯) 成人年齢の未確定条件 → [SOCIETY-009](13_population_society.md#society-009)
