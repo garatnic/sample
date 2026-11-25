@@ -13,6 +13,7 @@
     <p id="location"></p>
     <label for="health">HP <output id="hp"></output></label>
     <meter id="health" min="0" max="100" value="100"></meter>
+    <p>所持金 <output id="gold"></output></p>
   </header>
   <p id="notice" role="status"></p>
   <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
@@ -20,8 +21,8 @@
   <dialog id="inn" aria-labelledby="inn-title">
     <form method="dialog">
       <h2 id="inn-title">街道の宿</h2>
-      <p>休んでHPを全回復しますか？</p>
-      <button value="yes">YES</button>
+      <p id="inn-offer"></p>
+      <button id="inn-confirm" value="yes">YES</button>
       <button value="no" autofocus>NO</button>
     </form>
   </dialog>

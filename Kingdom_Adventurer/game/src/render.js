@@ -88,6 +88,11 @@ export function createRenderer(canvas) {
       }
     }
     for (const entry of buildings) building(entry);
+    for (const { x, y } of state.goldDrops) {
+      rect(x - 5, y - 5, 10, 10, '#654319');
+      rect(x - 4, y - 4, 8, 8, '#f2bc35');
+      rect(x - 2, y - 3, 3, 2, '#fff1a0');
+    }
     for (const { enemy } of encounters) {
       if (enemy) actor(enemy, false, time);
     }

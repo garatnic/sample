@@ -17,7 +17,7 @@ export function updateCombat(state, dt) {
       encounter.remaining -= dt;
       if (encounter.remaining <= 0) {
         encounter.enemy = { id: `enemy-${home.id}-${++encounter.generation}`,
-          x: home.x, y: home.y, hp: config.maxHp, cooldown: 0, flash: 0 };
+          x: home.x, y: home.y, hp: config.maxHp, gold: config.gold, cooldown: 0, flash: 0 };
       }
     }
 
@@ -67,6 +67,7 @@ export function updateCombat(state, dt) {
   if (enemy.hp <= 0) {
     nearest.enemy = null;
     nearest.remaining = config.spawnDelay;
+    if (enemy.gold > 0) state.goldDrops.push({ x: enemy.x, y: enemy.y, gold: enemy.gold });
     state.notice = { text: '魔物を撃破', remaining: 1.7 };
   }
 }
