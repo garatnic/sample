@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: DEV-033反映時点。
+基準: DEV-034反映時点。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全29仕様を対象とする。パスは `Kingdom_Adventurer/game/` 相対。関数名に加え、匿名イベント・データ・DOM・CSSセレクタも記載する。行番号は固定しない。関連仕様は直接の調査候補であり、変更時には呼出元・依存先も確認する。現行仕様は暫定実装。自動テストコードは未保存のため全行の関連テストは未登録（過去の検証記録は [TODO](../development/TODO.md)・[開発状況](../development/DEVELOPMENT_STATUS.md) 参照）。今回の静的照合は実機検証ではない。
 
 ## 仕様から実装を探す
@@ -24,7 +24,7 @@
 | `CUR-COMBAT-002` | 安全地帯 | src/world.js: inTown(), town; src/combat.js: updateCombat() の safe・chasing・移動候補・自動攻撃制限 | CUR-WORLD-002, CUR-COMBAT-003, CUR-COMBAT-005 | 未登録 |
 | `CUR-COMBAT-003` | 敵追跡・帰還 | src/combat.js: updateCombat() の chasing/goal/step/next; src/settings.js: enemy.speed/reach/aggro/leash; src/world.js: inTown(), spawns | CUR-COMBAT-002, CUR-COMBAT-004 | 未登録 |
 | `CUR-COMBAT-004` | 敵攻撃 | src/combat.js: updateCombat() の敵cooldown/flash・HP減算・早期return; src/settings.js: enemy.damage/attackDelay/reach; src/main.js: update() の player.flash・死亡判定; src/render.js: actor() | CUR-COMBAT-003, CUR-LIFE-001, CUR-UI-004 | 未登録 |
-| `CUR-COMBAT-005` | プレイヤー自動攻撃 | src/combat.js: updateCombat() の player.cooldown・nearest/range・HP減算・strike; src/settings.js: player.range/damage/attackDelay; src/growth.js: attackDamage(); src/main.js: update() の戦闘呼出・strike期限; src/render.js: render() の攻撃線・actor() | CUR-COMBAT-002, CUR-COMBAT-006, CUR-UI-004 | 未登録 |
+| `CUR-COMBAT-005` | プレイヤー自動攻撃 | src/combat.js: updateCombat() の player.cooldown・nearest/range・HP減算・strike; src/settings.js: player.range（素手）/damage/attackDelay; src/growth.js: attackDamage(); src/main.js: update() の戦闘呼出・strike期限; src/render.js: render() の攻撃線・actor() | CUR-COMBAT-002, CUR-COMBAT-006, CUR-UI-004 | 未登録 |
 | `CUR-COMBAT-006` | 撃破・再出現 | src/combat.js: updateCombat() の enemy=null/remaining/generation/notice・硬貨配置・経験値付与; src/growth.js: gainExperience(); src/settings.js: enemy.spawnDelay/maxHp; src/main.js: update() の通知期限、frame() の通知表示; src/render.js: render() の生存敵描画 | CUR-COMBAT-001, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-001 | 未登録 |
 | `CUR-COMBAT-007` | 貨幣ドロップ・拾得 | src/combat.js: updateCombat() の敵所持金・goldDrops; src/main.js: state, collectGold(), update(); src/settings.js: enemy.gold / currency.pickupRadius; src/render.js: render() の硬貨描画 | CUR-COMBAT-001, CUR-COMBAT-006, CUR-SYS-003, CUR-UI-001, CUR-UI-004 | 未登録 |
 | `CUR-GROWTH-001` | 討伐経験値・レベル | src/growth.js: growth, experienceToNextLevel(), gainExperience(), maxHealth(), attackDamage(); src/combat.js: 撃破時の付与と通知; src/main.js: createPlayer(), collectGold(), frame() | CUR-COMBAT-005, CUR-COMBAT-006, CUR-INN-002, CUR-LIFE-001, CUR-UI-001 | 未登録 |

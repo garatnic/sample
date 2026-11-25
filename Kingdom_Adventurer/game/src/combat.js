@@ -1,4 +1,4 @@
-import { settings } from './settings.js';
+import { settings } from './settings.js?v=7';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js';
 

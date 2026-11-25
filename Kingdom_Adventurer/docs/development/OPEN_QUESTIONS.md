@@ -282,6 +282,12 @@ v3.3で財産は継承し地位は失う。財産相続の競合や国家の継�
 - 関連仕様 [NATION-022](../specifications/12_nations_warfare.md#nation-022)・[NATION-011](../specifications/12_nations_warfare.md#nation-011)・[NATION-013](../specifications/12_nations_warfare.md#nation-013)
 - 原資料 [v4.0.md Q5](../history/v4.0.md#q5)・[v4.2.md Q5](../history/v4.2.md#q5)・[v4.4.md Q1](../history/v4.4.md#q1)
 
+## OPEN-041 武器別の射程
+
+射程の短い順に、素手 ＜ 短剣 ＜ 剣・斧・メイス ＜ 槍 ＜ 投擲 ＜ 弓を想定。銃器とマップ兵器は採用未定。採用する場合の射程順は弓 ＜ 銃器 ＜ マップ兵器。武器別の具体値は装備を実装するときに調整する。
+
+- 関連仕様 [COMBAT-001](../specifications/04_combat.md#combat-001)、[ITEM-001](../specifications/06_items_equipment.md#item-001)。2026-11-26のユーザー要望。
+
 ## Phase 1の暫定設定
 
 - 固定フィールドは2240×1568、宿場町1か所。敵は8地点で出現し、撃破8秒後に復帰。街は安全地帯。
