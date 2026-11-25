@@ -1,4 +1,5 @@
 import { settings } from './settings.js';
+import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js';
 
 export function createEncounters() {
@@ -62,12 +63,15 @@ export function updateCombat(state, dt) {
   const enemy = nearest.enemy;
   player.cooldown = settings.player.attackDelay;
   state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
-  enemy.hp -= settings.player.damage;
+  enemy.hp -= attackDamage(player.level);
   enemy.flash = 0.18;
   if (enemy.hp <= 0) {
     nearest.enemy = null;
     nearest.remaining = config.spawnDelay;
     if (enemy.gold > 0) state.goldDrops.push({ x: enemy.x, y: enemy.y, gold: enemy.gold });
-    state.notice = { text: '魔物を撃破', remaining: 1.7 };
+    const leveledUp = gainExperience(player, growth.defeatExperience);
+    state.notice = leveledUp
+      ? { text: `レベルアップ！ Lv.${player.level}`, remaining: 2.5, leveledUp: true }
+      : { text: `魔物を撃破（+${growth.defeatExperience} XP）`, remaining: 1.7 };
   }
 }

@@ -1,6 +1,7 @@
 import { settings } from './settings.js';
 import { innDoor, inTown, movePlayer, start, town } from './world.js';
-import { createEncounters, updateCombat } from './combat.js';
+import { createEncounters, updateCombat } from './combat.js?v=5';
+import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js';
 import { createRenderer } from './render.js';
 
@@ -9,6 +10,7 @@ const death = document.querySelector('#death');
 const innOffer = document.querySelector('#inn-offer');
 const innConfirm = document.querySelector('#inn-confirm');
 const gold = document.querySelector('#gold');
+const progress = document.querySelector('#progress');
 const hp = document.querySelector('#hp');
 const health = document.querySelector('#health');
 const locationLabel = document.querySelector('#location');
@@ -16,8 +18,8 @@ const notice = document.querySelector('#notice');
 const input = createInput(document.querySelector('#stick'), document.querySelector('#knob'));
 const render = createRenderer(document.querySelector('canvas'));
 
-function createPlayer() {
-  return { id: 'player', ...start, hp: settings.player.maxHp, cooldown: 0, flash: 0, moving: false };
+function createPlayer({ level = 1, experience = 0 } = {}) {
+  return { id: 'player', ...start, level, experience, hp: maxHealth(level), cooldown: 0, flash: 0, moving: false };
 }
 
 const state = { player: createPlayer(), encounters: createEncounters(), strike: null,
@@ -26,14 +28,14 @@ const state = { player: createPlayer(), encounters: createEncounters(), strike: 
 inn.addEventListener('close', () => {
   if (inn.returnValue === 'yes' && state.gold >= settings.inn.price) {
     state.gold -= settings.inn.price;
-    state.player.hp = settings.player.maxHp;
+    state.player.hp = maxHealth(state.player.level);
     state.player.flash = 0;
     state.notice = { text: `HPが全回復しました（−${settings.inn.price}G）`, remaining: 2 };
   }
 });
 death.addEventListener('cancel', event => event.preventDefault());
 death.addEventListener('close', () => {
-  state.player = createPlayer();
+  state.player = createPlayer(state.player);
   state.strike = null;
   state.notice = null;
   state.innContact = false;
@@ -50,7 +52,9 @@ function collectGold() {
   }
   if (collected > 0) {
     state.gold += collected;
-    state.notice = { text: `${collected}Gを拾いました`, remaining: 1.7 };
+    if (!state.notice?.leveledUp) {
+      state.notice = { text: `${collected}Gを拾いました`, remaining: 1.7 };
+    }
   }
 }
 
@@ -93,15 +97,18 @@ function setText(element, value) {
   if (element.textContent !== value) element.textContent = value;
 }
 
-health.max = settings.player.maxHp;
 let previous = performance.now();
 function frame(time) {
   const dt = Math.min((time - previous) / 1000, 0.04);
   previous = time;
   if (!inn.open && !death.open && state.player.hp > 0) update(dt);
-  health.value = state.player.hp;
+  const { level, experience, hp: currentHp } = state.player;
+  const maxHp = maxHealth(level);
+  if (health.max !== maxHp) health.max = maxHp;
+  health.value = currentHp;
+  setText(progress, `Lv.${level} · XP ${experience} / ${experienceToNextLevel(level)}`);
   setText(gold, `${state.gold}G`);
-  setText(hp, `${state.player.hp} / ${settings.player.maxHp}`);
+  setText(hp, `${currentHp} / ${maxHp}`);
   setText(locationLabel, inTown(state.player) ? town.name : '街道とその周辺');
   setText(notice, state.notice?.text ?? '');
   render(state, time);
