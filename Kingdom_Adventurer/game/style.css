@@ -50,19 +50,23 @@ button {
 }
 #stick { display: none; }
 @media (pointer: coarse) {
+  :root { --stick-size: 104px; }
   #stick {
     display: grid;
     place-items: center;
     position: fixed;
-    left: 1rem;
+    left: 50%;
     bottom: 1rem;
-    width: 104px;
-    height: 104px;
+    transform: translateX(-50%);
+    box-sizing: content-box;
+    width: var(--stick-size);
+    height: var(--stick-size);
     border: 2px solid #e8d2a5a3;
     border-radius: 50%;
     background: #17251eab;
     touch-action: none;
   }
   #knob { width: 38px; height: 38px; border-radius: 50%; background: #ddc794; }
+  #notice { bottom: calc(2rem + var(--stick-size) + 4px); }
   footer { display: none; }
 }
