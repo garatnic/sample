@@ -1,5 +1,6 @@
 # 現在の開発状況
 
+- DEV-030を実装 [`2b528d93655baa2ffb915e81ce53907161b6b3d0`](https://github.com/garatnic/sample/commit/2b528d93655baa2ffb915e81ce53907161b6b3d0)。公開ゲームのCSSに内容ハッシュを付け、通常ブラウザに残る旧CSSと取得URLを区別する。HTMLとCSSのハッシュの一致を検証。
 - DEV-029を実装 [`6e00387b8c0948a0a2f82eef4dab42ea4d0f058c`](https://github.com/garatnic/sample/commit/6e00387b8c0948a0a2f82eef4dab42ea4d0f058c)。スマホ用の仮想スティックを画面下中央へ移動し、通知をその上に表示。CSSとNodeの入力シミュレーションで確認。スマホ実機での新配置は未確認。
 - Phase 1完了後の個別変更として、DEV-027を実装 [`29051f1a7d13302348baa3fc51682904a33fec43`](https://github.com/garatnic/sample/commit/29051f1a7d13302348baa3fc51682904a33fec43)。敵の硬貨5G、初期所持金10G、宿泊料10Gは暫定。Nodeの簡易DOMで戦闘・拾得と宿泊の分岐を確認。ブラウザ、スマホ、実ゲームパッドでの今回の変更は未検証。
 - 次回の再開地点は DEV-028（数値調整・経済や時間との接続）または次に指定された機能。個別変更のためロードマップのPhase区分を維持。開発方針・未決事項にある無料宿泊と報酬なしは初期Phaseの履歴。最新値と挙動は現行仕様書を参照。
