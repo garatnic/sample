@@ -60,7 +60,8 @@
 - [x] DEV-031 ゲーム画面に ver.4 を表示し、ゲーム修正ごとに表示版を1つ上げる手順を整備する。関連 CUR-UI-001、SYSTEM-009。
   - 2026-11-25 実装 [`9042c597db6cc2933f1b069cc505f3742a2387fe`](https://github.com/garatnic/sample/commit/9042c597db6cc2933f1b069cc505f3742a2387fe)。HTMLの表示文字列と手順を確認。
 
-- [ ] DEV-032 討伐経験値とレベルアップ。関連 GROWTH-001、CUR-GROWTH-001、CUR-COMBAT-005/006、CUR-INN-002、CUR-LIFE-001、CUR-UI-001。経験値取得・基礎能力の上昇・表示・宿回復・戦闘不能後の維持を確認する。
+- [x] DEV-032 討伐経験値とレベルアップ。関連 GROWTH-001、CUR-GROWTH-001、CUR-COMBAT-005/006、CUR-INN-002、CUR-LIFE-001、CUR-UI-001。経験値取得・基礎能力の上昇・表示・宿回復・戦闘不能後の維持を確認する。
+  - 2026-11-26 ver.5 実装 [`52fe7fedb94556ffa29bbd47c07e0dffeafe3489`](https://github.com/garatnic/sample/commit/52fe7fedb94556ffa29bbd47c07e0dffeafe3489)。討伐、成長、HUD、宿、復帰ハンドラーをNodeで確認。熟練度はDEV-014で扱う。
 
 ## 登録漏れの確認
 現時点では分野単位の登録のみ。211個別仕様のTODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。

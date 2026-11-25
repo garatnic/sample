@@ -1,5 +1,6 @@
 # 現在の開発状況
 
+- ver.5 / DEV-032 [`52fe7fedb94556ffa29bbd47c07e0dffeafe3489`](https://github.com/garatnic/sample/commit/52fe7fedb94556ffa29bbd47c07e0dffeafe3489)。Lv.1開始、討伐経験値・レベルアップ・最大HPと通常攻撃の成長を実装。次回は指定機能、または DEV-014 の技能熟練度など残る成長仕様を確認する。数値は暫定。
 - DEV-031を実装 [`9042c597db6cc2933f1b069cc505f3742a2387fe`](https://github.com/garatnic/sample/commit/9042c597db6cc2933f1b069cc505f3742a2387fe)。画面左上に「Kingdom Adventurer ver.4」を表示。次回のゲーム修正は ver.5 とし、番号の更新と公開確認を開発基本方針に従って行う。
 - DEV-030を実装 [`2b528d93655baa2ffb915e81ce53907161b6b3d0`](https://github.com/garatnic/sample/commit/2b528d93655baa2ffb915e81ce53907161b6b3d0)。公開ゲームのCSSに内容ハッシュを付け、通常ブラウザに残る旧CSSと取得URLを区別する。HTMLとCSSのハッシュの一致を検証。
 - DEV-029を実装 [`6e00387b8c0948a0a2f82eef4dab42ea4d0f058c`](https://github.com/garatnic/sample/commit/6e00387b8c0948a0a2f82eef4dab42ea4d0f058c)。スマホ用の仮想スティックを画面下中央へ移動し、通知をその上に表示。CSSとNodeの入力シミュレーションで確認。スマホ実機での新配置は未確認。
