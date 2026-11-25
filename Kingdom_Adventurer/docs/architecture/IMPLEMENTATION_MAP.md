@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: DEV-032反映時点。
+基準: DEV-033反映時点。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全29仕様を対象とする。パスは `Kingdom_Adventurer/game/` 相対。関数名に加え、匿名イベント・データ・DOM・CSSセレクタも記載する。行番号は固定しない。関連仕様は直接の調査候補であり、変更時には呼出元・依存先も確認する。現行仕様は暫定実装。自動テストコードは未保存のため全行の関連テストは未登録（過去の検証記録は [TODO](../development/TODO.md)・[開発状況](../development/DEVELOPMENT_STATUS.md) 参照）。今回の静的照合は実機検証ではない。
 
 ## 仕様から実装を探す
@@ -16,7 +16,7 @@
 | `CUR-WORLD-003` | 地形 | src/world.js: terrainAt(), inTown(); src/render.js: tile(), colors; src/world.js: movePlayer(), walkable()（地形を衝突に使わない） | CUR-WORLD-001, CUR-MOVE-002, CUR-UI-003 | 未登録 |
 | `CUR-WORLD-004` | 建物 | src/world.js: buildings, inn, innDoor, walkable(); src/render.js: building(); src/main.js: update() の宿判定 | CUR-MOVE-002, CUR-INN-001, CUR-UI-003 | 未登録 |
 | `CUR-INPUT-001` | キーボード | src/input.js: directions, createInput(), keys, keydown/keyup/blur, clear(), read(); index.html: footer; style.css: footer/kbd | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001 | 未登録 |
-| `CUR-INPUT-002` | 仮想スティック | src/input.js: createInput(), move(), clear(), pointerイベント, read(); index.html: #stick/#knob; style.css: #stick（下中央）/#knob, @media(pointer:coarse); src/main.js: createInput() 呼出 | CUR-MOVE-001, CUR-UI-005, CUR-INPUT-001 | 未登録 |
+| `CUR-INPUT-002` | スワイプ移動 | src/input.js: createInput(), move(), clearTouch(), clear(), pointerイベント, read(); index.html: canvas; style.css: canvas の touch-action; src/main.js: createInput() 呼出 | CUR-MOVE-001, CUR-UI-005, CUR-INPUT-001 | 未登録 |
 | `CUR-INPUT-003` | ゲームパッド | src/input.js: createInput().read() の navigator.getGamepads・axes・閾値; src/main.js: update() の入力取得 | CUR-MOVE-001, CUR-INPUT-001, CUR-INPUT-002 | 未登録 |
 | `CUR-MOVE-001` | 移動速度 | src/settings.js: player.speed/radius; src/world.js: movePlayer(); src/input.js: read(); src/main.js: update() の moving; src/render.js: actor() | CUR-MOVE-002, CUR-INPUT-001, CUR-INPUT-002, CUR-INPUT-003, CUR-UI-004 | 未登録 |
 | `CUR-MOVE-002` | 境界・衝突 | src/world.js: movePlayer(), walkable(), buildings; src/settings.js: mapWidth/mapHeight/player.radius | CUR-WORLD-001, CUR-WORLD-004, CUR-MOVE-001 | 未登録 |
@@ -31,11 +31,11 @@
 | `CUR-INN-001` | 宿接触 | src/world.js: innDoor, buildings; src/main.js: update() の touchingInn/innContact/料金・残高案内/returnValue/showModal; src/input.js: clear(); index.html: #inn; src/render.js: building() の入口マーカー | CUR-WORLD-004, CUR-MOVE-001, CUR-INN-002 | 未登録 |
 | `CUR-INN-002` | 宿泊 | src/main.js: inn closeイベント（残高確認・支払い）, frame() の停止条件; src/settings.js: inn.price; src/growth.js: maxHealth(); index.html: #inn/#inn-offer/#inn-confirm/NO; style.css: dialog/button/backdrop; src/render.js: render() の継続描画 | CUR-INN-001, CUR-SYS-003, CUR-UI-001, CUR-UI-005 | 未登録 |
 | `CUR-LIFE-001` | 死亡・再開 | src/combat.js: updateCombat() のHP0; src/main.js: update(), createPlayer(), death cancel/closeイベント（所持金・硬貨・成長維持）, frame(); src/input.js: clear(); src/world.js: start; src/settings.js: player.maxHp; index.html: #death; style.css: dialog/button | CUR-SYS-002, CUR-COMBAT-004, CUR-INN-001, CUR-UI-005 | 未登録 |
-| `CUR-UI-001` | HUD | index.html: header/h1（タイトル・表示バージョン）/#location/#progress/#hp/#health/#gold/#notice/footer; src/main.js: frame(), setText(), health.max; src/world.js: inTown(), town; src/settings.js: player.maxHp; style.css: header/footer/#notice（coarse時にスティック上）/meter/@media | CUR-WORLD-002, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002 | 未登録 |
+| `CUR-UI-001` | HUD | index.html: header/h1（タイトル・表示バージョン）/#location/#progress/#hp/#health/#gold/#notice/footer; src/main.js: frame(), setText(), health.max; src/world.js: inTown(), town; src/settings.js: player.maxHp; style.css: header/footer/#notice/meter/@media | CUR-WORLD-002, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002 | 未登録 |
 | `CUR-UI-002` | 画面・カメラ | src/render.js: createRenderer(), render() の clientWidth/Height・DPR・setTransform・left/top・タイル走査; src/settings.js: tile/mapWidth/mapHeight; index.html: canvas; style.css: body/canvas | CUR-WORLD-001, CUR-UI-003, CUR-UI-004 | 未登録 |
 | `CUR-UI-003` | 地形・建物描画 | src/render.js: colors, rect(), tile(), building(), render(); src/world.js: terrainAt(), buildings, innDoor; src/settings.js: tile | CUR-WORLD-003, CUR-WORLD-004, CUR-UI-002 | 未登録 |
 | `CUR-UI-004` | キャラクター・戦闘描画 | src/render.js: actor(), render() の硬貨描画, rect(); src/settings.js: enemy.maxHp; src/main.js: update() の moving/flash/strike; src/combat.js: updateCombat() の flash/strike/hp | CUR-MOVE-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-002 | 未登録 |
-| `CUR-UI-005` | ダイアログ・外観 | index.html: #inn/#death/#stick/#knob・form/button; style.css: :root/dialog/backdrop/button/h1/#stick/#knob/@media; src/main.js: showModal/close/cancel; src/input.js: move()/clear() のノブ変位 | CUR-INN-002, CUR-LIFE-001, CUR-INPUT-002 | 未登録 |
+| `CUR-UI-005` | ダイアログ・外観 | index.html: #inn/#death・form/button; style.css: :root/dialog/backdrop/button/h1/@media; src/main.js: showModal/close/cancel | CUR-INN-002, CUR-LIFE-001 | 未登録 |
 
 ## ファイルから仕様を探す（逆引き）
 
@@ -47,7 +47,7 @@
 | `src/settings.js` | CUR-SYS-002, CUR-WORLD-001, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-002, CUR-UI-003, CUR-UI-004 |
 | `src/world.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-INN-001, CUR-LIFE-001, CUR-UI-001, CUR-UI-003 |
 | `src/growth.js` | CUR-SYS-002, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-INN-002, CUR-LIFE-001, CUR-UI-001 |
-| `src/input.js` | CUR-SYS-003, CUR-INPUT-001, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-UI-005 |
+| `src/input.js` | CUR-SYS-003, CUR-INPUT-001, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001 |
 | `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-COMBAT-007, CUR-LIFE-001, CUR-UI-004 |
 | `src/main.js` | CUR-SYS-001, CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-004, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-004, CUR-UI-005 |
 | `src/render.js` | CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-003, CUR-WORLD-004, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-UI-002, CUR-UI-003, CUR-UI-004 |

@@ -2,7 +2,7 @@ import { settings } from './settings.js';
 import { innDoor, inTown, movePlayer, start, town } from './world.js';
 import { createEncounters, updateCombat } from './combat.js?v=5';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
-import { createInput } from './input.js';
+import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js';
 
 const inn = document.querySelector('#inn');
@@ -15,8 +15,9 @@ const hp = document.querySelector('#hp');
 const health = document.querySelector('#health');
 const locationLabel = document.querySelector('#location');
 const notice = document.querySelector('#notice');
-const input = createInput(document.querySelector('#stick'), document.querySelector('#knob'));
-const render = createRenderer(document.querySelector('canvas'));
+const canvas = document.querySelector('canvas');
+const input = createInput(canvas);
+const render = createRenderer(canvas);
 
 function createPlayer({ level = 1, experience = 0 } = {}) {
   return { id: 'player', ...start, level, experience, hp: maxHealth(level), cooldown: 0, flash: 0, moving: false };

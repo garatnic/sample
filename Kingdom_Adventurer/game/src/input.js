@@ -3,18 +3,24 @@ const directions = {
   ArrowUp: [0, -1], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowRight: [1, 0],
 };
 
-export function createInput(stick, knob) {
+export function createInput(canvas) {
   const keys = new Set();
   const touch = { x: 0, y: 0 };
-  let pointer = null;
+  let gesture = null;
+
+  function clearTouch() {
+    const pointerId = gesture?.pointerId;
+    gesture = null;
+    touch.x = 0;
+    touch.y = 0;
+    if (pointerId !== undefined && canvas.hasPointerCapture(pointerId)) {
+      canvas.releasePointerCapture(pointerId);
+    }
+  }
 
   function clear() {
     keys.clear();
-    if (pointer !== null && stick.hasPointerCapture(pointer)) stick.releasePointerCapture(pointer);
-    pointer = null;
-    touch.x = 0;
-    touch.y = 0;
-    knob.style.transform = '';
+    clearTouch();
   }
 
   window.addEventListener('keydown', event => {
@@ -26,26 +32,23 @@ export function createInput(stick, knob) {
   window.addEventListener('blur', clear);
 
   function move(event) {
-    if (event.pointerId !== pointer) return;
-    const bounds = stick.getBoundingClientRect();
-    const x = event.clientX - bounds.left - bounds.width / 2;
-    const y = event.clientY - bounds.top - bounds.height / 2;
+    if (event.pointerId !== gesture?.pointerId) return;
+    const x = event.clientX - gesture.x;
+    const y = event.clientY - gesture.y;
     const length = Math.max(34, Math.hypot(x, y));
     touch.x = x / length;
     touch.y = y / length;
-    knob.style.transform = `translate(${touch.x * 34}px, ${touch.y * 34}px)`;
   }
 
-  stick.addEventListener('pointerdown', event => {
-    if (pointer !== null) return;
-    pointer = event.pointerId;
-    stick.setPointerCapture(pointer);
-    move(event);
+  canvas.addEventListener('pointerdown', event => {
+    if (event.pointerType !== 'touch' || gesture || document.querySelector('dialog[open]')) return;
+    gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    canvas.setPointerCapture(event.pointerId);
   });
-  stick.addEventListener('pointermove', move);
+  canvas.addEventListener('pointermove', move);
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
-    stick.addEventListener(type, event => {
-      if (event.pointerId === pointer) clear();
+    canvas.addEventListener(type, event => {
+      if (event.pointerId === gesture?.pointerId) clearTouch();
     });
   }
 

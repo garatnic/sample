@@ -63,5 +63,7 @@
 - [x] DEV-032 討伐経験値とレベルアップ。関連 GROWTH-001、CUR-GROWTH-001、CUR-COMBAT-005/006、CUR-INN-002、CUR-LIFE-001、CUR-UI-001。経験値取得・基礎能力の上昇・表示・宿回復・戦闘不能後の維持を確認する。
   - 2026-11-26 ver.5 実装 [`52fe7fedb94556ffa29bbd47c07e0dffeafe3489`](https://github.com/garatnic/sample/commit/52fe7fedb94556ffa29bbd47c07e0dffeafe3489)。討伐、成長、HUD、宿、復帰ハンドラーをNodeで確認。熟練度はDEV-014で扱う。
 
+- [ ] DEV-033 フィールド全域でスワイプ移動。固定スティックを削除し、指を離すと停止する。関連 CUR-INPUT-002、CUR-UI-001/005、SYSTEM-008。
+
 ## 登録漏れの確認
 現時点では分野単位の登録のみ。211個別仕様のTODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
