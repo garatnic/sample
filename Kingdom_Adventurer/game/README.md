@@ -8,6 +8,10 @@ WASD・矢印キー・ゲームパッド左スティックで移動します。�
 
 ブラウザ標準の JavaScript ES Modules・Canvas 2D を使用します。依存ライブラリやビルドは不要です。地形・配置は `src/world.js`、数値は `src/settings.js`、表示は `src/render.js`、入力は `src/input.js`、敵の更新は `src/combat.js` にあります。ページを再読み込みすると初期状態から始まります。
 
+## CSS更新時
+
+CSSを変更した場合は、`sha256sum game/style.css` の先頭12桁で `game/index.html` の `style.css?v=` の値を更新します。上記のコマンドは `Kingdom_Adventurer` 直下で実行します。
+
 ## 参考実装
 
 - [Kingdom Observer の Renderer](https://github.com/garatnic/kingdom/blob/6975895/engine/Renderer.js) の可視タイルだけを塗る方式と森林タイルの矩形パターンを調整して使用。街の建物は本作の固定配置用に描画。

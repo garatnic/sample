@@ -1,13 +1,13 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: DEV-029反映時点。
+基準: DEV-030反映時点。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全28仕様を対象とする。パスは `Kingdom_Adventurer/game/` 相対。関数名に加え、匿名イベント・データ・DOM・CSSセレクタも記載する。行番号は固定しない。関連仕様は直接の調査候補であり、変更時には呼出元・依存先も確認する。現行仕様は暫定実装。自動テストコードは未保存のため全行の関連テストは未登録（過去の検証記録は [TODO](../development/TODO.md)・[開発状況](../development/DEVELOPMENT_STATUS.md) 参照）。今回の静的照合は実機検証ではない。
 
 ## 仕様から実装を探す
 
 | 現行仕様ID | 機能 | 実装ファイル・関数・役割 | 関連現行仕様ID | 関連テスト |
 |---|---|---|---|---|
-| `CUR-SYS-001` | 起動 | index.html: module script・stylesheet・DOM; package.json: type/private; src/main.js: モジュール初期化; style.css: 基本表示 | CUR-SYS-002, CUR-UI-001 | 未登録 |
+| `CUR-SYS-001` | 起動 | index.html: module script・版付きstylesheet参照・DOM; package.json: type/private; src/main.js: モジュール初期化; style.css: 基本表示 | CUR-SYS-002, CUR-UI-001 | 未登録 |
 | `CUR-SYS-002` | 初期状態 | src/main.js: createPlayer(), state; src/world.js: start; src/settings.js: player.maxHp / currency.startingGold; src/combat.js: createEncounters() | CUR-WORLD-002, CUR-COMBAT-001, CUR-LIFE-001 | 未登録 |
 | `CUR-SYS-003` | フレーム処理 | src/main.js: frame(), update(), collectGold(), previous, requestAnimationFrame; src/input.js: read(); src/world.js: movePlayer(); src/combat.js: updateCombat(); src/render.js: render() | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-UI-001 | 未登録 |
 | `CUR-SYS-004` | 保存なし | src/main.js: state, createPlayer()（メモリ初期化）; index.html: 起動時モジュール読み込み | CUR-SYS-002, CUR-LIFE-001 | 未登録 |

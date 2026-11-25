@@ -1,13 +1,13 @@
 # 現行仕様書 — Kingdom Adventurer
 
-基準: 2026-11-25 / Phase 1完了後、DEV-029反映。
+基準: 2026-11-25 / Phase 1完了後、DEV-030反映。
 本書は現在の実装を静的に読み取った仕様であり、最終目標仕様ではない。全項目は現行の暫定実装として扱う。検証結果は[変更履歴](../../development/CHANGELOG.md)を参照。既存の目標仕様は [統合仕様書](../README.md) を参照する。
 現行仕様IDは CUR-分野-連番とし、目標仕様IDとは別の名前空間で永続管理する。変更・分割時も既存IDを維持し、廃止IDは再利用しない。数値の実行時正本はコード（特に settings.js）。本書は基準時点の値を記録する。距離は世界座標単位、時間は秒（明記した場合を除く）。
 
 ## 起動・状態
 
 ### CUR-SYS-001 起動
-HTML5、CSS、JavaScript ES modules、Canvas 2D。game/index.html が style.css と src/main.js を読み込む。package.json は private、type=module、外部依存・実行スクリプトなし。HTTP配信を前提とする。画面は日本語、タイトル Kingdom Adventurer。
+HTML5、CSS、JavaScript ES modules、Canvas 2D。game/index.html が 内容ハッシュをクエリに付けた style.css と src/main.js を読み込む。package.json は private、type=module、外部依存・実行スクリプトなし。HTTP配信を前提とする。画面は日本語、タイトル Kingdom Adventurer。
 
 ### CUR-SYS-002 初期状態
 プレイヤーID player、座標(1112,800)、HP100、攻撃待ち0、被弾点滅0、移動フラグfalse。敵出現枠8件（敵null、残時間0、世代0）。攻撃線・通知null、宿接触フラグfalse。初期所持金10G、地面の硬貨なし。起動直後からプレイする。
