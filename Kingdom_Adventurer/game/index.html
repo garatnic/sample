@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kingdom Adventurer</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <canvas aria-label="フィールド"></canvas>
+  <header>
+    <h1>Kingdom Adventurer</h1>
+    <p id="location"></p>
+    <label for="health">HP <output id="hp"></output></label>
+    <meter id="health" min="0" max="100" value="100"></meter>
+  </header>
+  <p id="notice" role="status"></p>
+  <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
+  <div id="stick" aria-hidden="true"><div id="knob"></div></div>
+  <dialog id="inn" aria-labelledby="inn-title">
+    <form method="dialog">
+      <h2 id="inn-title">街道の宿</h2>
+      <p>休んでHPを全回復しますか？</p>
+      <button value="yes">YES</button>
+      <button value="no" autofocus>NO</button>
+    </form>
+  </dialog>
+  <dialog id="death" aria-labelledby="death-title">
+    <h2 id="death-title">戦闘不能</h2>
+    <p>街でHPを全回復して再開できます。</p>
+    <form method="dialog"><button>街で再開</button></form>
+  </dialog>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
