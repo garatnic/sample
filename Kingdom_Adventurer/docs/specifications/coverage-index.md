@@ -405,3 +405,7 @@
 - [v7.2.md](../history/v7.2.md#確定方針と再開地点) 確定方針と再開地点 → [SOCIETY-016](13_population_society.md#society-016)
 - [v3.1.md](../history/v3.1.md#3-仲間と雇用についての既存仕様) 3. 仲間と雇用についての既存仕様 → [GROUP-003](08_companions_guilds.md#group-003)
 - [v3.1.md](../history/v3.1.md#1-v30で確定した仕様) 1. v3.0で確定した仕様 → [HOUSING-004](11_building_housing.md#housing-004)
+
+## 個別開発時の追加決定
+
+- [2026-11-26 武器の攻撃間隔と槌](../history/2026-11-26-weapon-speed.md) → [ITEM-001](06_items_equipment.md#item-001)

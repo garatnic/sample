@@ -1,7 +1,7 @@
 import { settings } from './settings.js?v=7';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js?v=8';
-import { items, damageAfterArmor } from './equipment.js?v=12';
+import { attackInterval, damageAfterArmor, items } from './equipment.js?v=13';
 
 export function createEncounters() {
   return spawns.map(home => ({ home, enemy: null, remaining: 0, generation: 0 }));
@@ -63,7 +63,7 @@ export function updateCombat(state, dt) {
   }
   if (!nearest) return;
   const enemy = nearest.enemy;
-  player.cooldown = settings.player.attackDelay;
+  player.cooldown = attackInterval(weapon);
   state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
   enemy.hp -= attackDamage(player.level) + (weapon?.bonus ?? 0);
   enemy.flash = 0.18;

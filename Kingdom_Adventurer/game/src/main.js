@@ -1,10 +1,10 @@
 import { settings } from './settings.js';
 import { innDoor, shopDoor, inTown, movePlayer, start, town } from './world.js?v=8';
-import { createEncounters, updateCombat } from './combat.js?v=12';
+import { createEncounters, updateCombat } from './combat.js?v=13';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=11';
-import { setupGearMenus } from './gear-ui.js?v=12';
+import { setupGearMenus } from './gear-ui.js?v=13';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');

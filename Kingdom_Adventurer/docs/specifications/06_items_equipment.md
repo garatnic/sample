@@ -26,11 +26,14 @@
 
 - 品質・ランダム性能・特殊効果あり。
 - 素材・製作者技能・製作条件・個体差で決定。
+- 素手と武器ジャンルごとに通常攻撃の基本間隔を設定する。ユニーク武器や特殊な武器は個別の攻撃間隔を設定できる。槌を武器ジャンルに含める。
 
 **出典**
 
 - [v0.6.md Q4](../history/v0.6.md#q4) 装備の性能 ／ 採用「品質・ランダム性能・特殊効果あり」
 - [v2.5.md Q2](../history/v2.5.md#q2) 装備の品質・性能 ／ 採用「素材・製作者技能・製作条件・個体差で決定」
+
+- [2026-11-26の追加決定](../history/2026-11-26-weapon-speed.md) 攻撃間隔と槌
 
 **関連仕様** [EXPLORE-001](03_exploration.md#explore-001) · [COMBAT-001](04_combat.md#combat-001) · [EXPLORE-002](03_exploration.md#explore-002) · [GROWTH-002](05_character_growth.md#growth-002)
 

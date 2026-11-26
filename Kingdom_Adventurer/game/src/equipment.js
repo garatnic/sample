@@ -6,10 +6,24 @@ export const slots = new Map([
 
 export const ringSlots = new Map([['ring', '指輪1'], ['ring-2', '指輪2']]);
 
+const attackIntervals = {
+  unarmed: 0.58,
+  dagger: 0.50,
+  sword: 0.64,
+  axe: 0.70,
+  mace: 0.76,
+  hammer: 0.90,
+};
+
+export function attackInterval(weapon) {
+  return weapon?.attackInterval ?? attackIntervals[weapon?.category] ?? attackIntervals.unarmed;
+}
+
 export const items = new Map([
-  ['iron-dagger', { slot: 'weapon', name: '鉄の短剣', price: 10, range: 22, bonus: 2 }],
-  ['iron-sword', { slot: 'weapon', name: '鉄の剣', price: 20, range: 30, bonus: 5 }],
-  ['iron-mace', { slot: 'weapon', name: '鉄のメイス', price: 30, range: 30, bonus: 8 }],
+  ['iron-dagger', { slot: 'weapon', category: 'dagger', name: '鉄の短剣', price: 10, range: 22, bonus: 2 }],
+  ['iron-sword', { slot: 'weapon', category: 'sword', name: '鉄の剣', price: 20, range: 30, bonus: 5 }],
+  ['iron-mace', { slot: 'weapon', category: 'mace', name: '鉄のメイス', price: 30, range: 30, bonus: 8 }],
+  ['iron-hammer', { slot: 'weapon', category: 'hammer', name: '鉄の槌', price: 40, range: 34, bonus: 14 }],
   ['iron-helmet', { slot: 'head', name: '鉄の兜', price: 20, defense: 5 }],
   ['leather-armor', { slot: 'body', name: '革の鎧', price: 20, defense: 6 }],
   ['iron-armor', { slot: 'body', name: '鉄の鎧', price: 40, defense: 10 }],

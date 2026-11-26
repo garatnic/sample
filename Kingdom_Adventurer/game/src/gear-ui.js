@@ -1,5 +1,5 @@
 import { attackDamage, maxHealth } from './growth.js?v=5';
-import { buyItem, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=12';
+import { attackInterval, buyItem, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=13';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');
@@ -51,7 +51,7 @@ export function setupGearMenus(state, input) {
   }
 
   const details = item => item.slot === 'weapon'
-    ? `${item.name}　攻撃+${item.bonus} / 射程${item.range}`
+    ? `${item.name}　攻撃+${item.bonus} / 射程${item.range} / 攻撃間隔${attackInterval(item).toFixed(2)}秒`
     : `${item.name}　防御+${item.defense}`;
 
   const markShopFilter = filters('#shop-tabs', key => {
