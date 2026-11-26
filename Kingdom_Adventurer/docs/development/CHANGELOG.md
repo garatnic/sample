@@ -10,6 +10,11 @@
 - ファイル一覧やコード差分の転載は不要。複数コミットが関係する場合は全て記載する。仕様IDは変更・廃止後も履歴に残す。
 - 変更理由が不明なら不明と記録する。検証していない結果を成功と記載しない。
 
+## 2026-11-26 — ver.14：弱い野外敵4種
+- 実装コミット [34ce7f3fa96bb875c927ee01236f5be70f96828a](https://github.com/garatnic/sample/commit/34ce7f3fa96bb875c927ee01236f5be70f96828a)。一律の魔物をオオカミ、大ネズミ、泥ガニ、小型クモの4種に変更。固定8地点・各1体、8秒で同種が再出現。見た目とHPバーを種別に連動。
+- 関連: DEV-041、CUR-COMBAT-001/003/004/006、CUR-UI-004、COMBAT-002、ECO-001。[Skyrimの生物分類資料](https://www.theorganizedgamer.com/wp-content/uploads/Soul-Gem-Guide.pdf)から序盤の小型種を選び、既存の敵より基本ダメージを下げたうえで能力値を暫定設定。現行の敵追加のため目標仕様・ロードマップ・未決事項は更新対象外。
+- 検証: Nodeで8枠と各種2体、敵攻撃、Canvasの簡易検証でHPバー、撃破時の硬貨、同種の再出現を確認。スマホ実機は未検証。
+
 ## 2026-11-26 — ver.13：武器別の攻撃間隔と槌
 - 実装コミット [dc9fb7d5c55cc94c14a68662340605ed2b83e452](https://github.com/garatnic/sample/commit/dc9fb7d5c55cc94c14a68662340605ed2b83e452)。通常攻撃の待ち時間を一律0.58秒から、素手・武器ジャンル別の設定に変更。個別値があれば優先し、店と所持品に攻撃間隔を表示。装備品屋に鉄の槌を追加。
 - 関連: DEV-040、CUR-COMBAT-005、CUR-SHOP-001、CUR-ITEM-001/002、ITEM-001。素手の従来値を基準に、短剣・剣・斧・メイス・槌の速度順は [Skyrimの武器資料](https://www.scribd.com/document/312057451/Elder-Scrolls-v-Skyrim-Prima-Unofficial-EGuide) を参考にした。価格と数値は既存武器との違いが出るよう暫定設定。ロードマップと未決事項の武器射程案は更新対象外。

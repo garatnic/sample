@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.14 / DEV-041 [34ce7f3fa96bb875c927ee01236f5be70f96828a](https://github.com/garatnic/sample/commit/34ce7f3fa96bb875c927ee01236f5be70f96828a)。弱い野外敵を4種、固定8地点に各1体。実機表示は未確認。次回の敵・生態系詳細はTODOの未完項目を参照。
+
 - ver.13 / DEV-040 [dc9fb7d5c55cc94c14a68662340605ed2b83e452](https://github.com/garatnic/sample/commit/dc9fb7d5c55cc94c14a68662340605ed2b83e452)。ジャンル別の攻撃間隔と個別値の優先、鉄の槌を実装。斧には間隔設定があり、具体的なアイテムはDEV-015の残項目。具体値は暫定。スマホ実機は未確認。
 
 - ver.12 / DEV-039 [1db72d245d4bd49c162802f6e4e4deb1687423d9](https://github.com/garatnic/sample/commit/1db72d245d4bd49c162802f6e4e4deb1687423d9)。指輪を2枠に拡張し、同じ指輪の同時装備は2個所持時に可能。共通の指輪タブと枠別操作をNodeで確認。次回は DEV-015 の残項目を参照。
