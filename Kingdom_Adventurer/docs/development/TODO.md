@@ -72,7 +72,8 @@
 - [x] DEV-035 武器屋・武器装備・容量無制限の所持品。購入、残高不足、装備・解除、戦闘と復帰を検証。関連 ITEM-001/003、ECONOMY-007/008、OPEN-041。
   - 2026-11-26 ver.8 [`f3954fde0dbe8b8453b53d3321d46623df6d8da8`](https://github.com/garatnic/sample/commit/f3954fde0dbe8b8453b53d3321d46623df6d8da8)。Nodeで購入、残高不足、1000個の所持、装備・解除のUIイベント、射程とダメージ、入口への接近を確認。スマホ実機は未検証。
 
-- [ ] DEV-036 装備画面の部位表示と4ステータス。関連 CUR-ITEM-001、CUR-UI-005、ITEM-008、SYSTEM-006。
+- [x] DEV-036 装備画面の部位表示と4ステータス。関連 CUR-ITEM-001、CUR-UI-005、ITEM-008、SYSTEM-006。
+  - 2026-11-26 ver.9 [`e590549d7b9cbb24a58d9533961c413a3451d3bd`](https://github.com/garatnic/sample/commit/e590549d7b9cbb24a58d9533961c413a3451d3bd)。HTMLの部位枠・4項目、JS構文、CSS版を検証。スマホ実機は未検証。
 
 ## 登録漏れの確認
 現時点では分野単位の登録のみ。211個別仕様のTODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。

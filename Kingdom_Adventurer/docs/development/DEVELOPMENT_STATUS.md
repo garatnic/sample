@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.9 / DEV-036 [`e590549d7b9cbb24a58d9533961c413a3451d3bd`](https://github.com/garatnic/sample/commit/e590549d7b9cbb24a58d9533961c413a3451d3bd)。人体シルエット付き装備画面を追加。武器枠は既存の装備機能と連動し、防具など他部位は見本枠。MPと防御は表示値の仮置き。次回の防具などの実装は DEV-015 を参照。
+
 - ver.8 / DEV-035 [`f3954fde0dbe8b8453b53d3321d46623df6d8da8`](https://github.com/garatnic/sample/commit/f3954fde0dbe8b8453b53d3321d46623df6d8da8)。武器屋と容量無制限の所持品、武器装備を実装。次回の装備追加は DEV-015 と OPEN-041 を参照。固定品揃え・価格・性能は暫定。
 
 - ver.7 / DEV-034 [`fca7186223acf76a114f58303c18072a9b579218`](https://github.com/garatnic/sample/commit/fca7186223acf76a114f58303c18072a9b579218)。無装備の通常攻撃射程は16、敵の接近停止・攻撃距離は15。武器実装時は OPEN-041 の射程順を確認する。
