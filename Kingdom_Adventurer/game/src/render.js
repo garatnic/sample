@@ -118,9 +118,9 @@ export function createRenderer(canvas) {
       }
     }
     for (const entry of buildings) building(entry);
-    for (const { x, y } of state.goldDrops) {
+    for (const { x, y, materials } of state.lootDrops) {
       rect(x - 5, y - 5, 10, 10, '#654319');
-      rect(x - 4, y - 4, 8, 8, '#f2bc35');
+      rect(x - 4, y - 4, 8, 8, materials.length ? '#bc8a55' : '#f2bc35');
       rect(x - 2, y - 3, 3, 2, '#fff1a0');
     }
     for (const { enemy } of encounters) {

@@ -1,7 +1,7 @@
 import { attackDamage, maxHealth } from './growth.js?v=5';
-import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=20';
-import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=20';
-import { canUseItem, maxMp, useItem } from './consumables.js?v=20';
+import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=25';
+import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=25';
+import { canUseItem, maxMp, useItem } from './consumables.js?v=25';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');
@@ -98,7 +98,7 @@ export function setupGearMenus(state, input) {
     for (const [id, item] of items) {
       if (!acceptsItem(shopId, item) || (shopFilter !== 'all' && shopFilter !== itemGroup(item))) continue;
       const quantity = state.player.inventory.get(id) ?? 0;
-      if (!buying && quantity === 0) continue;
+      if (buying ? item.sellOnly : quantity === 0) continue;
       const price = buying ? item.price : salePrice(item);
       const equipped = !buying && sellableQuantity(state.player, id) <= 0;
       const entry = document.createElement('li');

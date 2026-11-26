@@ -43,6 +43,13 @@ export const items = new Map([
   ['bread', { category: 'food', name: 'パン', price: 4, effect: { hp: 2, mp: 1 } }],
   ['water', { category: 'food', name: '水', price: 2, effect: { hp: 1, mp: 1 } }],
   ['wooden-trinket', { category: 'misc', name: '木彫りの置物', price: 4 }],
+  ['wolf-hide', { category: 'materials', name: 'オオカミの革', price: 6, sellOnly: true }],
+  ['wolf-fang', { category: 'materials', name: 'オオカミの牙', price: 4, sellOnly: true }],
+  ['rat-meat', { category: 'materials', name: '大ネズミの肉', price: 6, sellOnly: true }],
+  ['small-bone', { category: 'materials', name: '小さな骨', price: 4, sellOnly: true }],
+  ['crab-shell', { category: 'materials', name: '泥ガニの甲羅', price: 10, sellOnly: true }],
+  ['spider-silk', { category: 'materials', name: 'クモの糸', price: 6, sellOnly: true }],
+  ['venom-sac', { category: 'materials', name: 'クモの毒液', price: 4, sellOnly: true }],
 ]);
 
 export function equippedId(player, slot) {

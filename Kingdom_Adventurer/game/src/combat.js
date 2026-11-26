@@ -1,8 +1,9 @@
-import { enemyTypes, settings } from './settings.js?v=15';
+import { enemyTypes, settings } from './settings.js?v=25';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js?v=24';
-import { attackInterval, defenseRating, items } from './equipment.js?v=20';
-import { recordDefeat } from './quests.js?v=24';
+import { attackInterval, defenseRating, items } from './equipment.js?v=25';
+import { recordDefeat } from './quests.js?v=25';
+import { dropLoot } from './loot.js?v=25';
 
 export function physicalDamage(attack, defense, damageMultiplier) {
   const reductionBasisPoints = Math.min(8000, Math.max(0, defense) * 12);
@@ -29,7 +30,7 @@ export function updateCombat(state, dt) {
       encounter.remaining -= dt;
       if (encounter.remaining <= 0) {
         encounter.enemy = { id: `enemy-${home.id}-${++encounter.generation}`,
-          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, gold: config.gold, cooldown: 0, flash: 0 };
+          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0 };
       }
     }
 
@@ -84,7 +85,7 @@ export function updateCombat(state, dt) {
     recordDefeat(state, enemy.kind);
     nearest.enemy = null;
     nearest.remaining = config.spawnDelay;
-    if (enemy.gold > 0) state.goldDrops.push({ x: enemy.x, y: enemy.y, gold: enemy.gold });
+    dropLoot(state, enemy, enemyTypes[enemy.kind]);
     const leveledUp = gainExperience(player, growth.defeatExperience);
     state.notice = leveledUp
       ? { text: `レベルアップ！ Lv.${player.level}`, remaining: 2.5, leveledUp: true }

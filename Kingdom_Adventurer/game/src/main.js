@@ -1,14 +1,16 @@
 import { settings } from './settings.js';
 import { guildDoors, innDoor, shopDoors, inTown, movePlayer, start, town } from './world.js?v=24';
-import { createEncounters, updateCombat } from './combat.js?v=24';
+import { createEncounters, updateCombat } from './combat.js?v=25';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=24';
-import { setupGearMenus } from './gear-ui.js?v=23';
+import { createRenderer } from './render.js?v=25';
+import { setupGearMenus } from './gear-ui.js?v=25';
 import { gameDateTime, gameDay, gameMinutes } from './clock.js?v=24';
-import { maxMp } from './consumables.js?v=20';
+import { maxMp } from './consumables.js?v=25';
 
-import { setupQuestMenus } from './quests.js?v=24';
+import { setupQuestMenus } from './quests.js?v=25';
+
+import { collectLoot } from './loot.js?v=25';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -39,7 +41,7 @@ function createPlayer({ level = 1, experience = 0, inventory = new Map(), weapon
 }
 
 const state = { player: createPlayer(), encounters: createEncounters(), strike: null,
-  notice: null, innContact: false, gold: settings.currency.startingGold, goldDrops: [], shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 100])) };
+  notice: null, innContact: false, gold: settings.currency.startingGold, lootDrops: [], shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 100])) };
 Object.assign(state, { guilds: new Map(), guildContact: null });
 const openGuild = setupQuestMenus(state, input);
 const openShop = setupGearMenus(state, input);
@@ -62,23 +64,6 @@ death.addEventListener('close', () => {
   state.guildContact = null;
 });
 
-function collectGold() {
-  let collected = 0;
-  for (let i = state.goldDrops.length - 1; i >= 0; i--) {
-    const drop = state.goldDrops[i];
-    if (Math.hypot(state.player.x - drop.x, state.player.y - drop.y) <= settings.currency.pickupRadius) {
-      collected += drop.gold;
-      state.goldDrops.splice(i, 1);
-    }
-  }
-  if (collected > 0) {
-    state.gold += collected;
-    if (!state.notice?.leveledUp) {
-      state.notice = { text: `${collected}Gを拾いました`, remaining: 1.7 };
-    }
-  }
-}
-
 function update(dt) {
   const { player } = state;
   const direction = input.read();
@@ -89,7 +74,7 @@ function update(dt) {
   if (state.notice && (state.notice.remaining -= dt) <= 0) state.notice = null;
   if (state.strike && (state.strike.remaining -= dt) <= 0) state.strike = null;
 
-  collectGold();
+  collectLoot(state);
 
   const touchingInn = Math.hypot(player.x - innDoor.x, player.y - innDoor.y) <= 19;
   if (touchingInn && !state.innContact) {

@@ -1,7 +1,7 @@
-import { equippedId, items, ringSlots, slots } from './equipment.js?v=20';
+import { equippedId, items, ringSlots, slots } from './equipment.js?v=25';
 
 const equipmentTabs = [...slots];
-export const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['misc', 'その他']];
+export const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['materials', '素材'], ['misc', 'その他']];
 
 export const shops = {
   'weapon-shop': { name: '装備品屋', tabs: equipmentTabs },
@@ -18,7 +18,7 @@ export function acceptsItem(shopId, item) {
 
 export function buyItem(state, shopId, id) {
   const item = items.get(id);
-  if (!acceptsItem(shopId, item) || state.gold < item.price) return false;
+  if (!acceptsItem(shopId, item) || item.sellOnly || state.gold < item.price) return false;
   const inventory = state.player.inventory;
   inventory.set(id, (inventory.get(id) ?? 0) + 1);
   state.gold -= item.price;
