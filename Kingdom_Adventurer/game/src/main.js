@@ -1,10 +1,10 @@
 import { settings } from './settings.js';
 import { innDoor, shopDoor, inTown, movePlayer, start, town } from './world.js?v=14';
-import { createEncounters, updateCombat } from './combat.js?v=14';
+import { createEncounters, updateCombat } from './combat.js?v=15';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=14';
-import { setupGearMenus } from './gear-ui.js?v=13';
+import { setupGearMenus } from './gear-ui.js?v=15';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -127,7 +127,7 @@ function frame(time) {
   health.value = currentHp;
   setText(progress, `Lv.${level} · XP ${experience} / ${experienceToNextLevel(level)}`);
   setText(gold, `${state.gold}G`);
-  setText(hp, `${currentHp} / ${maxHp}`);
+  setText(hp, `${Math.ceil(currentHp * 10) / 10} / ${maxHp}`);
   setText(locationLabel, inTown(state.player) ? town.name : '街道とその周辺');
   setText(notice, state.notice?.text ?? '');
   render(state, time);

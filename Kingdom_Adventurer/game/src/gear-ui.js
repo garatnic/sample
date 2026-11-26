@@ -1,5 +1,5 @@
 import { attackDamage, maxHealth } from './growth.js?v=5';
-import { attackInterval, buyItem, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=13';
+import { attackInterval, buyItem, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=15';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');
@@ -92,7 +92,7 @@ export function setupGearMenus(state, input) {
   function renderInventory() {
     const player = state.player;
     const weapon = items.get(player.weaponId);
-    hp.textContent = `${player.hp} / ${maxHealth(player.level)}`;
+    hp.textContent = `${Math.ceil(player.hp * 10) / 10} / ${maxHealth(player.level)}`;
     attack.textContent = attackDamage(player.level) + (weapon?.bonus ?? 0);
     defense.textContent = defenseRating(player);
     for (const button of slotButtons) {

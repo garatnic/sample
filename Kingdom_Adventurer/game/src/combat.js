@@ -1,7 +1,13 @@
-import { enemyTypes, settings } from './settings.js?v=14';
+import { enemyTypes, settings } from './settings.js?v=15';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js?v=14';
-import { attackInterval, damageAfterArmor, items } from './equipment.js?v=13';
+import { attackInterval, defenseRating, items } from './equipment.js?v=15';
+
+export function physicalDamage(attack, defense, damageMultiplier) {
+  const reductionBasisPoints = Math.min(8000, Math.max(0, defense) * 12);
+  const remainingFraction = (10000 - reductionBasisPoints) / 10000;
+  return attack * damageMultiplier * remainingFraction;
+}
 
 export function createEncounters() {
   return spawns.map(home => ({ home, enemy: null, remaining: 0, generation: 0 }));
@@ -10,6 +16,7 @@ export function createEncounters() {
 export function updateCombat(state, dt) {
   const { player, encounters } = state;
   const config = settings.enemy;
+  const { playerDamageMultiplier, enemyDamageMultiplier } = settings.difficulty;
   const safe = inTown(player);
   player.cooldown = Math.max(0, player.cooldown - dt);
 
@@ -34,7 +41,7 @@ export function updateCombat(state, dt) {
       && Math.hypot(player.x - home.x, player.y - home.y) < config.leash;
     if (chasing && distance <= config.reach) {
       if (enemy.cooldown === 0) {
-        player.hp = Math.max(0, player.hp - damageAfterArmor(player, type.damage));
+        player.hp = Math.max(0, player.hp - physicalDamage(type.damage, defenseRating(player), enemyDamageMultiplier));
         player.flash = 0.22;
         enemy.cooldown = type.attackDelay;
         if (player.hp === 0) return;
@@ -67,7 +74,8 @@ export function updateCombat(state, dt) {
   const enemy = nearest.enemy;
   player.cooldown = attackInterval(weapon);
   state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
-  enemy.hp -= attackDamage(player.level) + (weapon?.bonus ?? 0);
+  const attack = attackDamage(player.level) + (weapon?.bonus ?? 0);
+  enemy.hp -= physicalDamage(attack, enemyTypes[enemy.kind].defense, playerDamageMultiplier);
   enemy.flash = 0.18;
   if (enemy.hp <= 0) {
     nearest.enemy = null;

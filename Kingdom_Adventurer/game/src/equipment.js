@@ -19,21 +19,23 @@ export function attackInterval(weapon) {
   return weapon?.attackInterval ?? attackIntervals[weapon?.category] ?? attackIntervals.unarmed;
 }
 
+const armorPieceBonus = 25;
+
 export const items = new Map([
   ['iron-dagger', { slot: 'weapon', category: 'dagger', name: '鉄の短剣', price: 10, range: 22, bonus: 2 }],
   ['iron-sword', { slot: 'weapon', category: 'sword', name: '鉄の剣', price: 20, range: 30, bonus: 5 }],
   ['iron-mace', { slot: 'weapon', category: 'mace', name: '鉄のメイス', price: 30, range: 30, bonus: 8 }],
   ['iron-hammer', { slot: 'weapon', category: 'hammer', name: '鉄の槌', price: 40, range: 34, bonus: 14 }],
-  ['iron-helmet', { slot: 'head', name: '鉄の兜', price: 20, defense: 5 }],
-  ['leather-armor', { slot: 'body', name: '革の鎧', price: 20, defense: 6 }],
-  ['iron-armor', { slot: 'body', name: '鉄の鎧', price: 40, defense: 10 }],
-  ['leather-right', { slot: 'arm-r', name: '革の右腕当て', price: 5, defense: 2 }],
-  ['leather-left', { slot: 'arm-l', name: '革の左腕当て', price: 5, defense: 2 }],
-  ['leather-belt', { slot: 'waist', name: '革のベルト', price: 5, defense: 1 }],
-  ['leather-leggings', { slot: 'legs', name: '革の脚絆', price: 10, defense: 3 }],
-  ['leather-boots', { slot: 'feet', name: '革のブーツ', price: 10, defense: 3 }],
-  ['iron-shield', { slot: 'shield', name: '鉄の盾', price: 25, defense: 6 }],
-  ['travel-cloak', { slot: 'cloak', name: '旅人のマント', price: 10, defense: 2 }],
+  ['iron-helmet', { slot: 'head', name: '鉄の兜', price: 20, defense: armorPieceBonus + 12 }],
+  ['leather-armor', { slot: 'body', name: '革の鎧', price: 20, defense: armorPieceBonus + 18 }],
+  ['iron-armor', { slot: 'body', name: '鉄の鎧', price: 40, defense: armorPieceBonus + 25 }],
+  ['leather-right', { slot: 'arm-r', name: '革の右腕当て', price: 5, defense: armorPieceBonus + 4 }],
+  ['leather-left', { slot: 'arm-l', name: '革の左腕当て', price: 5, defense: armorPieceBonus + 4 }],
+  ['leather-belt', { slot: 'waist', name: '革のベルト', price: 5, defense: 0 }],
+  ['leather-leggings', { slot: 'legs', name: '革の脚絆', price: 10, defense: armorPieceBonus + 7 }],
+  ['leather-boots', { slot: 'feet', name: '革のブーツ', price: 10, defense: armorPieceBonus + 7 }],
+  ['iron-shield', { slot: 'shield', name: '鉄の盾', price: 25, defense: armorPieceBonus + 20 }],
+  ['travel-cloak', { slot: 'cloak', name: '旅人のマント', price: 10, defense: 0 }],
   ['bronze-necklace', { slot: 'neck', name: '青銅の首飾り', price: 10, defense: 0 }],
   ['bronze-ring', { slot: 'ring', name: '青銅の指輪', price: 10, defense: 0 }],
 ]);
@@ -79,9 +81,4 @@ export function defenseRating(player) {
   let rating = 0;
   for (const id of player.armor.values()) rating += items.get(id).defense;
   return rating;
-}
-
-export function damageAfterArmor(player, damage) {
-  const reduction = Math.min(.75, defenseRating(player) * .03);
-  return Math.max(1, Math.round(damage * (1 - reduction)));
 }
