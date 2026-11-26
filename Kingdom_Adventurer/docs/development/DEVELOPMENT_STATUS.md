@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.19 / DEV-046 [9279d6aea6149a333c9deb68ac768c970e4de1c3](https://github.com/garatnic/sample/commit/9279d6aea6149a333c9deb68ac768c970e4de1c3)。両店の一覧で価格から直接売買できる。品名から詳細を開閉。模擬DOMで検証済み。スマホ実機は未確認。
+
 - ver.18 / DEV-045 [ad59c0fd7ecfec204571c1d1776fbeceea9f3569](https://github.com/garatnic/sample/commit/ad59c0fd7ecfec204571c1d1776fbeceea9f3569)。両店の商品名から取引詳細を開く。分類と売買は模擬DOMで確認。スマホ実機は未確認。
 
 - ver.17 / DEV-044 [1b7da0543a1736b153fc77b75243831be106d86b](https://github.com/garatnic/sample/commit/1b7da0543a1736b153fc77b75243831be106d86b)。店の入口から正しい施設IDを渡すよう修正。両店の開店と失敗後の再入店は模擬DOMで確認。実機は未確認。
