@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.8 / DEV-035 [`f3954fde0dbe8b8453b53d3321d46623df6d8da8`](https://github.com/garatnic/sample/commit/f3954fde0dbe8b8453b53d3321d46623df6d8da8)。武器屋と容量無制限の所持品、武器装備を実装。次回の装備追加は DEV-015 と OPEN-041 を参照。固定品揃え・価格・性能は暫定。
+
 - ver.7 / DEV-034 [`fca7186223acf76a114f58303c18072a9b579218`](https://github.com/garatnic/sample/commit/fca7186223acf76a114f58303c18072a9b579218)。無装備の通常攻撃射程は16、敵の接近停止・攻撃距離は15。武器実装時は OPEN-041 の射程順を確認する。
 - ver.6 / DEV-033 [`e280e4d4b037f3612c69d4666481939eafeca6c4`](https://github.com/garatnic/sample/commit/e280e4d4b037f3612c69d4666481939eafeca6c4)。画面全域からのスワイプ移動を追加し、固定スティックを撤去。Nodeの入力検証済み。スマホ実機は未確認。次回は指定機能、または DEV-014 の残る成長仕様を確認する。
 - ver.5 / DEV-032 [`52fe7fedb94556ffa29bbd47c07e0dffeafe3489`](https://github.com/garatnic/sample/commit/52fe7fedb94556ffa29bbd47c07e0dffeafe3489)。Lv.1開始、討伐経験値・レベルアップ・最大HPと通常攻撃の成長を実装。次回は指定機能、または DEV-014 の技能熟練度など残る成長仕様を確認する。数値は暫定。
