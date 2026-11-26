@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.22 / DEV-049 [d9698a94dffe64729027274c6cf7c6b6499ecaa1](https://github.com/garatnic/sample/commit/d9698a94dffe64729027274c6cf7c6b6499ecaa1)。両店の所持数と装備状態の表示を追加し、売買・着脱時の更新を確認。スマホ実機は未確認。
+
 - ver.21 / DEV-048 [628148e1847fdb9ddc2da090788264503a7904b3](https://github.com/garatnic/sample/commit/628148e1847fdb9ddc2da090788264503a7904b3)。冒険者ギルド、固定討伐依頼5件、同時受注上限5件とクエストウィンドウを実装。固定内容・報酬は暫定。スマホ実機は未確認。
 
 - ver.20 / DEV-047 [435b36c918522fd1d825dac6c838cd1f88583389](https://github.com/garatnic/sample/commit/435b36c918522fd1d825dac6c838cd1f88583389)。道具の回復・毒を実装。効果量は暫定、MPを減らす行動は未実装。スマホ実機は未確認。
