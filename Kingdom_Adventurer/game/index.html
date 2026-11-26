@@ -13,14 +13,14 @@
       <div>
         <label for="health">HP <output id="hp"></output></label>
         <meter id="health" min="0" max="100" value="100"></meter>
-        <p class="hud-mp">MP 100 / 100</p>
+        <p class="hud-mp" id="hud-mp">MP 100 / 100</p>
       </div>
       <button id="hud-toggle" type="button" aria-controls="hud-details" aria-expanded="false" aria-label="詳細を表示">
         <span aria-hidden="true">▾</span>
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.19</h1>
+      <h1>Kingdom Adventurer ver.20</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
@@ -86,7 +86,8 @@
       <section class="equipment-inventory" aria-labelledby="equipment-inventory-title">
         <h3 id="equipment-inventory-title" tabindex="-1">所持品</h3>
         <div id="inventory-tabs" class="gear-tabs" role="group" aria-label="所持品を分類で絞り込み"></div>
-        <p id="inventory-empty">該当する装備を持っていません。</p>
+        <p id="inventory-empty">該当する所持品はありません。</p>
+        <p id="item-feedback" role="status"></p>
         <ul id="inventory-items"></ul>
       </section>
     </div>
@@ -96,6 +97,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=19"></script>
+  <script type="module" src="./src/main.js?v=20"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import { enemyTypes, settings } from './settings.js?v=15';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js?v=16';
-import { attackInterval, defenseRating, items } from './equipment.js?v=16';
+import { attackInterval, defenseRating, items } from './equipment.js?v=20';
 
 export function physicalDamage(attack, defense, damageMultiplier) {
   const reductionBasisPoints = Math.min(8000, Math.max(0, defense) * 12);
@@ -75,7 +75,9 @@ export function updateCombat(state, dt) {
   player.cooldown = attackInterval(weapon);
   state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
   const attack = attackDamage(player.level) + (weapon?.bonus ?? 0);
-  enemy.hp -= physicalDamage(attack, enemyTypes[enemy.kind].defense, playerDamageMultiplier);
+  const poisonDamage = player.pendingPoison ?? 0;
+  player.pendingPoison = 0;
+  enemy.hp -= physicalDamage(attack, enemyTypes[enemy.kind].defense, playerDamageMultiplier) + poisonDamage;
   enemy.flash = 0.18;
   if (enemy.hp <= 0) {
     nearest.enemy = null;

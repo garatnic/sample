@@ -38,10 +38,10 @@ export const items = new Map([
   ['travel-cloak', { slot: 'cloak', name: '旅人のマント', price: 10, defense: 0 }],
   ['bronze-necklace', { slot: 'neck', name: '青銅の首飾り', price: 10, defense: 0 }],
   ['bronze-ring', { slot: 'ring', name: '青銅の指輪', price: 10, defense: 0 }],
-  ['healing-potion', { category: 'medicine', name: '回復薬', price: 8 }],
-  ['weak-poison', { category: 'medicine', name: '弱い毒', price: 6 }],
-  ['bread', { category: 'food', name: 'パン', price: 4 }],
-  ['water', { category: 'food', name: '水', price: 2 }],
+  ['healing-potion', { category: 'medicine', name: '回復薬', price: 8, effect: { hp: 25 } }],
+  ['weak-poison', { category: 'medicine', name: '弱い毒', price: 6, effect: { poison: 8 } }],
+  ['bread', { category: 'food', name: 'パン', price: 4, effect: { hp: 2, mp: 1 } }],
+  ['water', { category: 'food', name: '水', price: 2, effect: { hp: 1, mp: 1 } }],
   ['wooden-trinket', { category: 'misc', name: '木彫りの置物', price: 4 }],
 ]);
 

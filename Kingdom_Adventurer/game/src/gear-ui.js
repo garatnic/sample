@@ -1,6 +1,7 @@
 import { attackDamage, maxHealth } from './growth.js?v=5';
-import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=16';
-import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=16';
+import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=20';
+import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=20';
+import { canUseItem, maxMp, useItem } from './consumables.js?v=20';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');
@@ -15,6 +16,8 @@ export function setupGearMenus(state, input) {
   const shopGold = document.querySelector('#shop-gold');
   const feedback = document.querySelector('#shop-feedback');
   const empty = document.querySelector('#inventory-empty');
+  const itemFeedback = document.querySelector('#item-feedback');
+  const mp = document.querySelector('#gear-mp');
   const hp = document.querySelector('#gear-hp');
   const attack = document.querySelector('#gear-attack');
   const defense = document.querySelector('#gear-defense');
@@ -63,7 +66,11 @@ export function setupGearMenus(state, input) {
   const itemStats = item => item.slot === 'weapon'
     ? `攻撃+${item.bonus} / 射程${item.range} / 攻撃間隔${attackInterval(item).toFixed(2)}秒`
     : item.slot ? `防御+${item.defense}` : '';
-  const details = item => [item.name, itemStats(item)].filter(Boolean).join('　');
+  const effectText = ({ hp, mp, poison } = {}) => {
+    if (poison) return `次の通常攻撃で毒ダメージ+${poison}`;
+    return [hp && `HP+${hp}`, mp && `MP+${mp}`].filter(Boolean).join(' / ');
+  };
+  const details = item => [item.name, itemStats(item) || effectText(item.effect)].filter(Boolean).join('　');
 
   const markInventoryFilter = filters('#inventory-tabs', [...slots, ...goodsTabs], key => {
     inventoryFilter = key;
@@ -103,7 +110,7 @@ export function setupGearMenus(state, input) {
       summary.textContent = item.name;
       const facts = document.createElement('p');
       const group = shops[shopId].tabs.find(([key]) => key === itemGroup(item))[1];
-      const stats = itemStats(item);
+      const stats = itemStats(item) || effectText(item.effect);
       facts.textContent = [group, stats, `所持数 ${quantity}`].filter(Boolean).join(' / ');
 
       const button = document.createElement('button');
@@ -137,6 +144,7 @@ export function setupGearMenus(state, input) {
     const player = state.player;
     const weapon = items.get(player.weaponId);
     hp.textContent = `${Math.ceil(player.hp * 10) / 10} / ${maxHealth(player.level)}`;
+    mp.textContent = `${player.mp} / ${maxMp}`;
     attack.textContent = attackDamage(player.level) + (weapon?.bonus ?? 0);
     defense.textContent = defenseRating(player);
     for (const button of slotButtons) {
@@ -151,7 +159,21 @@ export function setupGearMenus(state, input) {
       const item = items.get(id);
       if (inventoryFilter !== 'all' && inventoryFilter !== itemGroup(item)) continue;
       if (!item.slot) {
-        row(inventoryList, `${details(item)} ×${quantity}`, []);
+        const index = inventoryList.children.length;
+        const actions = item.effect ? [{
+          label: '使う',
+          disabled: !canUseItem(player, id),
+          onClick: () => {
+            if (!useItem(player, id)) return;
+            itemFeedback.textContent = item.effect.poison
+              ? `${item.name}を使いました。次の攻撃に毒が乗ります。`
+              : `${item.name}を使いました。`;
+            renderInventory();
+            const next = inventoryList.children[index]?.querySelector('button');
+            (next && !next.disabled ? next : inventoryHeading).focus();
+          },
+        }] : [];
+        row(inventoryList, `${details(item)} ×${quantity}`, actions);
         continue;
       }
       const destinations = item.slot === 'ring' ? [...ringSlots] : [[item.slot, '']];
@@ -187,6 +209,7 @@ export function setupGearMenus(state, input) {
     if (document.querySelector('dialog[open]') || state.player.hp <= 0) return;
     input.clear();
     inventoryFilter = 'all';
+    itemFeedback.textContent = state.player.pendingPoison ? '次の攻撃に毒が乗ります。' : '';
     renderInventory();
     inventory.showModal();
   });

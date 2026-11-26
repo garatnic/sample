@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: DEV-046反映時点。
+基準: DEV-047反映時点。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全32仕様を対象とする。パスは `Kingdom_Adventurer/game/` 相対。関数名に加え、匿名イベント・データ・DOM・CSSセレクタも記載する。行番号は固定しない。関連仕様は直接の調査候補であり、変更時には呼出元・依存先も確認する。現行仕様は暫定実装。自動テストコードは未保存のため全行の関連テストは未登録（過去の検証記録は [TODO](../development/TODO.md)・[開発状況](../development/DEVELOPMENT_STATUS.md) 参照）。今回の静的照合は実機検証ではない。
 
 ## 仕様から実装を探す
@@ -36,6 +36,7 @@
 | `CUR-SHOP-003` | 分類別買取 | src/shop.js: acceptsItem(), salePrice(), sellableQuantity(), sellItem(); src/main.js: state.shopGold; src/gear-ui.js: setShopMode(), renderShop() の商品詳細・価格ボタン; index.html: #shop-sell/#shop-balance; style.css: #shop-stock | CUR-SHOP-001/002, CUR-ITEM-001 | ECONOMY-007/008, ITEM-009 |
 | `CUR-ITEM-001` | 所持品・装備 | src/main.js: createPlayer(), frame(); src/equipment.js: ringSlots, canEquipItem(), equipItem(), unequipSlot(); src/gear-ui.js: setupGearMenus(); src/combat.js: updateCombat(); index.html: #inventory/#open-inventory; style.css: .gear-menu/#open-inventory | CUR-SHOP-001, CUR-COMBAT-005, CUR-LIFE-001 | 未登録 |
 | `CUR-ITEM-002` | 部位別の装備画面 | index.html: #inventory・[data-gear-slot]/#inventory-tabs・.equipment-layout; style.css: .equipment-menu と幅別グリッド; src/gear-ui.js: setupGearMenus() 内の renderInventory()・details(); src/equipment.js: attackInterval(), defenseRating(), armorPieceBonus; src/growth.js: maxHealth(), attackDamage() | CUR-ITEM-001, CUR-COMBAT-005, CUR-UI-005 | ITEM-008 |
+| `CUR-ITEM-003` | 道具の使用 | src/consumables.js: canUseItem(), useItem(), maxMp; src/equipment.js: items.effect; src/gear-ui.js: itemFeedback, renderInventory(); src/combat.js: updateCombat() の pendingPoison; src/main.js: createPlayer(), frame(); index.html: #item-feedback/#hud-mp/#gear-mp | CUR-ITEM-001/002, CUR-SHOP-002, CUR-COMBAT-005 | COMBAT-001 |
 | `CUR-UI-001` | HUD | index.html: header/#hud-toggle/#hud-details/h1（タイトル・表示バージョン）/#location/#progress/#hp/#health/#gold/#notice/footer; src/main.js: frame(), setText(), health.max, hudToggle の click; src/world.js: inTown(), town; src/settings.js: player.maxHp; style.css: header/footer/#notice/meter/@media | CUR-WORLD-002, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002 | 未登録 |
 | `CUR-UI-002` | 画面・カメラ | src/render.js: createRenderer(), render() の clientWidth/Height・DPR・setTransform・left/top・タイル走査; src/settings.js: tile/mapWidth/mapHeight; index.html: canvas; style.css: body/canvas | CUR-WORLD-001, CUR-UI-003, CUR-UI-004 | 未登録 |
 | `CUR-UI-003` | 地形・建物描画 | src/render.js: colors, rect(), tile(), building(), render(); src/world.js: terrainAt(), buildings, innDoor; src/settings.js: tile | CUR-WORLD-003, CUR-WORLD-004, CUR-UI-002 | 未登録 |
@@ -46,19 +47,20 @@
 
 | ファイル | 関連現行仕様ID |
 |---|---|
-| `index.html` | CUR-SYS-001, CUR-SYS-004, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-002, CUR-UI-005, CUR-SHOP-001, CUR-ITEM-001, CUR-ITEM-002 |
+| `index.html` | CUR-SYS-001, CUR-SYS-004, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-002, CUR-UI-005, CUR-SHOP-001, CUR-ITEM-001, CUR-ITEM-002, CUR-ITEM-003 |
 | `style.css` | CUR-SYS-001, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-002, CUR-UI-005, CUR-SHOP-001, CUR-ITEM-001, CUR-ITEM-002 |
 | `package.json` | CUR-SYS-001 |
 | `src/settings.js` | CUR-SYS-002, CUR-WORLD-001, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-002, CUR-UI-003, CUR-UI-004 |
 | `src/world.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-INN-001, CUR-LIFE-001, CUR-UI-001, CUR-UI-003, CUR-SHOP-001, CUR-SHOP-002 |
 | `src/growth.js` | CUR-SYS-002, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-ITEM-002 |
 | `src/input.js` | CUR-SYS-003, CUR-INPUT-001, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001 |
-| `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-COMBAT-007, CUR-LIFE-001, CUR-UI-004, CUR-ITEM-001 |
-| `src/main.js` | CUR-SYS-001, CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-004, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-004, CUR-UI-005, CUR-SHOP-001, CUR-ITEM-001, CUR-SHOP-002, CUR-SHOP-003 |
+| `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-COMBAT-007, CUR-LIFE-001, CUR-UI-004, CUR-ITEM-001, CUR-ITEM-003 |
+| `src/main.js` | CUR-SYS-001, CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-004, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-UI-001, CUR-UI-004, CUR-UI-005, CUR-SHOP-001, CUR-ITEM-001, CUR-SHOP-002, CUR-SHOP-003, CUR-ITEM-003 |
 | `src/render.js` | CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-003, CUR-WORLD-004, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-SHOP-001, CUR-SHOP-002 |
-| `src/equipment.js` | CUR-SHOP-001, CUR-ITEM-001, CUR-COMBAT-005, CUR-COMBAT-004, CUR-ITEM-002, CUR-SHOP-002 |
-| `src/gear-ui.js` | CUR-SHOP-001, CUR-ITEM-001, CUR-ITEM-002, CUR-SHOP-002, CUR-SHOP-003 |
+| `src/equipment.js` | CUR-SHOP-001, CUR-ITEM-001, CUR-COMBAT-005, CUR-COMBAT-004, CUR-ITEM-002, CUR-SHOP-002, CUR-ITEM-003 |
+| `src/gear-ui.js` | CUR-SHOP-001, CUR-ITEM-001, CUR-ITEM-002, CUR-SHOP-002, CUR-SHOP-003, CUR-ITEM-003 |
 | `src/shop.js` | CUR-SHOP-001, CUR-SHOP-002, CUR-SHOP-003 |
+| `src/consumables.js` | CUR-ITEM-003 |
 
 ## 更新方法
 

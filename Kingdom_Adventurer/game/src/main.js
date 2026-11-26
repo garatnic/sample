@@ -1,10 +1,11 @@
 import { settings } from './settings.js';
 import { innDoor, shopDoors, inTown, movePlayer, start, town } from './world.js?v=16';
-import { createEncounters, updateCombat } from './combat.js?v=16';
+import { createEncounters, updateCombat } from './combat.js?v=20';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=16';
-import { setupGearMenus } from './gear-ui.js?v=19';
+import { setupGearMenus } from './gear-ui.js?v=20';
+import { maxMp } from './consumables.js?v=20';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -19,6 +20,7 @@ hudToggle.addEventListener('click', () => {
   hudToggle.setAttribute('aria-expanded', String(!hudDetails.hidden));
   hudToggle.setAttribute('aria-label', hudDetails.hidden ? '詳細を表示' : '詳細を閉じる');
 });
+const mp = document.querySelector('#hud-mp');
 const hp = document.querySelector('#hp');
 const health = document.querySelector('#health');
 const locationLabel = document.querySelector('#location');
@@ -28,7 +30,7 @@ const input = createInput(canvas);
 const render = createRenderer(canvas);
 
 function createPlayer({ level = 1, experience = 0, inventory = new Map(), weaponId = null, armor = new Map() } = {}) {
-  return { id: 'player', ...start, level, experience, inventory, weaponId, armor, hp: maxHealth(level), cooldown: 0, flash: 0, moving: false };
+  return { id: 'player', ...start, level, experience, inventory, weaponId, armor, hp: maxHealth(level), mp: maxMp, pendingPoison: 0, cooldown: 0, flash: 0, moving: false };
 }
 
 const state = { player: createPlayer(), encounters: createEncounters(), strike: null,
@@ -135,6 +137,7 @@ function frame(time) {
   health.value = currentHp;
   setText(progress, `Lv.${level} · XP ${experience} / ${experienceToNextLevel(level)}`);
   setText(gold, `${state.gold}G`);
+  setText(mp, `MP ${state.player.mp} / ${maxMp}`);
   setText(hp, `${Math.ceil(currentHp * 10) / 10} / ${maxHp}`);
   setText(locationLabel, inTown(state.player) ? town.name : '街道とその周辺');
   setText(notice, state.notice?.text ?? '');
