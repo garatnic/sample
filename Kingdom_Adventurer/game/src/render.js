@@ -1,5 +1,5 @@
 import { settings } from './settings.js';
-import { buildings, innDoor, shopDoor, terrainAt } from './world.js';
+import { buildings, innDoor, shopDoors, terrainAt } from './world.js?v=16';
 
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
@@ -56,7 +56,7 @@ export function createRenderer(canvas) {
 
   function building({ x, y, w, h, kind }) {
     const inn = kind === 'inn';
-    const shop = kind === 'weapon-shop';
+    const shop = shopDoors[kind];
     rect(x + 3, y + 6, w + 4, h, '#363e30');
     rect(x, y + 14, w, h - 14, '#d1b087');
     rect(x - 3, y, w + 6, h - 17, inn ? '#85533e' : '#666c51');
@@ -70,8 +70,8 @@ export function createRenderer(canvas) {
     ctx.fillStyle = '#493821';
     ctx.textAlign = 'center';
     ctx.font = 'bold 15px system-ui';
-    ctx.fillText(inn ? '宿' : '装備', x + w / 2, y + 28);
-    const door = inn ? innDoor : shopDoor;
+    ctx.fillText(inn ? '宿' : kind === 'goods-shop' ? '道具' : '装備', x + w / 2, y + 28);
+    const door = inn ? innDoor : shop;
     rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');
   }
 

@@ -1,7 +1,7 @@
 import { enemyTypes, settings } from './settings.js?v=15';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
-import { inTown, spawns } from './world.js?v=14';
-import { attackInterval, defenseRating, items } from './equipment.js?v=15';
+import { inTown, spawns } from './world.js?v=16';
+import { attackInterval, defenseRating, items } from './equipment.js?v=16';
 
 export function physicalDamage(attack, defense, damageMultiplier) {
   const reductionBasisPoints = Math.min(8000, Math.max(0, defense) * 12);

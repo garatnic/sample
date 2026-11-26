@@ -38,17 +38,12 @@ export const items = new Map([
   ['travel-cloak', { slot: 'cloak', name: '旅人のマント', price: 10, defense: 0 }],
   ['bronze-necklace', { slot: 'neck', name: '青銅の首飾り', price: 10, defense: 0 }],
   ['bronze-ring', { slot: 'ring', name: '青銅の指輪', price: 10, defense: 0 }],
+  ['healing-potion', { category: 'medicine', name: '回復薬', price: 8 }],
+  ['weak-poison', { category: 'medicine', name: '弱い毒', price: 6 }],
+  ['bread', { category: 'food', name: 'パン', price: 4 }],
+  ['water', { category: 'food', name: '水', price: 2 }],
+  ['wooden-trinket', { category: 'misc', name: '木彫りの置物', price: 4 }],
 ]);
-
-export function buyItem(state, id) {
-  const item = items.get(id);
-  if (!item || state.gold < item.price) return false;
-  const inventory = state.player.inventory;
-  inventory.set(id, (inventory.get(id) ?? 0) + 1);
-  state.gold -= item.price;
-  state.shopGold += item.price;
-  return true;
-}
 
 export function equippedId(player, slot) {
   return slot === 'weapon' ? player.weaponId : player.armor.get(slot);
@@ -57,7 +52,7 @@ export function equippedId(player, slot) {
 export function canEquipItem(player, id, slot = items.get(id)?.slot) {
   const item = items.get(id);
   const quantity = player.inventory.get(id) ?? 0;
-  if (!item || quantity < 1) return false;
+  if (!item?.slot || quantity < 1) return false;
   if (item.slot !== 'ring') return slot === item.slot;
   if (!ringSlots.has(slot)) return false;
   for (const otherSlot of ringSlots.keys()) {

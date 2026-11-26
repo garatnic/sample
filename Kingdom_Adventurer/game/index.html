@@ -20,7 +20,7 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.15</h1>
+      <h1>Kingdom Adventurer ver.16</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
@@ -40,7 +40,13 @@
   <dialog id="equipment-shop" class="gear-menu" aria-labelledby="shop-title">
     <h2 id="shop-title">装備品屋</h2>
     <p id="shop-gold"></p>
-    <div id="shop-tabs" class="gear-tabs" role="group" aria-label="商品を部位で絞り込み"></div>
+    <p id="shop-balance"></p>
+    <div class="gear-tabs" role="group" aria-label="取引の種類">
+      <button id="shop-buy" type="button" aria-pressed="true">買う</button>
+      <button id="shop-sell" type="button" aria-pressed="false">売る</button>
+    </div>
+    <div id="shop-tabs" class="gear-tabs" role="group" aria-label="商品を分類で絞り込み"></div>
+    <p id="shop-empty" hidden></p>
     <ul id="shop-stock"></ul>
     <p id="shop-feedback" role="status"></p>
     <form method="dialog"><button autofocus>閉じる</button></form>
@@ -79,7 +85,7 @@
       </div>
       <section class="equipment-inventory" aria-labelledby="equipment-inventory-title">
         <h3 id="equipment-inventory-title" tabindex="-1">所持品</h3>
-        <div id="inventory-tabs" class="gear-tabs" role="group" aria-label="所持品を部位で絞り込み"></div>
+        <div id="inventory-tabs" class="gear-tabs" role="group" aria-label="所持品を分類で絞り込み"></div>
         <p id="inventory-empty">該当する装備を持っていません。</p>
         <ul id="inventory-items"></ul>
       </section>
@@ -90,6 +96,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=15"></script>
+  <script type="module" src="./src/main.js?v=16"></script>
 </body>
 </html>

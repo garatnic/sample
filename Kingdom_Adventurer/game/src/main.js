@@ -1,10 +1,10 @@
 import { settings } from './settings.js';
-import { innDoor, shopDoor, inTown, movePlayer, start, town } from './world.js?v=14';
-import { createEncounters, updateCombat } from './combat.js?v=15';
+import { innDoor, shopDoors, inTown, movePlayer, start, town } from './world.js?v=16';
+import { createEncounters, updateCombat } from './combat.js?v=16';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=14';
-import { setupGearMenus } from './gear-ui.js?v=15';
+import { createRenderer } from './render.js?v=16';
+import { setupGearMenus } from './gear-ui.js?v=16';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -32,7 +32,7 @@ function createPlayer({ level = 1, experience = 0, inventory = new Map(), weapon
 }
 
 const state = { player: createPlayer(), encounters: createEncounters(), strike: null,
-  notice: null, innContact: false, gold: settings.currency.startingGold, goldDrops: [], shopContact: false, shopGold: 0 };
+  notice: null, innContact: false, gold: settings.currency.startingGold, goldDrops: [], shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 100])) };
 const openShop = setupGearMenus(state, input);
 
 inn.addEventListener('close', () => {
@@ -49,7 +49,7 @@ death.addEventListener('close', () => {
   state.strike = null;
   state.notice = null;
   state.innContact = false;
-  state.shopContact = false;
+  state.shopContact = null;
 });
 
 function collectGold() {
@@ -96,11 +96,14 @@ function update(dt) {
   }
   state.innContact = touchingInn;
 
-  const touchingShop = Math.hypot(player.x - shopDoor.x, player.y - shopDoor.y) <= 19;
-  const enteringShop = touchingShop && !state.shopContact;
+  const touchingShop = Object.keys(shopDoors).find(id => {
+    const door = shopDoors[id];
+    return Math.hypot(player.x - door.x, player.y - door.y) <= 19;
+  }) ?? null;
+  const enteringShop = touchingShop && touchingShop !== state.shopContact;
   state.shopContact = touchingShop;
   if (enteringShop) {
-    openShop();
+    openShop(enteringShop);
     return;
   }
 

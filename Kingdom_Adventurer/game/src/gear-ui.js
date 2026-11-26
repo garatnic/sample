@@ -1,9 +1,15 @@
 import { attackDamage, maxHealth } from './growth.js?v=5';
-import { attackInterval, buyItem, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=15';
+import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=16';
+import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=16';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');
   const inventory = document.querySelector('#inventory');
+  const shopTitle = document.querySelector('#shop-title');
+  const shopBalance = document.querySelector('#shop-balance');
+  const shopEmpty = document.querySelector('#shop-empty');
+  const buyButton = document.querySelector('#shop-buy');
+  const sellButton = document.querySelector('#shop-sell');
   const shopList = document.querySelector('#shop-stock');
   const inventoryList = document.querySelector('#inventory-items');
   const shopGold = document.querySelector('#shop-gold');
@@ -14,6 +20,9 @@ export function setupGearMenus(state, input) {
   const defense = document.querySelector('#gear-defense');
   const slotButtons = document.querySelectorAll('[data-gear-slot]');
   const inventoryHeading = document.querySelector('#equipment-inventory-title');
+  let shopId;
+  let shopMode;
+  let markShopFilter;
   let shopFilter = 'all';
   let inventoryFilter = 'all';
 
@@ -34,10 +43,11 @@ export function setupGearMenus(state, input) {
     return item;
   }
 
-  function filters(selector, onChange) {
+  function filters(selector, tabs, onChange) {
     const group = document.querySelector(selector);
+    group.replaceChildren();
     const buttons = new Map();
-    for (const [key, label] of [['all', '全種類'], ...slots]) {
+    for (const [key, label] of [['all', '全種類'], ...tabs]) {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = label;
@@ -52,41 +62,52 @@ export function setupGearMenus(state, input) {
 
   const details = item => item.slot === 'weapon'
     ? `${item.name}　攻撃+${item.bonus} / 射程${item.range} / 攻撃間隔${attackInterval(item).toFixed(2)}秒`
-    : `${item.name}　防御+${item.defense}`;
+    : item.slot ? `${item.name}　防御+${item.defense}` : item.name;
 
-  const markShopFilter = filters('#shop-tabs', key => {
-    shopFilter = key;
-    renderShop();
-  });
-  const markInventoryFilter = filters('#inventory-tabs', key => {
+  const markInventoryFilter = filters('#inventory-tabs', [...slots, ...goodsTabs], key => {
     inventoryFilter = key;
     renderInventory();
   });
 
-  const shopButtons = new Map();
-  function refreshShopBalance() {
-    shopGold.textContent = `所持金 ${state.gold}G`;
-    for (const [id, button] of shopButtons) {
-      button.disabled = state.gold < items.get(id).price;
-    }
+  function setShopMode(mode) {
+    shopMode = mode;
+    buyButton.setAttribute('aria-pressed', String(mode === 'buy'));
+    sellButton.setAttribute('aria-pressed', String(mode === 'sell'));
+    feedback.textContent = '';
+    renderShop();
   }
+
+  buyButton.addEventListener('click', () => setShopMode('buy'));
+  sellButton.addEventListener('click', () => setShopMode('sell'));
 
   function renderShop() {
     markShopFilter(shopFilter);
     shopList.replaceChildren();
-    shopButtons.clear();
+    shopGold.textContent = `所持金 ${state.gold}G`;
+    shopBalance.textContent = `店の所持金 ${state.shopGold[shopId]}G`;
+    const buying = shopMode === 'buy';
     for (const [id, item] of items) {
-      if (shopFilter !== 'all' && shopFilter !== item.slot) continue;
-      const entry = row(shopList, details(item), [{
-        label: `${item.price}Gで買う`,
+      if (!acceptsItem(shopId, item) || (shopFilter !== 'all' && shopFilter !== itemGroup(item))) continue;
+      const quantity = state.player.inventory.get(id) ?? 0;
+      if (!buying && quantity === 0) continue;
+      const price = buying ? item.price : salePrice(item);
+      const equipped = !buying && sellableQuantity(state.player, id) <= 0;
+      const index = shopList.children.length;
+      row(shopList, buying ? details(item) : `${details(item)} ×${quantity}`, [{
+        label: equipped ? '装備中' : `${price}Gで${buying ? '買う' : '売る'}`,
+        disabled: equipped || (buying ? state.gold : state.shopGold[shopId]) < price,
         onClick: () => {
-          if (buyItem(state, id)) feedback.textContent = `${item.name}を購入しました`;
-          refreshShopBalance();
+          const transact = buying ? buyItem : sellItem;
+          if (!transact(state, shopId, id)) return;
+          feedback.textContent = `${item.name}を${buying ? '購入' : '売却'}しました`;
+          renderShop();
+          const next = shopList.children[index]?.querySelector('button');
+          (next && !next.disabled ? next : buying ? buyButton : sellButton).focus();
         },
       }]);
-      shopButtons.set(id, entry.querySelector('button'));
     }
-    refreshShopBalance();
+    shopEmpty.hidden = shopList.children.length > 0;
+    shopEmpty.textContent = buying ? '該当する商品はありません。' : 'この分類で買い取れる所持品はありません。';
   }
 
   function renderInventory() {
@@ -105,7 +126,11 @@ export function setupGearMenus(state, input) {
     inventoryList.replaceChildren();
     for (const [id, quantity] of player.inventory) {
       const item = items.get(id);
-      if (inventoryFilter !== 'all' && inventoryFilter !== item.slot) continue;
+      if (inventoryFilter !== 'all' && inventoryFilter !== itemGroup(item)) continue;
+      if (!item.slot) {
+        row(inventoryList, `${details(item)} ×${quantity}`, []);
+        continue;
+      }
       const destinations = item.slot === 'ring' ? [...ringSlots] : [[item.slot, '']];
       const rowIndex = inventoryList.children.length;
       const actions = destinations.map(([slot, label], buttonIndex) => {
@@ -143,11 +168,16 @@ export function setupGearMenus(state, input) {
     inventory.showModal();
   });
 
-  return () => {
+  return id => {
     input.clear();
+    shopId = id;
+    shopTitle.textContent = shops[id].name;
     shopFilter = 'all';
-    feedback.textContent = '';
-    renderShop();
+    markShopFilter = filters('#shop-tabs', shops[id].tabs, key => {
+      shopFilter = key;
+      renderShop();
+    });
+    setShopMode('buy');
     shop.showModal();
   };
 }
