@@ -12,6 +12,13 @@ const innOffer = document.querySelector('#inn-offer');
 const innConfirm = document.querySelector('#inn-confirm');
 const gold = document.querySelector('#gold');
 const progress = document.querySelector('#progress');
+const hudToggle = document.querySelector('#hud-toggle');
+const hudDetails = document.querySelector('#hud-details');
+hudToggle.addEventListener('click', () => {
+  hudDetails.hidden = !hudDetails.hidden;
+  hudToggle.setAttribute('aria-expanded', String(!hudDetails.hidden));
+  hudToggle.setAttribute('aria-label', hudDetails.hidden ? '詳細を表示' : '詳細を閉じる');
+});
 const hp = document.querySelector('#hp');
 const health = document.querySelector('#health');
 const locationLabel = document.querySelector('#location');

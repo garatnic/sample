@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: DEV-036反映時点。
+基準: DEV-037反映時点。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全32仕様を対象とする。パスは `Kingdom_Adventurer/game/` 相対。関数名に加え、匿名イベント・データ・DOM・CSSセレクタも記載する。行番号は固定しない。関連仕様は直接の調査候補であり、変更時には呼出元・依存先も確認する。現行仕様は暫定実装。自動テストコードは未保存のため全行の関連テストは未登録（過去の検証記録は [TODO](../development/TODO.md)・[開発状況](../development/DEVELOPMENT_STATUS.md) 参照）。今回の静的照合は実機検証ではない。
 
 ## 仕様から実装を探す
@@ -34,7 +34,7 @@
 | `CUR-SHOP-001` | 武器屋 | src/world.js: buildings, shopDoor; src/main.js: update(), state; src/render.js: building(); src/equipment.js: weapons, buyWeapon(); src/gear-ui.js: setupGearMenus(); index.html: #weapon-shop; style.css: .gear-menu | CUR-ITEM-001, CUR-WORLD-004, CUR-SYS-003 | 未登録 |
 | `CUR-ITEM-001` | 所持品・武器装備 | src/main.js: createPlayer(), frame(); src/equipment.js: buyWeapon(); src/gear-ui.js: setupGearMenus(); src/combat.js: updateCombat(); index.html: #inventory/#open-inventory; style.css: .gear-menu/#open-inventory | CUR-SHOP-001, CUR-COMBAT-005, CUR-LIFE-001 | 未登録 |
 | `CUR-ITEM-002` | 部位別の装備画面 | index.html: #inventory・#weapon-slot・.equipment-layout; style.css: .equipment-menu と幅別グリッド; src/gear-ui.js: setupGearMenus() 内の refreshInventory(); src/growth.js: maxHealth(), attackDamage() | CUR-ITEM-001, CUR-COMBAT-005, CUR-UI-005 | 未登録 |
-| `CUR-UI-001` | HUD | index.html: header/h1（タイトル・表示バージョン）/#location/#progress/#hp/#health/#gold/#notice/footer; src/main.js: frame(), setText(), health.max; src/world.js: inTown(), town; src/settings.js: player.maxHp; style.css: header/footer/#notice/meter/@media | CUR-WORLD-002, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002 | 未登録 |
+| `CUR-UI-001` | HUD | index.html: header/#hud-toggle/#hud-details/h1（タイトル・表示バージョン）/#location/#progress/#hp/#health/#gold/#notice/footer; src/main.js: frame(), setText(), health.max, hudToggle の click; src/world.js: inTown(), town; src/settings.js: player.maxHp; style.css: header/footer/#notice/meter/@media | CUR-WORLD-002, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002 | 未登録 |
 | `CUR-UI-002` | 画面・カメラ | src/render.js: createRenderer(), render() の clientWidth/Height・DPR・setTransform・left/top・タイル走査; src/settings.js: tile/mapWidth/mapHeight; index.html: canvas; style.css: body/canvas | CUR-WORLD-001, CUR-UI-003, CUR-UI-004 | 未登録 |
 | `CUR-UI-003` | 地形・建物描画 | src/render.js: colors, rect(), tile(), building(), render(); src/world.js: terrainAt(), buildings, innDoor; src/settings.js: tile | CUR-WORLD-003, CUR-WORLD-004, CUR-UI-002 | 未登録 |
 | `CUR-UI-004` | キャラクター・戦闘描画 | src/render.js: actor(), render() の硬貨描画, rect(); src/settings.js: enemy.maxHp; src/main.js: update() の moving/flash/strike; src/combat.js: updateCombat() の flash/strike/hp | CUR-MOVE-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-002 | 未登録 |

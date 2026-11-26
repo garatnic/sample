@@ -4,18 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=0114a78d782b">
+  <link rel="stylesheet" href="./style.css?v=013853ea866f">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
   <header>
-    <h1>Kingdom Adventurer ver.9</h1>
-    <p id="location"></p>
-    <p id="progress"></p>
-    <label for="health">HP <output id="hp"></output></label>
-    <meter id="health" min="0" max="100" value="100"></meter>
-    <p>所持金 <output id="gold"></output></p>
-    <button id="open-inventory" type="button">装備</button>
+    <div class="hud-vitals">
+      <div>
+        <label for="health">HP <output id="hp"></output></label>
+        <meter id="health" min="0" max="100" value="100"></meter>
+        <p class="hud-mp">MP 100 / 100</p>
+      </div>
+      <button id="hud-toggle" type="button" aria-controls="hud-details" aria-expanded="false" aria-label="詳細を表示">
+        <span aria-hidden="true">▾</span>
+      </button>
+    </div>
+    <div id="hud-details" hidden>
+      <h1>Kingdom Adventurer ver.10</h1>
+      <p id="location"></p>
+      <p id="progress"></p>
+      <p>所持金 <output id="gold"></output></p>
+      <button id="open-inventory" type="button">装備</button>
+    </div>
   </header>
   <p id="notice" role="status"></p>
   <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
@@ -78,6 +88,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=9"></script>
+  <script type="module" src="./src/main.js?v=10"></script>
 </body>
 </html>

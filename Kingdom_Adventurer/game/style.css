@@ -168,3 +168,20 @@ button:disabled { opacity: .55; cursor: default; }
   }
   .equipment-stats { display: grid; grid-template-columns: 1fr 1fr; column-gap: .85rem; }
 }
+
+.hud-vitals {
+  display: grid;
+  grid-template-columns: minmax(6.75rem, 1fr) auto;
+  align-items: center;
+  gap: .5rem;
+}
+header .hud-mp { margin: 0; color: #b6dbef; font-variant-numeric: tabular-nums; }
+#hud-toggle {
+  pointer-events: auto;
+  min-width: 44px;
+  margin: 0;
+  padding: 0;
+}
+#hud-toggle span { display: inline-block; }
+#hud-toggle[aria-expanded="true"] span { transform: rotate(180deg); }
+#hud-details { margin-top: .55rem; }
