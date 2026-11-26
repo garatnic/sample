@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.16 / DEV-043 [21f98777ee44cc584725b6b17593e4bea36d5a54](https://github.com/garatnic/sample/commit/21f98777ee44cc584725b6b17593e4bea36d5a54)。道具屋と装備品屋の分類別買取を追加。商品の使用効果はDEV-015の残項目。価格・店資金は暫定。
+
 - ver.15 / DEV-042 [0ad251107ddd1683c58fb547c47c0ab417796b2d](https://github.com/garatnic/sample/commit/0ad251107ddd1683c58fb547c47c0ab417796b2d)。物理ダメージを共通化し、敵の防御、装備の実防御、敵味方別の難易度倍率を設定。具体値は暫定。難易度の変更UIは後続作業。
 
 - ver.14 / DEV-041 [34ce7f3fa96bb875c927ee01236f5be70f96828a](https://github.com/garatnic/sample/commit/34ce7f3fa96bb875c927ee01236f5be70f96828a)。弱い野外敵を4種、固定8地点に各1体。実機表示は未確認。次回の敵・生態系詳細はTODOの未完項目を参照。
