@@ -10,6 +10,11 @@
 - ファイル一覧やコード差分の転載は不要。複数コミットが関係する場合は全て記載する。仕様IDは変更・廃止後も履歴に残す。
 - 変更理由が不明なら不明と記録する。検証していない結果を成功と記載しない。
 
+## 2026-11-26 — ver.15：敵味方共通の物理ダメージ
+- 実装コミット [0ad251107ddd1683c58fb547c47c0ab417796b2d](https://github.com/garatnic/sample/commit/0ad251107ddd1683c58fb547c47c0ab417796b2d)。敵の実防御を設定し、敵味方で物理ダメージ式を共通化。各防具と盾の部位補正25を表示値に含め、装備合計をそのまま計算に使用する。与ダメージ倍率は敵味方別で初期値1.0。
+- 関連: DEV-042、CUR-COMBAT-004/005、CUR-ITEM-002、COMBAT-003、ITEM-001。[Skyrimの防御式](https://www.gamesas.com/quick-question-about-armor-t243127.html)と[80%上限](https://steamcommunity.com/sharedfiles/filedetails/?id=794662707)を参考にした。装備値と敵の値は暫定で、甲羅のある泥ガニを最も高く設定。難易度変更UIは後続の難易度仕様で扱う。目標仕様・ロードマップ・未決事項は更新対象外。
+- 検証: Nodeで装備・解除、既存の指輪2枠、上限境界、少量ダメージ、敵味方の倍率を変更した実戦闘を確認。スマホ実機は未検証。
+
 ## 2026-11-26 — ver.14：弱い野外敵4種
 - 実装コミット [34ce7f3fa96bb875c927ee01236f5be70f96828a](https://github.com/garatnic/sample/commit/34ce7f3fa96bb875c927ee01236f5be70f96828a)。一律の魔物をオオカミ、大ネズミ、泥ガニ、小型クモの4種に変更。固定8地点・各1体、8秒で同種が再出現。見た目とHPバーを種別に連動。
 - 関連: DEV-041、CUR-COMBAT-001/003/004/006、CUR-UI-004、COMBAT-002、ECO-001。[Skyrimの生物分類資料](https://www.theorganizedgamer.com/wp-content/uploads/Soul-Gem-Guide.pdf)から序盤の小型種を選び、既存の敵より基本ダメージを下げたうえで能力値を暫定設定。現行の敵追加のため目標仕様・ロードマップ・未決事項は更新対象外。

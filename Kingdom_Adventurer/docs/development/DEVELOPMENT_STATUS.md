@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.15 / DEV-042 [0ad251107ddd1683c58fb547c47c0ab417796b2d](https://github.com/garatnic/sample/commit/0ad251107ddd1683c58fb547c47c0ab417796b2d)。物理ダメージを共通化し、敵の防御、装備の実防御、敵味方別の難易度倍率を設定。具体値は暫定。難易度の変更UIは後続作業。
+
 - ver.14 / DEV-041 [34ce7f3fa96bb875c927ee01236f5be70f96828a](https://github.com/garatnic/sample/commit/34ce7f3fa96bb875c927ee01236f5be70f96828a)。弱い野外敵を4種、固定8地点に各1体。実機表示は未確認。次回の敵・生態系詳細はTODOの未完項目を参照。
 
 - ver.13 / DEV-040 [dc9fb7d5c55cc94c14a68662340605ed2b83e452](https://github.com/garatnic/sample/commit/dc9fb7d5c55cc94c14a68662340605ed2b83e452)。ジャンル別の攻撃間隔と個別値の優先、鉄の槌を実装。斧には間隔設定があり、具体的なアイテムはDEV-015の残項目。具体値は暫定。スマホ実機は未確認。
