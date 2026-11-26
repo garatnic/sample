@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.11 / DEV-038 [`16f8b05f283584c439b7071c4cb8e136117c0429`](https://github.com/garatnic/sample/commit/16f8b05f283584c439b7071c4cb8e136117c0429)。装備品屋と所持品に部位別タブを追加。防具の軽減値、価格は暫定。次回は DEV-015 の残項目を参照。
+
 - ver.10 / DEV-037 [`0c67242591d865d91edc11a09f66a79e375e6f40`](https://github.com/garatnic/sample/commit/0c67242591d865d91edc11a09f66a79e375e6f40)。左上HUDをHP・MP表示から展開する方式に変更。スマホ実機は未確認。
 
 - ver.9 / DEV-036 [`e590549d7b9cbb24a58d9533961c413a3451d3bd`](https://github.com/garatnic/sample/commit/e590549d7b9cbb24a58d9533961c413a3451d3bd)。人体シルエット付き装備画面を追加。武器枠は既存の装備機能と連動し、防具など他部位は見本枠。MPと防御は表示値の仮置き。次回の防具などの実装は DEV-015 を参照。
