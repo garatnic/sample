@@ -4,6 +4,8 @@ export const slots = new Map([
   ['shield', '盾'], ['cloak', 'マント'], ['neck', '首飾り'], ['ring', '指輪'],
 ]);
 
+export const ringSlots = new Map([['ring', '指輪1'], ['ring-2', '指輪2']]);
+
 export const items = new Map([
   ['iron-dagger', { slot: 'weapon', name: '鉄の短剣', price: 10, range: 22, bonus: 2 }],
   ['iron-sword', { slot: 'weapon', name: '鉄の剣', price: 20, range: 30, bonus: 5 }],
@@ -36,11 +38,22 @@ export function equippedId(player, slot) {
   return slot === 'weapon' ? player.weaponId : player.armor.get(slot);
 }
 
-export function equipItem(player, id) {
+export function canEquipItem(player, id, slot = items.get(id)?.slot) {
   const item = items.get(id);
-  if (!item || !player.inventory.has(id)) return;
-  if (item.slot === 'weapon') player.weaponId = id;
-  else player.armor.set(item.slot, id);
+  const quantity = player.inventory.get(id) ?? 0;
+  if (!item || quantity < 1) return false;
+  if (item.slot !== 'ring') return slot === item.slot;
+  if (!ringSlots.has(slot)) return false;
+  for (const otherSlot of ringSlots.keys()) {
+    if (otherSlot !== slot && equippedId(player, otherSlot) === id && quantity < 2) return false;
+  }
+  return true;
+}
+
+export function equipItem(player, id, slot = items.get(id)?.slot) {
+  if (!canEquipItem(player, id, slot)) return;
+  if (slot === 'weapon') player.weaponId = id;
+  else player.armor.set(slot, id);
 }
 
 export function unequipSlot(player, slot) {

@@ -1,5 +1,5 @@
 import { attackDamage, maxHealth } from './growth.js?v=5';
-import { buyItem, defenseRating, equippedId, equipItem, items, slots, unequipSlot } from './equipment.js?v=11';
+import { buyItem, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=12';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');
@@ -17,17 +17,21 @@ export function setupGearMenus(state, input) {
   let shopFilter = 'all';
   let inventoryFilter = 'all';
 
-  function row(list, text, action, onClick) {
+  function row(list, text, actions) {
     const item = document.createElement('li');
     const description = document.createElement('span');
     description.textContent = text;
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = action;
-    button.addEventListener('click', onClick);
-    item.append(description, button);
+    item.append(description);
+    for (const { label, onClick, disabled = false } of actions) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.disabled = disabled;
+      button.addEventListener('click', onClick);
+      item.append(button);
+    }
     list.append(item);
-    return button;
+    return item;
   }
 
   function filters(selector, onChange) {
@@ -73,11 +77,14 @@ export function setupGearMenus(state, input) {
     shopButtons.clear();
     for (const [id, item] of items) {
       if (shopFilter !== 'all' && shopFilter !== item.slot) continue;
-      const button = row(shopList, details(item), `${item.price}Gで買う`, () => {
-        if (buyItem(state, id)) feedback.textContent = `${item.name}を購入しました`;
-        refreshShopBalance();
-      });
-      shopButtons.set(id, button);
+      const entry = row(shopList, details(item), [{
+        label: `${item.price}Gで買う`,
+        onClick: () => {
+          if (buyItem(state, id)) feedback.textContent = `${item.name}を購入しました`;
+          refreshShopBalance();
+        },
+      }]);
+      shopButtons.set(id, entry.querySelector('button'));
     }
     refreshShopBalance();
   }
@@ -99,22 +106,30 @@ export function setupGearMenus(state, input) {
     for (const [id, quantity] of player.inventory) {
       const item = items.get(id);
       if (inventoryFilter !== 'all' && inventoryFilter !== item.slot) continue;
-      const active = equippedId(player, item.slot) === id;
-      row(inventoryList, `${details(item)} ×${quantity}`, active ? '外す' : '装備する', () => {
-        if (active) unequipSlot(player, item.slot);
-        else equipItem(player, id);
-        renderInventory();
-        const replacement = inventoryList.children[buttonIndex]?.querySelector('button');
-        replacement?.focus();
+      const destinations = item.slot === 'ring' ? [...ringSlots] : [[item.slot, '']];
+      const rowIndex = inventoryList.children.length;
+      const actions = destinations.map(([slot, label], buttonIndex) => {
+        const active = equippedId(player, slot) === id;
+        return {
+          label: active ? (label ? `${label}から外す` : '外す') : `${label ? `${label}に` : ''}装備する`,
+          disabled: !active && !canEquipItem(player, id, slot),
+          onClick: () => {
+            if (active) unequipSlot(player, slot);
+            else equipItem(player, id, slot);
+            renderInventory();
+            inventoryList.children[rowIndex]?.querySelectorAll('button')[buttonIndex]?.focus();
+          },
+        };
       });
-      const buttonIndex = inventoryList.children.length - 1;
+      row(inventoryList, `${details(item)} ×${quantity}`, actions);
     }
     empty.hidden = inventoryList.children.length > 0;
   }
 
   for (const button of slotButtons) {
     button.addEventListener('click', () => {
-      inventoryFilter = button.dataset.gearSlot;
+      const slot = button.dataset.gearSlot;
+      inventoryFilter = ringSlots.has(slot) ? 'ring' : slot;
       renderInventory();
       inventoryHeading.focus();
     });

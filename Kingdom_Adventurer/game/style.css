@@ -114,7 +114,7 @@ button:disabled { opacity: .55; cursor: default; }
   position: relative;
   display: grid;
   grid-template: repeat(6, minmax(3.2rem, 1fr)) / repeat(3, minmax(0, 1fr));
-  grid-template-areas: ". head ." "cloak . neck" "right body left" "weapon waist shield" ". legs ring" ". feet .";
+  grid-template-areas: ". head ." "cloak . neck" "right body left" "weapon waist shield" "ring-2 legs ring" ". feet .";
   gap: .45rem;
   align-items: center;
   min-height: clamp(22rem, 62vh, 34rem);
@@ -160,6 +160,7 @@ button:disabled { opacity: .55; cursor: default; }
 .slot-shield { grid-area: shield; }
 .slot-legs { grid-area: legs; }
 .slot-ring { grid-area: ring; }
+.slot-ring-2 { grid-area: ring-2; }
 .slot-feet { grid-area: feet; }
 @media (max-width: 760px) {
   .equipment-layout {

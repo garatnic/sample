@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=dc9e7303664a">
+  <link rel="stylesheet" href="./style.css?v=728efd32962f">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,7 +20,7 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.11</h1>
+      <h1>Kingdom Adventurer ver.12</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
@@ -73,7 +73,8 @@
         <button class="equipment-slot slot-waist" data-gear-slot="waist" type="button">腰 <small>未装備</small></button>
         <button class="equipment-slot slot-shield" data-gear-slot="shield" type="button">盾 <small>未装備</small></button>
         <button class="equipment-slot slot-legs" data-gear-slot="legs" type="button">脚 <small>未装備</small></button>
-        <button class="equipment-slot slot-ring" data-gear-slot="ring" type="button">指輪 <small>未装備</small></button>
+        <button class="equipment-slot slot-ring" data-gear-slot="ring" type="button">指輪1 <small>未装備</small></button>
+        <button class="equipment-slot slot-ring-2" data-gear-slot="ring-2" type="button">指輪2 <small>未装備</small></button>
         <button class="equipment-slot slot-feet" data-gear-slot="feet" type="button">足 <small>未装備</small></button>
       </div>
       <section class="equipment-inventory" aria-labelledby="equipment-inventory-title">
@@ -89,6 +90,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=11"></script>
+  <script type="module" src="./src/main.js?v=12"></script>
 </body>
 </html>

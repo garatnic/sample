@@ -1,7 +1,7 @@
 import { settings } from './settings.js?v=7';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js?v=8';
-import { items, damageAfterArmor } from './equipment.js?v=11';
+import { items, damageAfterArmor } from './equipment.js?v=12';
 
 export function createEncounters() {
   return spawns.map(home => ({ home, enemy: null, remaining: 0, generation: 0 }));
