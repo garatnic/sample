@@ -43,7 +43,7 @@ export function createRenderer(canvas) {
     ctx.fillStyle = '#493821';
     ctx.textAlign = 'center';
     ctx.font = 'bold 15px system-ui';
-    ctx.fillText(inn ? '宿' : '武器', x + w / 2, y + 28);
+    ctx.fillText(inn ? '宿' : '装備', x + w / 2, y + 28);
     const door = inn ? innDoor : shopDoor;
     rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');
   }

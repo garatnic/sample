@@ -1,10 +1,10 @@
 import { settings } from './settings.js';
 import { innDoor, shopDoor, inTown, movePlayer, start, town } from './world.js?v=8';
-import { createEncounters, updateCombat } from './combat.js?v=8';
+import { createEncounters, updateCombat } from './combat.js?v=11';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=8';
-import { setupGearMenus } from './gear-ui.js?v=9';
+import { createRenderer } from './render.js?v=11';
+import { setupGearMenus } from './gear-ui.js?v=11';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -27,8 +27,8 @@ const canvas = document.querySelector('canvas');
 const input = createInput(canvas);
 const render = createRenderer(canvas);
 
-function createPlayer({ level = 1, experience = 0, inventory = new Map(), weaponId = null } = {}) {
-  return { id: 'player', ...start, level, experience, inventory, weaponId, hp: maxHealth(level), cooldown: 0, flash: 0, moving: false };
+function createPlayer({ level = 1, experience = 0, inventory = new Map(), weaponId = null, armor = new Map() } = {}) {
+  return { id: 'player', ...start, level, experience, inventory, weaponId, armor, hp: maxHealth(level), cooldown: 0, flash: 0, moving: false };
 }
 
 const state = { player: createPlayer(), encounters: createEncounters(), strike: null,

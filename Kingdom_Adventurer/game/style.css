@@ -185,3 +185,25 @@ header .hud-mp { margin: 0; color: #b6dbef; font-variant-numeric: tabular-nums; 
 #hud-toggle span { display: inline-block; }
 #hud-toggle[aria-expanded="true"] span { transform: rotate(180deg); }
 #hud-details { margin-top: .55rem; }
+
+.gear-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+  margin-block: .6rem;
+}
+.gear-tabs button {
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: .35rem .55rem;
+  color: inherit;
+  background: #253544;
+  border: 1px solid #65788a;
+}
+.gear-tabs button[aria-pressed="true"] {
+  color: #201b12;
+  background: #e2cf9c;
+}
+.equipment-slot { color: inherit; }
+.slot-weapon { color: #ffedc4; }

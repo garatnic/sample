@@ -1,7 +1,7 @@
 import { settings } from './settings.js?v=7';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
 import { inTown, spawns } from './world.js?v=8';
-import { weapons } from './equipment.js';
+import { items, damageAfterArmor } from './equipment.js?v=11';
 
 export function createEncounters() {
   return spawns.map(home => ({ home, enemy: null, remaining: 0, generation: 0 }));
@@ -32,7 +32,7 @@ export function updateCombat(state, dt) {
       && Math.hypot(player.x - home.x, player.y - home.y) < config.leash;
     if (chasing && distance <= config.reach) {
       if (enemy.cooldown === 0) {
-        player.hp = Math.max(0, player.hp - config.damage);
+        player.hp = Math.max(0, player.hp - damageAfterArmor(player, config.damage));
         player.flash = 0.22;
         enemy.cooldown = config.attackDelay;
         if (player.hp === 0) return;
@@ -52,7 +52,7 @@ export function updateCombat(state, dt) {
 
   if (safe || player.cooldown > 0) return;
   let nearest = null;
-  const weapon = weapons.get(player.weaponId);
+  const weapon = items.get(player.weaponId);
   let range = weapon?.range ?? settings.player.range;
   for (const encounter of encounters) {
     if (!encounter.enemy) continue;

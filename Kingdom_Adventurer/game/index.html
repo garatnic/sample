@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=013853ea866f">
+  <link rel="stylesheet" href="./style.css?v=dc9e7303664a">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,7 +20,7 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.10</h1>
+      <h1>Kingdom Adventurer ver.11</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
@@ -37,10 +37,11 @@
       <button value="no" autofocus>NO</button>
     </form>
   </dialog>
-  <dialog id="weapon-shop" class="gear-menu" aria-labelledby="shop-title">
-    <h2 id="shop-title">武器屋</h2>
+  <dialog id="equipment-shop" class="gear-menu" aria-labelledby="shop-title">
+    <h2 id="shop-title">装備品屋</h2>
     <p id="shop-gold"></p>
-    <ul id="weapon-stock"></ul>
+    <div id="shop-tabs" class="gear-tabs" role="group" aria-label="商品を部位で絞り込み"></div>
+    <ul id="shop-stock"></ul>
     <p id="shop-feedback" role="status"></p>
     <form method="dialog"><button autofocus>閉じる</button></form>
   </dialog>
@@ -60,26 +61,26 @@
         <svg class="equipment-silhouette" viewBox="0 0 180 320" aria-hidden="true">
           <path d="M90 15c-15 0-24 12-24 27 0 12 5 21 12 27v10l-28 9c-12 4-17 12-20 25l-9 44-14 34 2 15 10 2 12-12 14-29 13-37 1 46-9 48-6 64-9 13c-3 5 1 9 7 9h22l10-10 10-71 6-30 6 30 10 71 10 10h22c6 0 10-4 7-9l-9-13-6-64-9-48 1-46 13 37 14 29 12 12 10-2 2-15-14-34-9-44c-3-13-8-21-20-25l-28-9V69c7-6 12-15 12-27 0-15-9-27-24-27z"/>
         </svg>
-        <div class="equipment-slot slot-head">頭 <small>未実装</small></div>
-        <div class="equipment-slot slot-cloak">マント <small>未実装</small></div>
-        <div class="equipment-slot slot-neck">首飾り <small>未実装</small></div>
-        <div class="equipment-slot slot-body">胴 <small>未実装</small></div>
-        <div class="equipment-slot slot-arm-r">右腕 <small>未実装</small></div>
-        <div class="equipment-slot slot-arm-l">左腕 <small>未実装</small></div>
-        <button class="equipment-slot slot-weapon" id="weapon-slot" type="button" aria-controls="inventory-items">
-          武器 <small id="equipped" role="status"></small>
+        <button class="equipment-slot slot-head" data-gear-slot="head" type="button">頭 <small>未装備</small></button>
+        <button class="equipment-slot slot-cloak" data-gear-slot="cloak" type="button">マント <small>未装備</small></button>
+        <button class="equipment-slot slot-neck" data-gear-slot="neck" type="button">首飾り <small>未装備</small></button>
+        <button class="equipment-slot slot-body" data-gear-slot="body" type="button">胴 <small>未装備</small></button>
+        <button class="equipment-slot slot-arm-r" data-gear-slot="arm-r" type="button">右腕 <small>未装備</small></button>
+        <button class="equipment-slot slot-arm-l" data-gear-slot="arm-l" type="button">左腕 <small>未装備</small></button>
+        <button class="equipment-slot slot-weapon" data-gear-slot="weapon" type="button" aria-controls="inventory-items">
+          武器 <small></small>
         </button>
-        <div class="equipment-slot slot-waist">腰 <small>未実装</small></div>
-        <div class="equipment-slot slot-shield">盾 <small>未実装</small></div>
-        <div class="equipment-slot slot-legs">脚 <small>未実装</small></div>
-        <div class="equipment-slot slot-ring">指輪 <small>未実装</small></div>
-        <div class="equipment-slot slot-feet">足 <small>未実装</small></div>
+        <button class="equipment-slot slot-waist" data-gear-slot="waist" type="button">腰 <small>未装備</small></button>
+        <button class="equipment-slot slot-shield" data-gear-slot="shield" type="button">盾 <small>未装備</small></button>
+        <button class="equipment-slot slot-legs" data-gear-slot="legs" type="button">脚 <small>未装備</small></button>
+        <button class="equipment-slot slot-ring" data-gear-slot="ring" type="button">指輪 <small>未装備</small></button>
+        <button class="equipment-slot slot-feet" data-gear-slot="feet" type="button">足 <small>未装備</small></button>
       </div>
       <section class="equipment-inventory" aria-labelledby="equipment-inventory-title">
         <h3 id="equipment-inventory-title" tabindex="-1">所持品</h3>
-        <p id="inventory-empty">武器を持っていません。</p>
+        <div id="inventory-tabs" class="gear-tabs" role="group" aria-label="所持品を部位で絞り込み"></div>
+        <p id="inventory-empty">該当する装備を持っていません。</p>
         <ul id="inventory-items"></ul>
-        <button type="button" id="unequip">武器を外す</button>
       </section>
     </div>
   </dialog>
@@ -88,6 +89,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=10"></script>
+  <script type="module" src="./src/main.js?v=11"></script>
 </body>
 </html>
