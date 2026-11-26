@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: DEV-040反映時点。
+基準: DEV-041反映時点。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全32仕様を対象とする。パスは `Kingdom_Adventurer/game/` 相対。関数名に加え、匿名イベント・データ・DOM・CSSセレクタも記載する。行番号は固定しない。関連仕様は直接の調査候補であり、変更時には呼出元・依存先も確認する。現行仕様は暫定実装。自動テストコードは未保存のため全行の関連テストは未登録（過去の検証記録は [TODO](../development/TODO.md)・[開発状況](../development/DEVELOPMENT_STATUS.md) 参照）。今回の静的照合は実機検証ではない。
 
 ## 仕様から実装を探す
@@ -20,12 +20,12 @@
 | `CUR-INPUT-003` | ゲームパッド | src/input.js: createInput().read() の navigator.getGamepads・axes・閾値; src/main.js: update() の入力取得 | CUR-MOVE-001, CUR-INPUT-001, CUR-INPUT-002 | 未登録 |
 | `CUR-MOVE-001` | 移動速度 | src/settings.js: player.speed/radius; src/world.js: movePlayer(); src/input.js: read(); src/main.js: update() の moving; src/render.js: actor() | CUR-MOVE-002, CUR-INPUT-001, CUR-INPUT-002, CUR-INPUT-003, CUR-UI-004 | 未登録 |
 | `CUR-MOVE-002` | 境界・衝突 | src/world.js: movePlayer(), walkable(), buildings; src/settings.js: mapWidth/mapHeight/player.radius | CUR-WORLD-001, CUR-WORLD-004, CUR-MOVE-001 | 未登録 |
-| `CUR-COMBAT-001` | 敵出現枠 | src/world.js: spawns; src/combat.js: createEncounters(), updateCombat() の生成処理; src/settings.js: enemy.maxHp / gold; src/main.js: state.encounters; src/render.js: render() の敵描画 | CUR-COMBAT-003, CUR-COMBAT-006, CUR-SYS-002 | 未登録 |
+| `CUR-COMBAT-001` | 敵出現枠 | src/world.js: spawns; src/combat.js: createEncounters(), updateCombat() の生成処理; src/settings.js: enemyTypes.maxHp / enemy.gold; src/main.js: state.encounters; src/render.js: render() の敵描画 | CUR-COMBAT-003, CUR-COMBAT-006, CUR-SYS-002 | 未登録 |
 | `CUR-COMBAT-002` | 安全地帯 | src/world.js: inTown(), town; src/combat.js: updateCombat() の safe・chasing・移動候補・自動攻撃制限 | CUR-WORLD-002, CUR-COMBAT-003, CUR-COMBAT-005 | 未登録 |
-| `CUR-COMBAT-003` | 敵追跡・帰還 | src/combat.js: updateCombat() の chasing/goal/step/next; src/settings.js: enemy.speed/reach/aggro/leash; src/world.js: inTown(), spawns | CUR-COMBAT-002, CUR-COMBAT-004 | 未登録 |
-| `CUR-COMBAT-004` | 敵攻撃 | src/combat.js: updateCombat() の敵cooldown/flash・HP減算; src/equipment.js: damageAfterArmor()・早期return; src/settings.js: enemy.damage/attackDelay/reach; src/main.js: update() の player.flash・死亡判定; src/render.js: actor() | CUR-COMBAT-003, CUR-LIFE-001, CUR-UI-004 | 未登録 |
+| `CUR-COMBAT-003` | 敵追跡・帰還 | src/combat.js: updateCombat() の chasing/goal/step/next; src/settings.js: enemyTypes.speed / enemy.reach/aggro/leash; src/world.js: inTown(), spawns | CUR-COMBAT-002, CUR-COMBAT-004 | 未登録 |
+| `CUR-COMBAT-004` | 敵攻撃 | src/combat.js: updateCombat() の敵cooldown/flash・HP減算; src/equipment.js: damageAfterArmor()・早期return; src/settings.js: enemyTypes.damage/attackDelay / enemy.reach; src/main.js: update() の player.flash・死亡判定; src/render.js: actor() | CUR-COMBAT-003, CUR-LIFE-001, CUR-UI-004 | 未登録 |
 | `CUR-COMBAT-005` | プレイヤー自動攻撃 | src/combat.js: updateCombat() の player.cooldown・nearest/range・HP減算・strike; src/settings.js: player.range（素手）/damage; src/equipment.js: items, attackIntervals, attackInterval(); src/growth.js: attackDamage(); src/main.js: update() の戦闘呼出・strike期限; src/render.js: render() の攻撃線・actor() | CUR-COMBAT-002, CUR-COMBAT-006, CUR-UI-004 | 未登録 |
-| `CUR-COMBAT-006` | 撃破・再出現 | src/combat.js: updateCombat() の enemy=null/remaining/generation/notice・硬貨配置・経験値付与; src/growth.js: gainExperience(); src/settings.js: enemy.spawnDelay/maxHp; src/main.js: update() の通知期限、frame() の通知表示; src/render.js: render() の生存敵描画 | CUR-COMBAT-001, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-001 | 未登録 |
+| `CUR-COMBAT-006` | 撃破・再出現 | src/combat.js: updateCombat() の enemy=null/remaining/generation/notice・硬貨配置・経験値付与; src/growth.js: gainExperience(); src/settings.js: enemy.spawnDelay / enemyTypes.maxHp; src/main.js: update() の通知期限、frame() の通知表示; src/render.js: render() の生存敵描画 | CUR-COMBAT-001, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-001 | 未登録 |
 | `CUR-COMBAT-007` | 貨幣ドロップ・拾得 | src/combat.js: updateCombat() の敵所持金・goldDrops; src/main.js: state, collectGold(), update(); src/settings.js: enemy.gold / currency.pickupRadius; src/render.js: render() の硬貨描画 | CUR-COMBAT-001, CUR-COMBAT-006, CUR-SYS-003, CUR-UI-001, CUR-UI-004 | 未登録 |
 | `CUR-GROWTH-001` | 討伐経験値・レベル | src/growth.js: growth, experienceToNextLevel(), gainExperience(), maxHealth(), attackDamage(); src/combat.js: 撃破時の付与と通知; src/main.js: createPlayer(), collectGold(), frame() | CUR-COMBAT-005, CUR-COMBAT-006, CUR-INN-002, CUR-LIFE-001, CUR-UI-001 | 未登録 |
 | `CUR-INN-001` | 宿接触 | src/world.js: innDoor, buildings; src/main.js: update() の touchingInn/innContact/料金・残高案内/returnValue/showModal; src/input.js: clear(); index.html: #inn; src/render.js: building() の入口マーカー | CUR-WORLD-004, CUR-MOVE-001, CUR-INN-002 | 未登録 |
@@ -37,7 +37,7 @@
 | `CUR-UI-001` | HUD | index.html: header/#hud-toggle/#hud-details/h1（タイトル・表示バージョン）/#location/#progress/#hp/#health/#gold/#notice/footer; src/main.js: frame(), setText(), health.max, hudToggle の click; src/world.js: inTown(), town; src/settings.js: player.maxHp; style.css: header/footer/#notice/meter/@media | CUR-WORLD-002, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002 | 未登録 |
 | `CUR-UI-002` | 画面・カメラ | src/render.js: createRenderer(), render() の clientWidth/Height・DPR・setTransform・left/top・タイル走査; src/settings.js: tile/mapWidth/mapHeight; index.html: canvas; style.css: body/canvas | CUR-WORLD-001, CUR-UI-003, CUR-UI-004 | 未登録 |
 | `CUR-UI-003` | 地形・建物描画 | src/render.js: colors, rect(), tile(), building(), render(); src/world.js: terrainAt(), buildings, innDoor; src/settings.js: tile | CUR-WORLD-003, CUR-WORLD-004, CUR-UI-002 | 未登録 |
-| `CUR-UI-004` | キャラクター・戦闘描画 | src/render.js: actor(), render() の硬貨描画, rect(); src/settings.js: enemy.maxHp; src/main.js: update() の moving/flash/strike; src/combat.js: updateCombat() の flash/strike/hp | CUR-MOVE-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-002 | 未登録 |
+| `CUR-UI-004` | キャラクター・戦闘描画 | src/render.js: actor(), enemySprites, render() の硬貨描画, rect(); src/settings.js: enemyTypes.maxHp（生成時に個体へ設定）; src/main.js: update() の moving/flash/strike; src/combat.js: updateCombat() の flash/strike/hp | CUR-MOVE-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-002 | 未登録 |
 | `CUR-UI-005` | ダイアログ・外観 | index.html: #inn/#death・form/button; style.css: :root/dialog/backdrop/button/h1/@media; src/main.js: showModal/close/cancel | CUR-INN-002, CUR-LIFE-001 | 未登録 |
 
 ## ファイルから仕様を探す（逆引き）

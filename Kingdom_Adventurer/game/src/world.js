@@ -16,14 +16,14 @@ const shop = buildings.find(building => building.kind === 'weapon-shop');
 export const shopDoor = { x: shop.x + shop.w / 2, y: shop.y + shop.h + 12 };
 
 export const spawns = [
-  { id: 'east-road', x: 1436, y: 800 },
-  { id: 'west-road', x: 812, y: 800 },
-  { id: 'north-grove', x: 1112, y: 460 },
-  { id: 'south-field', x: 1112, y: 1060 },
-  { id: 'east-grove', x: 1505, y: 670 },
-  { id: 'east-field', x: 1510, y: 925 },
-  { id: 'far-grove', x: 1800, y: 580 },
-  { id: 'far-west', x: 514, y: 650 },
+  { id: 'east-road', kind: 'wolf', x: 1436, y: 800 },
+  { id: 'west-road', kind: 'rat', x: 812, y: 800 },
+  { id: 'north-grove', kind: 'spider', x: 1112, y: 460 },
+  { id: 'south-field', kind: 'crab', x: 1112, y: 1060 },
+  { id: 'east-grove', kind: 'spider', x: 1505, y: 670 },
+  { id: 'east-field', kind: 'crab', x: 1510, y: 925 },
+  { id: 'far-grove', kind: 'wolf', x: 1800, y: 580 },
+  { id: 'far-west', kind: 'rat', x: 514, y: 650 },
 ];
 
 export function inTown({ x, y }) {

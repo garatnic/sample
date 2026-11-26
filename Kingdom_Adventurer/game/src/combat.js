@@ -1,6 +1,6 @@
-import { settings } from './settings.js?v=7';
+import { enemyTypes, settings } from './settings.js?v=14';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
-import { inTown, spawns } from './world.js?v=8';
+import { inTown, spawns } from './world.js?v=14';
 import { attackInterval, damageAfterArmor, items } from './equipment.js?v=13';
 
 export function createEncounters() {
@@ -15,11 +15,13 @@ export function updateCombat(state, dt) {
 
   for (const encounter of encounters) {
     const { home } = encounter;
+    const kind = home.kind;
+    const type = enemyTypes[kind];
     if (!encounter.enemy) {
       encounter.remaining -= dt;
       if (encounter.remaining <= 0) {
         encounter.enemy = { id: `enemy-${home.id}-${++encounter.generation}`,
-          x: home.x, y: home.y, hp: config.maxHp, gold: config.gold, cooldown: 0, flash: 0 };
+          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, gold: config.gold, cooldown: 0, flash: 0 };
       }
     }
 
@@ -32,9 +34,9 @@ export function updateCombat(state, dt) {
       && Math.hypot(player.x - home.x, player.y - home.y) < config.leash;
     if (chasing && distance <= config.reach) {
       if (enemy.cooldown === 0) {
-        player.hp = Math.max(0, player.hp - damageAfterArmor(player, config.damage));
+        player.hp = Math.max(0, player.hp - damageAfterArmor(player, type.damage));
         player.flash = 0.22;
-        enemy.cooldown = config.attackDelay;
+        enemy.cooldown = type.attackDelay;
         if (player.hp === 0) return;
       }
     } else {
@@ -43,7 +45,7 @@ export function updateCombat(state, dt) {
       const dy = goal.y - enemy.y;
       const length = Math.hypot(dx, dy);
       if (length > 0) {
-        const step = Math.min(config.speed * dt, length) / length;
+        const step = Math.min(type.speed * dt, length) / length;
         const next = { x: enemy.x + dx * step, y: enemy.y + dy * step };
         if (!inTown(next)) Object.assign(enemy, next);
       }
@@ -74,6 +76,6 @@ export function updateCombat(state, dt) {
     const leveledUp = gainExperience(player, growth.defeatExperience);
     state.notice = leveledUp
       ? { text: `レベルアップ！ Lv.${player.level}`, remaining: 2.5, leveledUp: true }
-      : { text: `魔物を撃破（+${growth.defeatExperience} XP）`, remaining: 1.7 };
+      : { text: `${enemyTypes[enemy.kind].name}を撃破（+${growth.defeatExperience} XP）`, remaining: 1.7 };
   }
 }

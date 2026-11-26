@@ -3,6 +3,33 @@ import { buildings, innDoor, shopDoor, terrainAt } from './world.js';
 
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
+const enemySprites = {
+  wolf: [
+    [-14, -7, 5, 4, '#495865'], [-8, -1, 4, 6, '#38424f'], [5, -1, 4, 6, '#38424f'],
+    [-10, -10, 20, 11, '#8094a6'], [2, -15, 10, 10, '#a8b9c6'],
+    [3, -19, 3, 5, '#a8b9c6'], [9, -18, 3, 5, '#a8b9c6'], [11, -10, 5, 4, '#495865'],
+    [9, -13, 2, 2, '#ffe293'],
+  ],
+  rat: [
+    [-15, -1, 10, 2, '#daa19b'], [-15, -4, 2, 4, '#daa19b'],
+    [-8, -8, 15, 10, '#84654d'], [2, -10, 5, 5, '#d9968d'],
+    [4, -6, 7, 6, '#b78a6c'], [8, -5, 2, 2, '#322a32'], [10, -2, 2, 2, '#efb0a2'],
+  ],
+  crab: [
+    [-12, 0, 5, 3, '#874e39'], [7, 0, 5, 3, '#874e39'],
+    [-10, -9, 20, 11, '#c97545'], [-6, -12, 12, 5, '#e29a56'],
+    [-15, -8, 6, 5, '#e29a56'], [9, -8, 6, 5, '#e29a56'],
+    [-14, -11, 3, 4, '#e29a56'], [11, -11, 3, 4, '#e29a56'],
+    [-5, -9, 2, 2, '#382c32'], [3, -9, 2, 2, '#382c32'],
+  ],
+  spider: [
+    [-15, -10, 30, 2, '#ae8eb5'], [-15, -5, 30, 2, '#ae8eb5'],
+    [-14, 0, 28, 2, '#ae8eb5'], [-12, 4, 24, 2, '#ae8eb5'],
+    [-7, -14, 14, 13, '#624469'], [-5, -6, 10, 9, '#8c6299'],
+    [-3, -4, 2, 2, '#f3cf7d'], [1, -4, 2, 2, '#f3cf7d'],
+  ],
+};
+
 export function createRenderer(canvas) {
   const ctx = canvas.getContext('2d');
   const rect = (x, y, w, h, color) => {
@@ -48,7 +75,7 @@ export function createRenderer(canvas) {
     rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');
   }
 
-  function actor({ x, y, hp, flash, moving }, player, time) {
+  function actor({ x, y, hp, maxHp, flash, moving, kind }, player, time) {
     rect(x - 11, y + 4, 22, 5, '#24352c88');
     if (player) {
       const step = moving ? Math.floor(time / 105) % 2 * 3 : 0;
@@ -59,12 +86,12 @@ export function createRenderer(canvas) {
       rect(x - 7, y - 24, 14, 5, '#573b2c');
       return;
     }
-    rect(x - 11, y - 12, 22, 15, flash ? '#ffd38b' : '#923f46');
-    rect(x - 7, y - 17, 14, 5, '#703941');
-    rect(x - 6, y - 10, 3, 3, '#f3d585');
-    rect(x + 3, y - 10, 3, 3, '#f3d585');
+    const sprite = enemySprites[kind];
+    for (const [left, top, width, height, color] of sprite) {
+      rect(x + left, y + top, width, height, flash ? '#ffd38b' : color);
+    }
     rect(x - 11, y - 23, 22, 3, '#30252a');
-    rect(x - 11, y - 23, 22 * hp / settings.enemy.maxHp, 3, '#f1a678');
+    rect(x - 11, y - 23, 22 * hp / maxHp, 3, '#f1a678');
   }
 
   return function render(state, time) {
