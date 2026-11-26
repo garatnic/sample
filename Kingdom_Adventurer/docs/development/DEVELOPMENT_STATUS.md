@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.25 / DEV-052 [71e37b9985fe3330988700d704720da10652eb41](https://github.com/garatnic/sample/commit/71e37b9985fe3330988700d704720da10652eb41)。非人型の素材入手と道具屋の買取を実装。素材の錬成は未実装。スマホ実機は未確認。
+
 - ver.24 / DEV-051 [129acb34908a26c11476d45d55d72e9c48389f3c](https://github.com/garatnic/sample/commit/129acb34908a26c11476d45d55d72e9c48389f3c)。ギルド別5枠を閲覧日で更新。現地にあるギルドは1か所、2か所分のデータを用いて分離と10件受注を検証。スマホ実機は未確認。
 
 - ver.23 / DEV-050 [6b509681f8cfe2757cc830124029a8d4187b9c74](https://github.com/garatnic/sample/commit/6b509681f8cfe2757cc830124029a8d4187b9c74)。未所持数の非表示とゲーム内時計を実装。開始は4000年1月1日08:00、速度はSYSTEM-002に準拠。宿泊・待機による時間進行は今後の課題。スマホ実機は未確認。
