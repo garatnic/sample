@@ -64,3 +64,107 @@ button:disabled { opacity: .55; cursor: default; }
   justify-content: space-between;
 }
 .gear-menu form { margin-top: .75rem; }
+
+.equipment-menu {
+  box-sizing: border-box;
+  width: min(72rem, calc(100vw - 1rem));
+  max-width: none;
+  max-height: calc(100dvh - 1rem);
+  padding: clamp(.65rem, 2vw, 1.3rem);
+  color: #e8edf2;
+  background: #0d1824;
+  border: 1px solid #8b9bad;
+}
+.equipment-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: .7rem;
+  border-bottom: 1px solid #526376;
+}
+.equipment-heading form { margin: 0; }
+.equipment-layout {
+  display: grid;
+  grid-template-columns: minmax(8rem, .7fr) minmax(17rem, 2fr) minmax(12rem, 1.15fr);
+  grid-template-areas: "stats body inventory";
+  align-items: start;
+  gap: .75rem;
+  margin-top: .75rem;
+}
+.equipment-stats, .equipment-inventory {
+  margin: 0;
+  padding: .75rem;
+  background: #101d2b;
+  border: 1px solid #526376;
+}
+.equipment-stats { grid-area: stats; }
+.equipment-stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: .35rem;
+  padding: .45rem 0;
+  font-variant-numeric: tabular-nums;
+}
+.equipment-stats dd { margin: 0; white-space: nowrap; }
+.equipment-inventory { grid-area: inventory; }
+.equipment-inventory h3 { margin: 0; }
+.equipment-inventory li { border-bottom: 1px solid #37485a; padding-bottom: .5rem; }
+.equipment-body {
+  grid-area: body;
+  position: relative;
+  display: grid;
+  grid-template: repeat(6, minmax(3.2rem, 1fr)) / repeat(3, minmax(0, 1fr));
+  grid-template-areas: ". head ." "cloak . neck" "right body left" "weapon waist shield" ". legs ring" ". feet .";
+  gap: .45rem;
+  align-items: center;
+  min-height: clamp(22rem, 62vh, 34rem);
+  padding: .5rem;
+  border: 1px solid #526376;
+  background: radial-gradient(ellipse, #263d52, #101b28 72%);
+}
+.equipment-silhouette {
+  position: absolute;
+  inset: 8% 0 2%;
+  width: 100%;
+  height: 90%;
+  fill: #162738;
+  stroke: #a9c9e1;
+  stroke-width: 1.6;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px #65a0c6);
+}
+.equipment-slot {
+  z-index: 1;
+  box-sizing: border-box;
+  display: grid;
+  place-content: center;
+  min-width: 0;
+  min-height: 3.2rem;
+  margin: 0;
+  padding: .25rem;
+  text-align: center;
+  background: #111f2eea;
+  border: 1px solid #8194a6;
+  border-radius: .25rem;
+  overflow-wrap: anywhere;
+}
+.equipment-slot small { display: block; color: #b9c7d3; }
+.slot-head { grid-area: head; }
+.slot-cloak { grid-area: cloak; }
+.slot-neck { grid-area: neck; }
+.slot-body { grid-area: body; }
+.slot-arm-r { grid-area: right; }
+.slot-arm-l { grid-area: left; }
+.slot-weapon { grid-area: weapon; color: #ffedc4; border-color: #cea45c; }
+.slot-waist { grid-area: waist; }
+.slot-shield { grid-area: shield; }
+.slot-legs { grid-area: legs; }
+.slot-ring { grid-area: ring; }
+.slot-feet { grid-area: feet; }
+@media (max-width: 760px) {
+  .equipment-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "body" "stats" "inventory";
+  }
+  .equipment-stats { display: grid; grid-template-columns: 1fr 1fr; column-gap: .85rem; }
+}

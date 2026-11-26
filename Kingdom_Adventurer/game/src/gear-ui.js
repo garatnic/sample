@@ -1,3 +1,4 @@
+import { attackDamage, maxHealth } from './growth.js?v=5';
 import { buyWeapon, weapons } from './equipment.js';
 
 export function setupGearMenus(state, input) {
@@ -6,6 +7,11 @@ export function setupGearMenus(state, input) {
   const shopList = document.querySelector('#weapon-stock');
   const inventoryList = document.querySelector('#inventory-items');
   const shopGold = document.querySelector('#shop-gold');
+  const hp = document.querySelector('#gear-hp');
+  const attack = document.querySelector('#gear-attack');
+  document.querySelector('#weapon-slot').addEventListener('click', () => {
+    document.querySelector('#equipment-inventory-title').focus();
+  });
   const equipped = document.querySelector('#equipped');
   const unequip = document.querySelector('#unequip');
   const feedback = document.querySelector('#shop-feedback');
@@ -43,7 +49,10 @@ export function setupGearMenus(state, input) {
 
   function refreshInventory() {
     const player = state.player;
-    equipped.textContent = `装備中: ${weapons.get(player.weaponId)?.name ?? '素手'}`;
+    const weapon = weapons.get(player.weaponId);
+    equipped.textContent = weapon?.name ?? '素手';
+    hp.textContent = `${player.hp} / ${maxHealth(player.level)}`;
+    attack.textContent = attackDamage(player.level) + (weapon?.bonus ?? 0);
     unequip.disabled = player.weaponId === null;
     for (const button of inventoryList.querySelectorAll('button')) {
       const active = button.value === player.weaponId;

@@ -4,18 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=db55aa6ff206">
+  <link rel="stylesheet" href="./style.css?v=0114a78d782b">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
   <header>
-    <h1>Kingdom Adventurer ver.8</h1>
+    <h1>Kingdom Adventurer ver.9</h1>
     <p id="location"></p>
     <p id="progress"></p>
     <label for="health">HP <output id="hp"></output></label>
     <meter id="health" min="0" max="100" value="100"></meter>
     <p>所持金 <output id="gold"></output></p>
-    <button id="open-inventory" type="button">持ち物</button>
+    <button id="open-inventory" type="button">装備</button>
   </header>
   <p id="notice" role="status"></p>
   <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
@@ -34,19 +34,50 @@
     <p id="shop-feedback" role="status"></p>
     <form method="dialog"><button autofocus>閉じる</button></form>
   </dialog>
-  <dialog id="inventory" class="gear-menu" aria-labelledby="inventory-title">
-    <h2 id="inventory-title">持ち物</h2>
-    <p id="equipped" role="status"></p>
-    <p id="inventory-empty">武器を持っていません。</p>
-    <ul id="inventory-items"></ul>
-    <button type="button" id="unequip">武器を外す</button>
-    <form method="dialog"><button autofocus>閉じる</button></form>
+  <dialog id="inventory" class="gear-menu equipment-menu" aria-labelledby="inventory-title">
+    <div class="equipment-heading">
+      <h2 id="inventory-title">装備</h2>
+      <form method="dialog"><button autofocus>閉じる</button></form>
+    </div>
+    <div class="equipment-layout">
+      <dl class="equipment-stats" aria-label="ステータス">
+        <div><dt>HP</dt><dd id="gear-hp"></dd></div>
+        <div><dt>MP</dt><dd id="gear-mp">100 / 100</dd></div>
+        <div><dt>攻撃力</dt><dd id="gear-attack"></dd></div>
+        <div><dt>防御力</dt><dd id="gear-defense">0</dd></div>
+      </dl>
+      <div class="equipment-body" aria-label="装備部位">
+        <svg class="equipment-silhouette" viewBox="0 0 180 320" aria-hidden="true">
+          <path d="M90 15c-15 0-24 12-24 27 0 12 5 21 12 27v10l-28 9c-12 4-17 12-20 25l-9 44-14 34 2 15 10 2 12-12 14-29 13-37 1 46-9 48-6 64-9 13c-3 5 1 9 7 9h22l10-10 10-71 6-30 6 30 10 71 10 10h22c6 0 10-4 7-9l-9-13-6-64-9-48 1-46 13 37 14 29 12 12 10-2 2-15-14-34-9-44c-3-13-8-21-20-25l-28-9V69c7-6 12-15 12-27 0-15-9-27-24-27z"/>
+        </svg>
+        <div class="equipment-slot slot-head">頭 <small>未実装</small></div>
+        <div class="equipment-slot slot-cloak">マント <small>未実装</small></div>
+        <div class="equipment-slot slot-neck">首飾り <small>未実装</small></div>
+        <div class="equipment-slot slot-body">胴 <small>未実装</small></div>
+        <div class="equipment-slot slot-arm-r">右腕 <small>未実装</small></div>
+        <div class="equipment-slot slot-arm-l">左腕 <small>未実装</small></div>
+        <button class="equipment-slot slot-weapon" id="weapon-slot" type="button" aria-controls="inventory-items">
+          武器 <small id="equipped" role="status"></small>
+        </button>
+        <div class="equipment-slot slot-waist">腰 <small>未実装</small></div>
+        <div class="equipment-slot slot-shield">盾 <small>未実装</small></div>
+        <div class="equipment-slot slot-legs">脚 <small>未実装</small></div>
+        <div class="equipment-slot slot-ring">指輪 <small>未実装</small></div>
+        <div class="equipment-slot slot-feet">足 <small>未実装</small></div>
+      </div>
+      <section class="equipment-inventory" aria-labelledby="equipment-inventory-title">
+        <h3 id="equipment-inventory-title" tabindex="-1">所持品</h3>
+        <p id="inventory-empty">武器を持っていません。</p>
+        <ul id="inventory-items"></ul>
+        <button type="button" id="unequip">武器を外す</button>
+      </section>
+    </div>
   </dialog>
   <dialog id="death" aria-labelledby="death-title">
     <h2 id="death-title">戦闘不能</h2>
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=8"></script>
+  <script type="module" src="./src/main.js?v=9"></script>
 </body>
 </html>
