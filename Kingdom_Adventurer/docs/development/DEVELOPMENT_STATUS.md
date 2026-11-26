@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.12 / DEV-039 [1db72d245d4bd49c162802f6e4e4deb1687423d9](https://github.com/garatnic/sample/commit/1db72d245d4bd49c162802f6e4e4deb1687423d9)。指輪を2枠に拡張し、同じ指輪の同時装備は2個所持時に可能。共通の指輪タブと枠別操作をNodeで確認。次回は DEV-015 の残項目を参照。
+
 - ver.11 / DEV-038 [`16f8b05f283584c439b7071c4cb8e136117c0429`](https://github.com/garatnic/sample/commit/16f8b05f283584c439b7071c4cb8e136117c0429)。装備品屋と所持品に部位別タブを追加。防具の軽減値、価格は暫定。次回は DEV-015 の残項目を参照。
 
 - ver.10 / DEV-037 [`0c67242591d865d91edc11a09f66a79e375e6f40`](https://github.com/garatnic/sample/commit/0c67242591d865d91edc11a09f66a79e375e6f40)。左上HUDをHP・MP表示から展開する方式に変更。スマホ実機は未確認。
