@@ -63,6 +63,18 @@ button:disabled { opacity: .55; cursor: default; }
   gap: .4rem .8rem;
   justify-content: space-between;
 }
+#shop-stock details { width: 100%; }
+#shop-stock summary {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: .65rem .75rem;
+  background: #304339;
+  border-radius: .25rem;
+  cursor: pointer;
+}
+#shop-stock details[open] { padding-bottom: .5rem; }
+#shop-stock details > p { margin: .6rem 0; }
+
 .gear-menu form { margin-top: .75rem; }
 
 .equipment-menu {

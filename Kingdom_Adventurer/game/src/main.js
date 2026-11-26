@@ -4,7 +4,7 @@ import { createEncounters, updateCombat } from './combat.js?v=16';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=16';
-import { setupGearMenus } from './gear-ui.js?v=16';
+import { setupGearMenus } from './gear-ui.js?v=18';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');

@@ -60,9 +60,10 @@ export function setupGearMenus(state, input) {
     };
   }
 
-  const details = item => item.slot === 'weapon'
-    ? `${item.name}　攻撃+${item.bonus} / 射程${item.range} / 攻撃間隔${attackInterval(item).toFixed(2)}秒`
-    : item.slot ? `${item.name}　防御+${item.defense}` : item.name;
+  const itemStats = item => item.slot === 'weapon'
+    ? `攻撃+${item.bonus} / 射程${item.range} / 攻撃間隔${attackInterval(item).toFixed(2)}秒`
+    : item.slot ? `防御+${item.defense}` : '';
+  const details = item => [item.name, itemStats(item)].filter(Boolean).join('　');
 
   const markInventoryFilter = filters('#inventory-tabs', [...slots, ...goodsTabs], key => {
     inventoryFilter = key;
@@ -80,7 +81,7 @@ export function setupGearMenus(state, input) {
   buyButton.addEventListener('click', () => setShopMode('buy'));
   sellButton.addEventListener('click', () => setShopMode('sell'));
 
-  function renderShop() {
+  function renderShop(selectedId) {
     markShopFilter(shopFilter);
     shopList.replaceChildren();
     shopGold.textContent = `所持金 ${state.gold}G`;
@@ -92,20 +93,39 @@ export function setupGearMenus(state, input) {
       if (!buying && quantity === 0) continue;
       const price = buying ? item.price : salePrice(item);
       const equipped = !buying && sellableQuantity(state.player, id) <= 0;
-      const index = shopList.children.length;
-      row(shopList, buying ? details(item) : `${details(item)} ×${quantity}`, [{
-        label: equipped ? '装備中' : `${price}Gで${buying ? '買う' : '売る'}`,
-        disabled: equipped || (buying ? state.gold : state.shopGold[shopId]) < price,
-        onClick: () => {
-          const transact = buying ? buyItem : sellItem;
-          if (!transact(state, shopId, id)) return;
-          feedback.textContent = `${item.name}を${buying ? '購入' : '売却'}しました`;
-          renderShop();
-          const next = shopList.children[index]?.querySelector('button');
-          (next && !next.disabled ? next : buying ? buyButton : sellButton).focus();
-        },
-      }]);
+      const entry = document.createElement('li');
+      const disclosure = document.createElement('details');
+      disclosure.name = 'shop-product';
+      disclosure.open = selectedId === id;
+      const summary = document.createElement('summary');
+      summary.textContent = item.name;
+      const facts = document.createElement('p');
+      const group = shops[shopId].tabs.find(([key]) => key === itemGroup(item))[1];
+      const stats = itemStats(item);
+      facts.textContent = [group, stats, `所持数 ${quantity}`].filter(Boolean).join(' / ');
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = `${price}Gで${buying ? '買う' : '売る'}`;
+      const insufficient = (buying ? state.gold : state.shopGold[shopId]) < price;
+      button.disabled = equipped || insufficient;
+      disclosure.append(summary, facts, button);
+      if (button.disabled) {
+        const reason = document.createElement('small');
+        reason.textContent = equipped ? '装備中のため売却できません' : '所持金が足りません';
+        disclosure.append(reason);
+      }
+      button.addEventListener('click', () => {
+        const transact = buying ? buyItem : sellItem;
+        if (!transact(state, shopId, id)) return;
+        feedback.textContent = `${item.name}を${buying ? '購入' : '売却'}しました`;
+        renderShop(id);
+      });
+      entry.append(disclosure);
+      shopList.append(entry);
+      if (selectedId === id) (button.disabled ? summary : button).focus({ preventScroll: true });
     }
+    if (selectedId && !shopList.querySelector('details[open]')) sellButton.focus({ preventScroll: true });
     shopEmpty.hidden = shopList.children.length > 0;
     shopEmpty.textContent = buying ? '該当する商品はありません。' : 'この分類で買い取れる所持品はありません。';
   }
