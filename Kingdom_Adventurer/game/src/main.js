@@ -1,9 +1,10 @@
 import { settings } from './settings.js';
-import { innDoor, inTown, movePlayer, start, town } from './world.js';
-import { createEncounters, updateCombat } from './combat.js?v=7';
+import { innDoor, shopDoor, inTown, movePlayer, start, town } from './world.js?v=8';
+import { createEncounters, updateCombat } from './combat.js?v=8';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js';
+import { createRenderer } from './render.js?v=8';
+import { setupGearMenus } from './gear-ui.js';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -19,12 +20,13 @@ const canvas = document.querySelector('canvas');
 const input = createInput(canvas);
 const render = createRenderer(canvas);
 
-function createPlayer({ level = 1, experience = 0 } = {}) {
-  return { id: 'player', ...start, level, experience, hp: maxHealth(level), cooldown: 0, flash: 0, moving: false };
+function createPlayer({ level = 1, experience = 0, inventory = new Map(), weaponId = null } = {}) {
+  return { id: 'player', ...start, level, experience, inventory, weaponId, hp: maxHealth(level), cooldown: 0, flash: 0, moving: false };
 }
 
 const state = { player: createPlayer(), encounters: createEncounters(), strike: null,
-  notice: null, innContact: false, gold: settings.currency.startingGold, goldDrops: [] };
+  notice: null, innContact: false, gold: settings.currency.startingGold, goldDrops: [], shopContact: false, shopGold: 0 };
+const openShop = setupGearMenus(state, input);
 
 inn.addEventListener('close', () => {
   if (inn.returnValue === 'yes' && state.gold >= settings.inn.price) {
@@ -40,6 +42,7 @@ death.addEventListener('close', () => {
   state.strike = null;
   state.notice = null;
   state.innContact = false;
+  state.shopContact = false;
 });
 
 function collectGold() {
@@ -86,6 +89,14 @@ function update(dt) {
   }
   state.innContact = touchingInn;
 
+  const touchingShop = Math.hypot(player.x - shopDoor.x, player.y - shopDoor.y) <= 19;
+  const enteringShop = touchingShop && !state.shopContact;
+  state.shopContact = touchingShop;
+  if (enteringShop) {
+    openShop();
+    return;
+  }
+
   updateCombat(state, dt);
   if (player.hp === 0) {
     input.clear();
@@ -102,7 +113,7 @@ let previous = performance.now();
 function frame(time) {
   const dt = Math.min((time - previous) / 1000, 0.04);
   previous = time;
-  if (!inn.open && !death.open && state.player.hp > 0) update(dt);
+  if (!document.querySelector('dialog[open]') && state.player.hp > 0) update(dt);
   const { level, experience, hp: currentHp } = state.player;
   const maxHp = maxHealth(level);
   if (health.max !== maxHp) health.max = maxHp;

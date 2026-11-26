@@ -1,6 +1,7 @@
 import { settings } from './settings.js?v=7';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
-import { inTown, spawns } from './world.js';
+import { inTown, spawns } from './world.js?v=8';
+import { weapons } from './equipment.js';
 
 export function createEncounters() {
   return spawns.map(home => ({ home, enemy: null, remaining: 0, generation: 0 }));
@@ -51,7 +52,8 @@ export function updateCombat(state, dt) {
 
   if (safe || player.cooldown > 0) return;
   let nearest = null;
-  let range = settings.player.range;
+  const weapon = weapons.get(player.weaponId);
+  let range = weapon?.range ?? settings.player.range;
   for (const encounter of encounters) {
     if (!encounter.enemy) continue;
     const distance = Math.hypot(player.x - encounter.enemy.x, player.y - encounter.enemy.y);
@@ -63,7 +65,7 @@ export function updateCombat(state, dt) {
   const enemy = nearest.enemy;
   player.cooldown = settings.player.attackDelay;
   state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
-  enemy.hp -= attackDamage(player.level);
+  enemy.hp -= attackDamage(player.level) + (weapon?.bonus ?? 0);
   enemy.flash = 0.18;
   if (enemy.hp <= 0) {
     nearest.enemy = null;

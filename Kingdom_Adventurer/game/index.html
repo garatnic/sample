@@ -4,17 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=520aa4ec9918">
+  <link rel="stylesheet" href="./style.css?v=db55aa6ff206">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
   <header>
-    <h1>Kingdom Adventurer ver.7</h1>
+    <h1>Kingdom Adventurer ver.8</h1>
     <p id="location"></p>
     <p id="progress"></p>
     <label for="health">HP <output id="hp"></output></label>
     <meter id="health" min="0" max="100" value="100"></meter>
     <p>所持金 <output id="gold"></output></p>
+    <button id="open-inventory" type="button">持ち物</button>
   </header>
   <p id="notice" role="status"></p>
   <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
@@ -26,11 +27,26 @@
       <button value="no" autofocus>NO</button>
     </form>
   </dialog>
+  <dialog id="weapon-shop" class="gear-menu" aria-labelledby="shop-title">
+    <h2 id="shop-title">武器屋</h2>
+    <p id="shop-gold"></p>
+    <ul id="weapon-stock"></ul>
+    <p id="shop-feedback" role="status"></p>
+    <form method="dialog"><button autofocus>閉じる</button></form>
+  </dialog>
+  <dialog id="inventory" class="gear-menu" aria-labelledby="inventory-title">
+    <h2 id="inventory-title">持ち物</h2>
+    <p id="equipped" role="status"></p>
+    <p id="inventory-empty">武器を持っていません。</p>
+    <ul id="inventory-items"></ul>
+    <button type="button" id="unequip">武器を外す</button>
+    <form method="dialog"><button autofocus>閉じる</button></form>
+  </dialog>
   <dialog id="death" aria-labelledby="death-title">
     <h2 id="death-title">戦闘不能</h2>
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=7"></script>
+  <script type="module" src="./src/main.js?v=8"></script>
 </body>
 </html>

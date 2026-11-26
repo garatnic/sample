@@ -51,3 +51,16 @@ button {
 @media (pointer: coarse) {
   footer { display: none; }
 }
+
+#open-inventory { pointer-events: auto; }
+button:disabled { opacity: .55; cursor: default; }
+.gear-menu { width: 28rem; max-height: calc(100dvh - 4rem); overflow: auto; }
+.gear-menu ul { display: grid; gap: .55rem; padding: 0; }
+.gear-menu li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .4rem .8rem;
+  justify-content: space-between;
+}
+.gear-menu form { margin-top: .75rem; }

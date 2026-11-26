@@ -1,5 +1,5 @@
 import { settings } from './settings.js';
-import { buildings, innDoor, terrainAt } from './world.js';
+import { buildings, innDoor, shopDoor, terrainAt } from './world.js';
 
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
@@ -29,6 +29,7 @@ export function createRenderer(canvas) {
 
   function building({ x, y, w, h, kind }) {
     const inn = kind === 'inn';
+    const shop = kind === 'weapon-shop';
     rect(x + 3, y + 6, w + 4, h, '#363e30');
     rect(x, y + 14, w, h - 14, '#d1b087');
     rect(x - 3, y, w + 6, h - 17, inn ? '#85533e' : '#666c51');
@@ -37,13 +38,14 @@ export function createRenderer(canvas) {
     rect(x + w / 2 - 7, y + h - 17, 14, 17, '#443729');
     rect(x + 8, y + h - 13, 8, 7, '#e3ce93');
     rect(x + w - 16, y + h - 13, 8, 7, '#e3ce93');
-    if (!inn) return;
+    if (!inn && !shop) return;
     rect(x + w / 2 - 17, y + 10, 34, 24, '#f0dbad');
     ctx.fillStyle = '#493821';
     ctx.textAlign = 'center';
     ctx.font = 'bold 15px system-ui';
-    ctx.fillText('宿', x + w / 2, y + 28);
-    rect(innDoor.x - 10, innDoor.y - 6, 20, 12, '#cfbb8b');
+    ctx.fillText(inn ? '宿' : '武器', x + w / 2, y + 28);
+    const door = inn ? innDoor : shopDoor;
+    rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');
   }
 
   function actor({ x, y, hp, flash, moving }, player, time) {
