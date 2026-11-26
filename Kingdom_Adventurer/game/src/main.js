@@ -4,7 +4,7 @@ import { createEncounters, updateCombat } from './combat.js?v=21';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=21';
-import { setupGearMenus } from './gear-ui.js?v=20';
+import { setupGearMenus } from './gear-ui.js?v=22';
 import { maxMp } from './consumables.js?v=20';
 
 import { setupQuestMenus } from './quests.js?v=21';

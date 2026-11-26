@@ -226,3 +226,9 @@ header .hud-mp { margin: 0; color: #b6dbef; font-variant-numeric: tabular-nums; 
 }
 .equipment-slot { color: inherit; }
 .slot-weapon { color: #ffedc4; }
+.equipment-slot.is-equipped {
+  color: #edfff0;
+  background: #234c3d;
+  border-color: #83cba6;
+}
+.equipment-slot.is-equipped small { color: #d0f5df; }

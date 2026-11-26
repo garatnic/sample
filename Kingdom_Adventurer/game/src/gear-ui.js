@@ -107,11 +107,11 @@ export function setupGearMenus(state, input) {
       disclosure.dataset.itemId = id;
       disclosure.open = expandedId === id;
       const summary = document.createElement('summary');
-      summary.textContent = item.name;
+      summary.textContent = `${item.name}（${quantity}）`;
       const facts = document.createElement('p');
       const group = shops[shopId].tabs.find(([key]) => key === itemGroup(item))[1];
       const stats = itemStats(item) || effectText(item.effect);
-      facts.textContent = [group, stats, `所持数 ${quantity}`].filter(Boolean).join(' / ');
+      facts.textContent = [group, stats].filter(Boolean).join(' / ');
 
       const button = document.createElement('button');
       button.type = 'button';
@@ -150,7 +150,8 @@ export function setupGearMenus(state, input) {
     for (const button of slotButtons) {
       const slot = button.dataset.gearSlot;
       const item = items.get(equippedId(player, slot));
-      button.querySelector('small').textContent = item?.name ?? (slot === 'weapon' ? '素手' : '未装備');
+      button.classList.toggle('is-equipped', Boolean(item));
+      button.querySelector('small').textContent = item ? `✓ ${item.name}` : (slot === 'weapon' ? '素手' : '未装備');
     }
 
     markInventoryFilter(inventoryFilter);
