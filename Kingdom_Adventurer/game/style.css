@@ -63,7 +63,13 @@ button:disabled { opacity: .55; cursor: default; }
   gap: .4rem .8rem;
   justify-content: space-between;
 }
-#shop-stock details { width: 100%; }
+#shop-stock li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .5rem;
+}
+#shop-stock li > button { margin: 0; }
 #shop-stock summary {
   box-sizing: border-box;
   min-height: 44px;

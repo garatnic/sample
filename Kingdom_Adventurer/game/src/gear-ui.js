@@ -81,12 +81,13 @@ export function setupGearMenus(state, input) {
   buyButton.addEventListener('click', () => setShopMode('buy'));
   sellButton.addEventListener('click', () => setShopMode('sell'));
 
-  function renderShop(selectedId) {
+  function renderShop(expandedId, focusId) {
     markShopFilter(shopFilter);
     shopList.replaceChildren();
     shopGold.textContent = `所持金 ${state.gold}G`;
     shopBalance.textContent = `店の所持金 ${state.shopGold[shopId]}G`;
     const buying = shopMode === 'buy';
+    let focusTarget = buying ? buyButton : sellButton;
     for (const [id, item] of items) {
       if (!acceptsItem(shopId, item) || (shopFilter !== 'all' && shopFilter !== itemGroup(item))) continue;
       const quantity = state.player.inventory.get(id) ?? 0;
@@ -96,7 +97,8 @@ export function setupGearMenus(state, input) {
       const entry = document.createElement('li');
       const disclosure = document.createElement('details');
       disclosure.name = 'shop-product';
-      disclosure.open = selectedId === id;
+      disclosure.dataset.itemId = id;
+      disclosure.open = expandedId === id;
       const summary = document.createElement('summary');
       summary.textContent = item.name;
       const facts = document.createElement('p');
@@ -106,10 +108,11 @@ export function setupGearMenus(state, input) {
 
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = `${price}Gで${buying ? '買う' : '売る'}`;
+      button.textContent = `${price}G`;
+      button.setAttribute('aria-label', `${item.name}を${price}Gで${buying ? '買う' : '売る'}`);
       const insufficient = (buying ? state.gold : state.shopGold[shopId]) < price;
       button.disabled = equipped || insufficient;
-      disclosure.append(summary, facts, button);
+      disclosure.append(summary, facts);
       if (button.disabled) {
         const reason = document.createElement('small');
         reason.textContent = equipped ? '装備中のため売却できません' : '所持金が足りません';
@@ -119,13 +122,13 @@ export function setupGearMenus(state, input) {
         const transact = buying ? buyItem : sellItem;
         if (!transact(state, shopId, id)) return;
         feedback.textContent = `${item.name}を${buying ? '購入' : '売却'}しました`;
-        renderShop(id);
+        renderShop(shopList.querySelector('details[open]')?.dataset.itemId, id);
       });
-      entry.append(disclosure);
+      entry.append(disclosure, button);
       shopList.append(entry);
-      if (selectedId === id) (button.disabled ? summary : button).focus({ preventScroll: true });
+      if (focusId === id) focusTarget = button.disabled ? summary : button;
     }
-    if (selectedId && !shopList.querySelector('details[open]')) sellButton.focus({ preventScroll: true });
+    if (focusId) focusTarget.focus({ preventScroll: true });
     shopEmpty.hidden = shopList.children.length > 0;
     shopEmpty.textContent = buying ? '該当する商品はありません。' : 'この分類で買い取れる所持品はありません。';
   }
