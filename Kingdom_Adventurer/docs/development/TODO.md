@@ -105,7 +105,8 @@
 - [x] DEV-046 両店の一覧に品名と価格を表示し、詳細を閉じたまま売買できるようにする。関連 CUR-SHOP-001/002/003。
   - 2026-11-26 ver.19 [9279d6aea6149a333c9deb68ac768c970e4de1c3](https://github.com/garatnic/sample/commit/9279d6aea6149a333c9deb68ac768c970e4de1c3)。両店で詳細を開かず売買できることを確認。
 
-- [ ] DEV-047 道具の使用効果。回復上限、消費数、毒の次回攻撃適用を検証する。関連 CUR-ITEM-001/002、CUR-COMBAT-005、COMBAT-001。
+- [x] DEV-047 道具の使用効果。回復上限、消費数、毒の次回攻撃適用を検証する。関連 CUR-ITEM-001/002、CUR-COMBAT-005、COMBAT-001。
+  - 2026-11-26 ver.20 [435b36c918522fd1d825dac6c838cd1f88583389](https://github.com/garatnic/sample/commit/435b36c918522fd1d825dac6c838cd1f88583389)。消費・回復上限・毒の適用を確認。
 
 ## 登録漏れの確認
 現時点では分野単位の登録のみ。211個別仕様のTODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
