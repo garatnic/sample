@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=377662fe4370">
+  <link rel="stylesheet" href="./style.css?v=11e127a161fe">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,11 +20,12 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.20</h1>
+      <h1>Kingdom Adventurer ver.21</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
       <button id="open-inventory" type="button">装備</button>
+      <button id="open-quests" type="button">クエスト</button>
     </div>
   </header>
   <p id="notice" role="status"></p>
@@ -92,11 +93,26 @@
       </section>
     </div>
   </dialog>
+  <dialog id="guild" class="gear-menu" aria-labelledby="guild-title">
+    <h2 id="guild-title">冒険者ギルド</h2>
+    <p class="quest-count"></p>
+    <p class="quest-empty" hidden>掲示中の依頼はありません。</p>
+    <ul></ul>
+    <p id="guild-feedback" role="status" tabindex="-1"></p>
+    <form method="dialog"><button autofocus>閉じる</button></form>
+  </dialog>
+  <dialog id="quest-journal" class="gear-menu" aria-labelledby="quest-title">
+    <h2 id="quest-title">クエスト</h2>
+    <p class="quest-count"></p>
+    <p class="quest-empty" hidden>ギルドで討伐依頼を受けられます。</p>
+    <ul></ul>
+    <form method="dialog"><button autofocus>閉じる</button></form>
+  </dialog>
   <dialog id="death" aria-labelledby="death-title">
     <h2 id="death-title">戦闘不能</h2>
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=20"></script>
+  <script type="module" src="./src/main.js?v=21"></script>
 </body>
 </html>

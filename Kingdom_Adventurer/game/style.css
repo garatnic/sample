@@ -52,7 +52,7 @@ button {
   footer { display: none; }
 }
 
-#open-inventory { pointer-events: auto; }
+#open-inventory, #open-quests { pointer-events: auto; }
 button:disabled { opacity: .55; cursor: default; }
 .gear-menu { width: 28rem; max-height: calc(100dvh - 4rem); overflow: auto; }
 .gear-menu ul { display: grid; gap: .55rem; padding: 0; }

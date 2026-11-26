@@ -6,11 +6,14 @@ export const buildings = [
   { id: 'inn-crossroads', x: 1070, y: 666, w: 84, h: 59, kind: 'inn' },
   { id: 'house-west', x: 972, y: 697, w: 56, h: 48, kind: 'goods-shop' },
   { id: 'house-east', x: 1204, y: 697, w: 58, h: 49, kind: 'weapon-shop' },
-  { id: 'house-southwest', x: 1007, y: 844, w: 58, h: 47, kind: 'house' },
+  { id: 'house-southwest', x: 1007, y: 844, w: 58, h: 47, kind: 'guild' },
   { id: 'house-southeast', x: 1174, y: 849, w: 66, h: 50, kind: 'house' },
 ];
 const inn = buildings.find(building => building.kind === 'inn');
 export const innDoor = { x: inn.x + inn.w / 2, y: inn.y + inn.h + 12 };
+
+const guild = buildings.find(building => building.kind === 'guild');
+export const guildDoor = { x: guild.x + guild.w / 2, y: guild.y + guild.h + 12 };
 
 export const shopDoors = Object.fromEntries(
   buildings.filter(building => building.kind.endsWith('-shop')).map(({ kind, x, y, w, h }) =>

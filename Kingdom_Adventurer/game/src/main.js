@@ -1,11 +1,13 @@
 import { settings } from './settings.js';
-import { innDoor, shopDoors, inTown, movePlayer, start, town } from './world.js?v=16';
-import { createEncounters, updateCombat } from './combat.js?v=20';
+import { guildDoor, innDoor, shopDoors, inTown, movePlayer, start, town } from './world.js?v=21';
+import { createEncounters, updateCombat } from './combat.js?v=21';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=16';
+import { createRenderer } from './render.js?v=21';
 import { setupGearMenus } from './gear-ui.js?v=20';
 import { maxMp } from './consumables.js?v=20';
+
+import { setupQuestMenus } from './quests.js?v=21';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -35,6 +37,8 @@ function createPlayer({ level = 1, experience = 0, inventory = new Map(), weapon
 
 const state = { player: createPlayer(), encounters: createEncounters(), strike: null,
   notice: null, innContact: false, gold: settings.currency.startingGold, goldDrops: [], shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 100])) };
+Object.assign(state, { activeQuests: new Map(), completedQuests: new Set(), guildGold: 100, guildContact: false });
+const openGuild = setupQuestMenus(state, input);
 const openShop = setupGearMenus(state, input);
 
 inn.addEventListener('close', () => {
@@ -52,6 +56,7 @@ death.addEventListener('close', () => {
   state.notice = null;
   state.innContact = false;
   state.shopContact = null;
+  state.guildContact = false;
 });
 
 function collectGold() {
@@ -112,6 +117,14 @@ function update(dt) {
       console.error('Shop menu failed to open', error);
       state.notice = { text: '店のメニューを開けませんでした。入口に入り直してください。', remaining: 3 };
     }
+  }
+
+  const touchingGuild = Math.hypot(player.x - guildDoor.x, player.y - guildDoor.y) <= 19;
+  const enteringGuild = touchingGuild && !state.guildContact;
+  state.guildContact = touchingGuild;
+  if (enteringGuild) {
+    openGuild();
+    return;
   }
 
   updateCombat(state, dt);

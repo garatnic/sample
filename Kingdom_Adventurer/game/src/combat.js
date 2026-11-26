@@ -1,7 +1,8 @@
 import { enemyTypes, settings } from './settings.js?v=15';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
-import { inTown, spawns } from './world.js?v=16';
+import { inTown, spawns } from './world.js?v=21';
 import { attackInterval, defenseRating, items } from './equipment.js?v=20';
+import { recordDefeat } from './quests.js?v=21';
 
 export function physicalDamage(attack, defense, damageMultiplier) {
   const reductionBasisPoints = Math.min(8000, Math.max(0, defense) * 12);
@@ -80,6 +81,7 @@ export function updateCombat(state, dt) {
   enemy.hp -= physicalDamage(attack, enemyTypes[enemy.kind].defense, playerDamageMultiplier) + poisonDamage;
   enemy.flash = 0.18;
   if (enemy.hp <= 0) {
+    recordDefeat(state, enemy.kind);
     nearest.enemy = null;
     nearest.remaining = config.spawnDelay;
     if (enemy.gold > 0) state.goldDrops.push({ x: enemy.x, y: enemy.y, gold: enemy.gold });
