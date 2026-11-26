@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.23 / DEV-050 [6b509681f8cfe2757cc830124029a8d4187b9c74](https://github.com/garatnic/sample/commit/6b509681f8cfe2757cc830124029a8d4187b9c74)。未所持数の非表示とゲーム内時計を実装。開始は4000年1月1日08:00、速度はSYSTEM-002に準拠。宿泊・待機による時間進行は今後の課題。スマホ実機は未確認。
+
 - ver.22 / DEV-049 [d9698a94dffe64729027274c6cf7c6b6499ecaa1](https://github.com/garatnic/sample/commit/d9698a94dffe64729027274c6cf7c6b6499ecaa1)。両店の所持数と装備状態の表示を追加し、売買・着脱時の更新を確認。スマホ実機は未確認。
 
 - ver.21 / DEV-048 [628148e1847fdb9ddc2da090788264503a7904b3](https://github.com/garatnic/sample/commit/628148e1847fdb9ddc2da090788264503a7904b3)。冒険者ギルド、固定討伐依頼5件、同時受注上限5件とクエストウィンドウを実装。固定内容・報酬は暫定。スマホ実機は未確認。
