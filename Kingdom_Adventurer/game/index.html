@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=0e62fcaf81fe">
+  <link rel="stylesheet" href="./style.css?v=c776c55e4dfc">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,7 +20,7 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.22</h1>
+      <h1>Kingdom Adventurer ver.23</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
@@ -28,6 +28,10 @@
       <button id="open-quests" type="button">クエスト</button>
     </div>
   </header>
+  <div id="game-clock" aria-label="ゲーム内時計">
+    <div id="clock-date">4000年1月1日（土）</div>
+    <div id="clock-time">08:00</div>
+  </div>
   <p id="notice" role="status"></p>
   <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
   <dialog id="inn" aria-labelledby="inn-title">
@@ -113,6 +117,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=22"></script>
+  <script type="module" src="./src/main.js?v=23"></script>
 </body>
 </html>

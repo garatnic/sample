@@ -4,7 +4,8 @@ import { createEncounters, updateCombat } from './combat.js?v=21';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=21';
-import { setupGearMenus } from './gear-ui.js?v=22';
+import { setupGearMenus } from './gear-ui.js?v=23';
+import { gameDateTime, gameMinutes } from './clock.js?v=23';
 import { maxMp } from './consumables.js?v=20';
 
 import { setupQuestMenus } from './quests.js?v=21';
@@ -26,6 +27,8 @@ const mp = document.querySelector('#hud-mp');
 const hp = document.querySelector('#hp');
 const health = document.querySelector('#health');
 const locationLabel = document.querySelector('#location');
+const clockDate = document.querySelector('#clock-date');
+const clockTime = document.querySelector('#clock-time');
 const notice = document.querySelector('#notice');
 const canvas = document.querySelector('canvas');
 const input = createInput(canvas);
@@ -140,10 +143,22 @@ function setText(element, value) {
 }
 
 let previous = performance.now();
+let elapsedPlaySeconds = 0;
+let previousClockMinute = -1;
 function frame(time) {
   const dt = Math.min((time - previous) / 1000, 0.04);
   previous = time;
-  if (!document.querySelector('dialog[open]') && state.player.hp > 0) update(dt);
+  if (!document.querySelector('dialog[open]') && state.player.hp > 0) {
+    elapsedPlaySeconds += dt;
+    update(dt);
+  }
+  const minute = gameMinutes(elapsedPlaySeconds);
+  if (minute !== previousClockMinute) {
+    previousClockMinute = minute;
+    const clock = gameDateTime(minute);
+    setText(clockDate, clock.date);
+    setText(clockTime, clock.time);
+  }
   const { level, experience, hp: currentHp } = state.player;
   const maxHp = maxHealth(level);
   if (health.max !== maxHp) health.max = maxHp;

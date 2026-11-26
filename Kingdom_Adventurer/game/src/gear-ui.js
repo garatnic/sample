@@ -107,7 +107,7 @@ export function setupGearMenus(state, input) {
       disclosure.dataset.itemId = id;
       disclosure.open = expandedId === id;
       const summary = document.createElement('summary');
-      summary.textContent = `${item.name}（${quantity}）`;
+      summary.textContent = quantity > 0 ? `${item.name}（${quantity}）` : item.name;
       const facts = document.createElement('p');
       const group = shops[shopId].tabs.find(([key]) => key === itemGroup(item))[1];
       const stats = itemStats(item) || effectText(item.effect);
