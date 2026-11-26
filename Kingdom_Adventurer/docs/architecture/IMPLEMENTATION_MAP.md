@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: DEV-050反映時点。
+基準: DEV-051反映時点。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全32仕様を対象とする。パスは `Kingdom_Adventurer/game/` 相対。関数名に加え、匿名イベント・データ・DOM・CSSセレクタも記載する。行番号は固定しない。関連仕様は直接の調査候補であり、変更時には呼出元・依存先も確認する。現行仕様は暫定実装。自動テストコードは未保存のため全行の関連テストは未登録（過去の検証記録は [TODO](../development/TODO.md)・[開発状況](../development/DEVELOPMENT_STATUS.md) 参照）。今回の静的照合は実機検証ではない。
 
 ## 仕様から実装を探す
@@ -11,7 +11,7 @@
 | `CUR-SYS-002` | 初期状態 | src/main.js: createPlayer(), state; src/growth.js: maxHealth(); src/world.js: start; src/settings.js: player.maxHp / currency.startingGold; src/combat.js: createEncounters() | CUR-WORLD-002, CUR-COMBAT-001, CUR-LIFE-001 | 未登録 |
 | `CUR-SYS-003` | フレーム処理 | src/main.js: frame(), update(), collectGold(), previous, requestAnimationFrame; src/input.js: read(); src/world.js: movePlayer(); src/combat.js: updateCombat(); src/render.js: render() | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-UI-001 | 未登録 |
 | `CUR-SYS-004` | 保存なし | src/main.js: state, createPlayer()（メモリ初期化）; index.html: 起動時モジュール読み込み | CUR-SYS-002, CUR-LIFE-001 | 未登録 |
-| `CUR-SYS-005` | ゲーム内時計 | src/clock.js: gameDateTime(); src/main.js: frame(), elapsedPlaySeconds; index.html: #game-clock; style.css: #game-clock | CUR-SYS-003 | SYSTEM-002 |
+| `CUR-SYS-005` | ゲーム内時計 | src/clock.js: gameDateTime(), gameDay(); src/main.js: frame(), elapsedPlaySeconds; index.html: #game-clock; style.css: #game-clock | CUR-SYS-003 | SYSTEM-002 |
 | `CUR-WORLD-001` | 固定マップ | src/settings.js: tile/mapWidth/mapHeight; src/world.js: 固定配置・terrainAt(); src/render.js: render() のタイル範囲 | CUR-WORLD-003, CUR-MOVE-002, CUR-UI-002 | 未登録 |
 | `CUR-WORLD-002` | 街 | src/world.js: town, start, inTown(); src/main.js: createPlayer(), frame() の所在地; src/combat.js: updateCombat() の安全判定 | CUR-COMBAT-002, CUR-UI-001, CUR-LIFE-001 | 未登録 |
 | `CUR-WORLD-003` | 地形 | src/world.js: terrainAt(), inTown(); src/render.js: tile(), colors; src/world.js: movePlayer(), walkable()（地形を衝突に使わない） | CUR-WORLD-001, CUR-MOVE-002, CUR-UI-003 | 未登録 |
@@ -27,7 +27,7 @@
 | `CUR-COMBAT-004` | 敵攻撃 | src/combat.js: updateCombat() の敵cooldown/flash・HP減算; src/combat.js: physicalDamage()・早期return; src/equipment.js: defenseRating(); src/settings.js: enemyTypes.damage/attackDelay / enemy.reach / difficulty.enemyDamageMultiplier; src/main.js: update() の player.flash・死亡判定; src/render.js: actor() | CUR-COMBAT-003, CUR-LIFE-001, CUR-UI-004 | 未登録 |
 | `CUR-COMBAT-005` | プレイヤー自動攻撃 | src/combat.js: updateCombat() の player.cooldown・nearest/range・HP減算・strike、physicalDamage(); src/settings.js: player.range（素手）/damage、enemyTypes.defense、difficulty.playerDamageMultiplier; src/equipment.js: items, attackIntervals, attackInterval(); src/growth.js: attackDamage(); src/main.js: update() の戦闘呼出・strike期限; src/render.js: render() の攻撃線・actor() | CUR-COMBAT-002, CUR-COMBAT-006, CUR-UI-004 | 未登録 |
 | `CUR-COMBAT-006` | 撃破・再出現 | src/combat.js: updateCombat() の enemy=null/remaining/generation/notice・硬貨配置・経験値付与・recordDefeat(); src/growth.js: gainExperience(); src/settings.js: enemy.spawnDelay / enemyTypes.maxHp; src/main.js: update() の通知期限、frame() の通知表示; src/render.js: render() の生存敵描画 | CUR-COMBAT-001, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-001 | 未登録 |
-| `CUR-QUEST-001` | ギルド討伐依頼 | src/quests.js: quests, acceptQuest(), recordDefeat(), reportQuest(), setupQuestMenus(); src/main.js: state, update(); src/world.js: guildDoor, buildings; src/combat.js: updateCombat(); src/render.js: building(); index.html: #guild | CUR-WORLD-004, CUR-COMBAT-006, CUR-QUEST-002 | QUEST-002/005 |
+| `CUR-QUEST-001` | ギルド討伐依頼 | src/quests.js: templates, refreshGuild(), acceptQuest(), recordDefeat(), reportQuest(), setupQuestMenus(); src/main.js: state, update(); src/world.js: guildDoors, buildings; src/combat.js: updateCombat(); src/render.js: building(); index.html: #guild | CUR-WORLD-004, CUR-COMBAT-006, CUR-QUEST-002 | QUEST-002/005 |
 | `CUR-QUEST-002` | クエスト一覧 | src/quests.js: setupQuestMenus(); index.html: #open-quests/#quest-journal; style.css: #open-quests, .gear-menu | CUR-QUEST-001, CUR-SYS-003 | 未登録 |
 | `CUR-COMBAT-007` | 貨幣ドロップ・拾得 | src/combat.js: updateCombat() の敵所持金・goldDrops; src/main.js: state, collectGold(), update(); src/settings.js: enemy.gold / currency.pickupRadius; src/render.js: render() の硬貨描画 | CUR-COMBAT-001, CUR-COMBAT-006, CUR-SYS-003, CUR-UI-001, CUR-UI-004 | 未登録 |
 | `CUR-GROWTH-001` | 討伐経験値・レベル | src/growth.js: growth, experienceToNextLevel(), gainExperience(), maxHealth(), attackDamage(); src/combat.js: 撃破時の付与と通知; src/main.js: createPlayer(), collectGold(), frame() | CUR-COMBAT-005, CUR-COMBAT-006, CUR-INN-002, CUR-LIFE-001, CUR-UI-001 | 未登録 |

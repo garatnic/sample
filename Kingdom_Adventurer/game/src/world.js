@@ -12,8 +12,10 @@ export const buildings = [
 const inn = buildings.find(building => building.kind === 'inn');
 export const innDoor = { x: inn.x + inn.w / 2, y: inn.y + inn.h + 12 };
 
-const guild = buildings.find(building => building.kind === 'guild');
-export const guildDoor = { x: guild.x + guild.w / 2, y: guild.y + guild.h + 12 };
+export const guildDoors = Object.fromEntries(
+  buildings.filter(building => building.kind === 'guild').map(({ id, x, y, w, h }) =>
+    [id, { x: x + w / 2, y: y + h + 12 }]),
+);
 
 export const shopDoors = Object.fromEntries(
   buildings.filter(building => building.kind.endsWith('-shop')).map(({ kind, x, y, w, h }) =>

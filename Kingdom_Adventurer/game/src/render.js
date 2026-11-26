@@ -1,5 +1,5 @@
 import { settings } from './settings.js';
-import { buildings, guildDoor, innDoor, shopDoors, terrainAt } from './world.js?v=21';
+import { buildings, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=24';
 
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
@@ -54,7 +54,7 @@ export function createRenderer(canvas) {
     }
   }
 
-  function building({ x, y, w, h, kind }) {
+  function building({ id, x, y, w, h, kind }) {
     const inn = kind === 'inn';
     const shop = shopDoors[kind];
     rect(x + 3, y + 6, w + 4, h, '#363e30');
@@ -72,7 +72,7 @@ export function createRenderer(canvas) {
     ctx.textAlign = 'center';
     ctx.font = guild ? 'bold 10px system-ui' : 'bold 15px system-ui';
     ctx.fillText(inn ? '宿' : guild ? 'ギルド' : kind === 'goods-shop' ? '道具' : '装備', x + w / 2, y + 28);
-    const door = inn ? innDoor : guild ? guildDoor : shop;
+    const door = inn ? innDoor : guild ? guildDoors[id] : shop;
     rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');
   }
 
