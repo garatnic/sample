@@ -103,8 +103,13 @@ function update(dt) {
   const enteringShop = touchingShop && touchingShop !== state.shopContact;
   state.shopContact = touchingShop;
   if (enteringShop) {
-    openShop(enteringShop);
-    return;
+    try {
+      openShop(touchingShop);
+      return;
+    } catch (error) {
+      console.error('Shop menu failed to open', error);
+      state.notice = { text: '店のメニューを開けませんでした。入口に入り直してください。', remaining: 3 };
+    }
   }
 
   updateCombat(state, dt);
