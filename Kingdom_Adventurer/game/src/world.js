@@ -51,12 +51,31 @@ function walkable(x, y) {
     && y > b.y - radius && y < b.y + b.h + radius);
 }
 
-export function movePlayer(player, dx, dy, dt) {
+export const cave = {
+  id: 'cave-spider',
+  name: '岩陰の洞窟',
+  width: 768,
+  height: 576,
+  entrance: { x: 1376, y: 496 },
+  fieldArrival: { x: 1376, y: 536 },
+  exit: { x: 384, y: 512 },
+  caveArrival: { x: 384, y: 472 },
+  spawns: [
+    { id: 'cave-west', kind: 'rat', x: 192, y: 320 },
+    { id: 'cave-east', kind: 'spider', x: 568, y: 288 },
+    { id: 'cave-north', kind: 'spider', x: 384, y: 144 },
+  ],
+};
+
+export const field = { id: 'field', width: settings.mapWidth, height: settings.mapHeight, spawns };
+export const portalRadius = 19;
+
+export function movePlayer(player, dx, dy, dt, area = field) {
   const length = Math.max(1, Math.hypot(dx, dy));
   const step = settings.player.speed * dt / length;
-  const margin = settings.player.radius;
-  const x = Math.max(margin, Math.min(settings.mapWidth - margin, player.x + dx * step));
-  const y = Math.max(margin, Math.min(settings.mapHeight - margin, player.y + dy * step));
-  if (walkable(x, player.y)) player.x = x;
-  if (walkable(player.x, y)) player.y = y;
+  const margin = settings.player.radius + (area === cave ? settings.tile : 0);
+  const x = Math.max(margin, Math.min(area.width - margin, player.x + dx * step));
+  const y = Math.max(margin, Math.min(area.height - margin, player.y + dy * step));
+  if (area === cave || walkable(x, player.y)) player.x = x;
+  if (area === cave || walkable(player.x, y)) player.y = y;
 }

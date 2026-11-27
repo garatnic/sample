@@ -1,5 +1,5 @@
 import { settings } from './settings.js';
-import { buildings, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=24';
+import { buildings, cave, field, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=29';
 
 import { harvestSeconds } from './trees.js?v=28';
 
@@ -56,6 +56,26 @@ export function createRenderer(canvas) {
       rect(px + 4 + variation, py + 8 + variation, 5, 2,
         { road: '#aa936c', town: '#aaa47a', grass: '#75945f' }[terrain]);
     }
+  }
+
+  function caveTile(x, y, size) {
+    const wall = x === 0 || y === 0 || (x + 1) * size === cave.width || (y + 1) * size === cave.height;
+    const px = x * size;
+    const py = y * size;
+    const variation = ((x * 37) ^ (y * 53)) & 15;
+    rect(px, py, size, size, wall ? '#292833' : '#51474a');
+    rect(px + variation, py + 7 + variation, wall ? 14 : 5, wall ? 5 : 2, wall ? '#403943' : '#65575a');
+  }
+
+  function drawPortal({ x, y }, outdoors) {
+    rect(x - 23, y - 30, 46, 36, '#4c494e');
+    rect(x - 18, y - 39, 36, 16, '#74696d');
+    rect(x - 14, y - 24, 28, 30, outdoors ? '#211d28' : '#d6b074');
+    rect(x - 20, y + 5, 40, 4, '#a48862');
+    ctx.fillStyle = '#fff1cd';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 14px system-ui';
+    ctx.fillText(outdoors ? '洞窟入口' : '出口', x, y - 48);
   }
 
   function drawTree({ x, y, itemId, remaining, capacity }) {
@@ -128,17 +148,21 @@ export function createRenderer(canvas) {
     const left = Math.round(player.x - width / 2);
     const top = Math.round(player.y - height / 2);
     ctx.translate(-left, -top);
-    const { tile: size, mapWidth, mapHeight } = settings;
-    for (let y = Math.max(0, Math.floor(top / size)); y * size < Math.min(mapHeight, top + height); y++) {
-      for (let x = Math.max(0, Math.floor(left / size)); x * size < Math.min(mapWidth, left + width); x++) {
-        tile(x, y, size);
+    const { tile: size } = settings;
+    const area = state.area ?? field;
+    const outdoors = area === field;
+    const drawTile = outdoors ? tile : caveTile;
+    for (let y = Math.max(0, Math.floor(top / size)); y * size < Math.min(area.height, top + height); y++) {
+      for (let x = Math.max(0, Math.floor(left / size)); x * size < Math.min(area.width, left + width); x++) {
+        drawTile(x, y, size);
       }
     }
-    for (const tree of state.resources.trees) {
+    for (const tree of outdoors ? state.resources.trees : []) {
       if (tree.x >= left - 20 && tree.x <= left + width + 20
         && tree.y >= top - 8 && tree.y <= top + height + 40) drawTree(tree);
     }
-    for (const entry of buildings) building(entry);
+    for (const entry of outdoors ? buildings : []) building(entry);
+    drawPortal(outdoors ? cave.entrance : cave.exit, outdoors);
     for (const { x, y, materials } of state.lootDrops) {
       rect(x - 5, y - 5, 10, 10, '#654319');
       rect(x - 4, y - 4, 8, 8, materials.length ? '#bc8a55' : '#f2bc35');
@@ -148,7 +172,7 @@ export function createRenderer(canvas) {
       if (enemy) actor(enemy, false, time);
     }
     actor(player, true, time);
-    const harvest = state.resources.harvest;
+    const harvest = outdoors && state.resources.harvest;
     if (harvest) {
       const { x, y } = harvest.tree;
       rect(x - 22, y - 51, 44, 8, '#202a21');

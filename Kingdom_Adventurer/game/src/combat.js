@@ -1,6 +1,6 @@
 import { enemyTypes, settings } from './settings.js?v=25';
 import { attackDamage, gainExperience, growth } from './growth.js?v=5';
-import { inTown, spawns } from './world.js?v=24';
+import { field, inTown } from './world.js?v=29';
 import { attackInterval, defenseRating, items } from './equipment.js?v=27';
 import { recordDefeat } from './quests.js?v=27';
 import { dropLoot } from './loot.js?v=27';
@@ -11,7 +11,7 @@ export function physicalDamage(attack, defense, damageMultiplier) {
   return attack * damageMultiplier * remainingFraction;
 }
 
-export function createEncounters() {
+export function createEncounters(spawns = field.spawns) {
   return spawns.map(home => ({ home, enemy: null, remaining: 0, generation: 0 }));
 }
 
@@ -19,7 +19,8 @@ export function updateCombat(state, dt) {
   const { player, encounters } = state;
   const config = settings.enemy;
   const { playerDamageMultiplier, enemyDamageMultiplier } = settings.difficulty;
-  const safe = inTown(player);
+  const outdoors = (state.area ?? field) === field;
+  const safe = outdoors && inTown(player);
   player.cooldown = Math.max(0, player.cooldown - dt);
 
   for (const encounter of encounters) {
@@ -56,7 +57,7 @@ export function updateCombat(state, dt) {
       if (length > 0) {
         const step = Math.min(type.speed * dt, length) / length;
         const next = { x: enemy.x + dx * step, y: enemy.y + dy * step };
-        if (!inTown(next)) Object.assign(enemy, next);
+        if (!outdoors || !inTown(next)) Object.assign(enemy, next);
       }
     }
   }
