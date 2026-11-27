@@ -120,3 +120,9 @@
 - [v4.5.md Q1](../history/v4.5.md#q1) 国家の初期配置 ／ 採用「世界生成時に地形・資源・人口を考慮して国家と未所属地を配置」
 
 **関連仕様** [NATION-034](12_nations_warfare.md#nation-034) · [NATION-013](12_nations_warfare.md#nation-013) · [NATION-014](12_nations_warfare.md#nation-014) · [QUEST-001](14_quests_history.md#quest-001)
+
+### フィールドのチャンク管理（追加決定）
+
+16×16タイル単位でフィールドの地形と移動個体を索引する。チャンク境界は移動を制限しない。地形・マップ規模の最終目標は既存仕様を参照。
+
+**出典** [2026-11-27 野外のチャンク管理とMOB](../history/2026-11-27-field-mobs.md)。

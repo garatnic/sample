@@ -188,11 +188,15 @@
 
   - ver.39 [c4e6d799463c5259644caed98358cf9a45a18f3a](https://github.com/garatnic/sample/commit/c4e6d799463c5259644caed98358cf9a45a18f3a)。Nodeの自動テスト11件合格。
 
-- [ ] DEV-074 野外のチャンク別出現数と地形、都市周辺の敵・動物密度を検討する。関連 ECO-001/005/007。
+- [x] DEV-074 チャンク発生・徘徊・住民戦闘・保存移行を実装する。関連 CUR-WORLD-001、CUR-COMBAT-001〜006、CUR-NATION-002、CUR-SYS-004、ECO-001/005/007。個体数上限・宿泊・画面外・セーブ往復を検証する。
+
+  - ver.41 [c2e06e3b81e3459555f56efbef2dbdb64b8817e3](https://github.com/garatnic/sample/commit/c2e06e3b81e3459555f56efbef2dbdb64b8817e3)。自動テスト15件とゲーム内7日のシミュレーション。実機負荷・長期調整は DEV-076。
 
 - [x] DEV-075 狩猟開始後の自動追撃、動物HPバーとメニューの狩猟ボタン削除。関連 CUR-COMBAT-005、CUR-SYS-004、CUR-UI-001/004。
 
   - ver.40 [1f3570001db141629b087271ec0aab98ff0928fb](https://github.com/garatnic/sample/commit/1f3570001db141629b087271ec0aab98ff0928fb)。Nodeの自動テスト11件合格。
+
+- [ ] DEV-076 フィールドMOBの地域密度、宿泊時の処理時間、住民戦闘の長期バランスをスマートフォン実機と複数条件で測定する。空き住宅への住民補充の扱いを OPEN_QUESTIONS と照合する。関連 CUR-WORLD-007、CUR-COMBAT-001〜003。
 
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
