@@ -1,10 +1,12 @@
+import { createSkills } from './skills.js?v=32';
+import { setupSkillMenu } from './skill-menu.js?v=32';
 import { settings } from './settings.js';
 import { cave, field, guildDoors, innDoor, shopDoors, inTown, movePlayer, portalRadius, start, town } from './world.js?v=29';
-import { createEncounters, inCombat, updateCombat } from './combat.js?v=31';
-import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
+import { createEncounters, inCombat, updateCombat } from './combat.js?v=32';
+import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=29';
-import { setupGearMenus } from './gear-ui.js?v=27';
+import { setupGearMenus } from './gear-ui.js?v=32';
 import { gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=30';
 import { maxMp } from './consumables.js?v=27';
 
@@ -13,8 +15,8 @@ import { setupQuestMenus } from './quests.js?v=27';
 import { collectLoot } from './loot.js?v=27';
 
 import { createTrees, updateTrees } from './trees.js?v=28';
-import { items } from './equipment.js?v=27';
-import { areas, makeSave, restoreSave } from './save-data.js?v=31';
+import { items } from './equipment.js?v=32';
+import { areas, makeSave, restoreSave } from './save-data.js?v=32';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
 const inn = document.querySelector('#inn');
@@ -41,8 +43,8 @@ const canvas = document.querySelector('canvas');
 const input = createInput(canvas);
 const render = createRenderer(canvas);
 
-function createPlayer({ level = 1, experience = 0, inventory = new Map(), weaponId = null, armor = new Map() } = {}) {
-  return { id: 'player', ...start, level, experience, inventory, weaponId, armor, hp: maxHealth(level), mp: maxMp, pendingPoison: 0, cooldown: 0, flash: 0, moving: false };
+function createPlayer({ level = 1, experience = 0, inventory = new Map(), weaponId = null, armor = new Map(), skills = createSkills() } = {}) {
+  return { id: 'player', ...start, level, experience, inventory, weaponId, armor, skills, hp: maxHealth(level), mp: maxMp, pendingPoison: 0, cooldown: 0, flash: 0, moving: false };
 }
 
 const areaStates = new Map(areas.map(area => [
@@ -229,5 +231,6 @@ const saves = setupSaveMenu({
 await saves.loadOnStart();
 const openGuild = setupQuestMenus(state, input);
 const openShop = setupGearMenus(state, input);
+setupSkillMenu(state, input);
 previous = performance.now();
 requestAnimationFrame(frame);

@@ -1,5 +1,6 @@
-import { attackDamage, maxHealth } from './growth.js?v=5';
-import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=27';
+import { playerAttack } from './weapon-skill.js?v=32';
+import { maxHealth } from './growth.js?v=32';
+import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=32';
 import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=27';
 import { canUseItem, maxMp, useItem } from './consumables.js?v=27';
 
@@ -142,7 +143,7 @@ export function setupGearMenus(state, input) {
     const weapon = items.get(player.weaponId);
     hp.textContent = `${Math.ceil(player.hp * 10) / 10} / ${maxHealth(player.level)}`;
     mp.textContent = `${player.mp} / ${maxMp}`;
-    attack.textContent = attackDamage(player.level) + (weapon?.bonus ?? 0);
+    attack.textContent = Number(playerAttack(player, weapon).toFixed(2));
     defense.textContent = defenseRating(player);
     for (const button of slotButtons) {
       const slot = button.dataset.gearSlot;

@@ -1,13 +1,14 @@
+import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
 import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=29';
 import { enemyTypes, settings } from './settings.js?v=25';
-import { canEquipItem, items } from './equipment.js?v=27';
-import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
+import { canEquipItem, items } from './equipment.js?v=32';
+import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { maxMp } from './consumables.js?v=27';
 import { gameDay } from './clock.js?v=30';
 import { createTrees, harvestSeconds } from './trees.js?v=28';
 
 const format = 'kingdom-adventurer';
-const version = 1;
+const version = 2;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -16,7 +17,7 @@ export function makeSave(state, areaStates, clock) {
     format, version, clock, area: state.area.id, gold: state.gold,
     player: { x: player.x, y: player.y, hp: player.hp, mp: player.mp,
       level: player.level, experience: player.experience, weaponId: player.weaponId,
-      inventory: [...player.inventory], armor: [...player.armor],
+      inventory: [...player.inventory], armor: [...player.armor], skills: [...player.skills],
       pendingPoison: player.pendingPoison, cooldown: player.cooldown },
     areas: areas.map(area => {
       const { encounters, lootDrops } = areaStates.get(area);
@@ -47,8 +48,23 @@ function entries(value) {
   return result;
 }
 
-function restorePlayer(data, area) {
-  check(position(data, area) && integer(data.level, 1) && integer(data.experience, 0, experienceToNextLevel(data.level) - 1)
+function restoreSkills(data) {
+  const skills = entries(data);
+  check(skills.size === skillDefinitions.size);
+  for (const [id, { requiredXp }] of skillDefinitions) {
+    const skill = skills.get(id);
+    check(record(skill) && integer(skill.value, initialSkill, maxSkill));
+    if (!requiredXp) check(skill.value === initialSkill && skill.experience === 0);
+    else if (skill.value === maxSkill) check(skill.experience === 0);
+    else check(integer(skill.experience, 0, requiredXp(skill.value) - 1));
+  }
+  return structuredClone(skills);
+}
+
+function restorePlayer(data, area, savedVersion) {
+  const legacy = savedVersion === 1;
+  const requiredXp = legacy ? 30 + 10 * (data?.level - 1) : experienceToNextLevel(data?.level);
+  check(position(data, area) && integer(data.level, 1) && integer(data.experience, 0, requiredXp - 1)
     && number(data.hp, Number.MIN_VALUE, maxHealth(data.level)) && number(data.mp, 0, maxMp)
     && number(data.pendingPoison) && number(data.cooldown));
   const { x, y, hp, mp, level, experience, weaponId, pendingPoison, cooldown } = data;
@@ -65,9 +81,14 @@ function restorePlayer(data, area) {
   for (const [id, count] of inventory) check(items.has(id) && integer(count, 1));
   const armor = entries(data.armor);
   const player = { id: 'player', x, y, hp, mp, level, experience, weaponId, pendingPoison, cooldown,
-    inventory, armor, flash: 0, moving: false };
+    inventory, armor, skills: legacy ? createSkills() : restoreSkills(data.skills), flash: 0, moving: false };
   check(weaponId === null || canEquipItem(player, weaponId, 'weapon'));
   for (const [slot, id] of armor) check(slot !== 'weapon' && canEquipItem(player, id, slot));
+  if (legacy) {
+    // Preserve the fraction of progress towards the next level.
+    const next = experienceToNextLevel(level);
+    player.experience = Math.min(next - 1, Math.floor(experience / requiredXp * next));
+  }
   return player;
 }
 
@@ -119,11 +140,11 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && data.version === version && integer(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
-  const player = restorePlayer(data.player, area);
+  const player = restorePlayer(data.player, area, data.version);
   const areaStates = new Map(areas.map((entry, index) => [entry, restoreArea(data.areas[index], entry)]));
   const day = gameDay(data.clock);
   const guilds = restoreGuilds(data.guilds, day);

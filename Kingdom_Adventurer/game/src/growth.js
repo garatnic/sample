@@ -1,15 +1,12 @@
 import { settings } from './settings.js';
 
 export const growth = {
-  defeatExperience: 10,
-  firstLevelExperience: 30,
-  experienceIncreasePerLevel: 10,
   hpPerLevel: 10,
   damagePerLevel: 2,
 };
 
 export function experienceToNextLevel(level) {
-  return growth.firstLevelExperience + (level - 1) * growth.experienceIncreasePerLevel;
+  return 75 + level * 25;
 }
 
 export function maxHealth(level) {

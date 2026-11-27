@@ -22,10 +22,10 @@ export function attackInterval(weapon) {
 const armorPieceBonus = 25;
 
 export const items = new Map([
-  ['iron-dagger', { slot: 'weapon', category: 'dagger', name: '鉄の短剣', price: 10, range: 22, bonus: 2 }],
-  ['iron-sword', { slot: 'weapon', category: 'sword', name: '鉄の剣', price: 20, range: 30, bonus: 5 }],
-  ['iron-mace', { slot: 'weapon', category: 'mace', name: '鉄のメイス', price: 30, range: 30, bonus: 8 }],
-  ['iron-hammer', { slot: 'weapon', category: 'hammer', name: '鉄の槌', price: 40, range: 34, bonus: 14 }],
+  ['iron-dagger', { slot: 'weapon', category: 'dagger', skill: 'one-handed', name: '鉄の短剣', price: 10, range: 22, bonus: 2 }],
+  ['iron-sword', { slot: 'weapon', category: 'sword', skill: 'one-handed', name: '鉄の剣', price: 20, range: 30, bonus: 5 }],
+  ['iron-mace', { slot: 'weapon', category: 'mace', skill: 'one-handed', name: '鉄のメイス', price: 30, range: 30, bonus: 8 }],
+  ['iron-hammer', { slot: 'weapon', category: 'hammer', skill: 'two-handed', name: '鉄の槌', price: 40, range: 34, bonus: 14 }],
   ['iron-helmet', { slot: 'head', name: '鉄の兜', price: 20, defense: armorPieceBonus + 12 }],
   ['leather-armor', { slot: 'body', name: '革の鎧', price: 20, defense: armorPieceBonus + 18 }],
   ['iron-armor', { slot: 'body', name: '鉄の鎧', price: 40, defense: armorPieceBonus + 25 }],

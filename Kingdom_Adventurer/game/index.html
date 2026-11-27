@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=821d0322877c">
+  <link rel="stylesheet" href="./style.css?v=061c6db2dbfd">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,13 +20,14 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.31</h1>
+      <h1>Kingdom Adventurer ver.32</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
       <button id="open-inventory" type="button">装備</button>
       <button id="open-items" type="button">道具</button>
       <button id="open-quests" type="button">クエスト</button>
+      <button id="open-skills" type="button" aria-haspopup="dialog">スキル</button>
       <button id="open-save" type="button" aria-haspopup="dialog">セーブ</button>
     </div>
   </header>
@@ -36,6 +37,11 @@
   </div>
   <p id="notice" role="status"></p>
   <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
+  <dialog id="skill-menu" class="gear-menu" aria-labelledby="skill-title">
+    <h2 id="skill-title">スキル</h2>
+    <div id="skill-groups"></div>
+    <form method="dialog"><button autofocus>閉じる</button></form>
+  </dialog>
   <dialog id="save-menu" class="gear-menu" aria-labelledby="save-title">
     <h2 id="save-title">セーブ</h2>
     <p>このブラウザに1枠保存します。宿泊とエリア移動でも上書きされます。</p>
@@ -132,6 +138,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=31"></script>
+  <script type="module" src="./src/main.js?v=32"></script>
 </body>
 </html>

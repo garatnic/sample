@@ -1,7 +1,7 @@
 import { enemyTypes, settings } from './settings.js?v=25';
-import { attackDamage, gainExperience, growth } from './growth.js?v=5';
+import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=32';
 import { field, inTown } from './world.js?v=29';
-import { attackInterval, defenseRating, items } from './equipment.js?v=27';
+import { attackInterval, defenseRating, items } from './equipment.js?v=32';
 import { recordDefeat } from './quests.js?v=27';
 import { dropLoot } from './loot.js?v=27';
 
@@ -87,19 +87,22 @@ export function updateCombat(state, dt) {
   const enemy = nearest.enemy;
   player.cooldown = attackInterval(weapon);
   state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
-  const attack = attackDamage(player.level) + (weapon?.bonus ?? 0);
+  const attack = playerAttack(player, weapon);
+  const levelBeforeHit = player.level;
   const poisonDamage = player.pendingPoison ?? 0;
   player.pendingPoison = 0;
-  enemy.hp -= physicalDamage(attack, enemyTypes[enemy.kind].defense, playerDamageMultiplier) + poisonDamage;
+  const damage = physicalDamage(attack, enemyTypes[enemy.kind].defense, playerDamageMultiplier);
+  enemy.hp -= damage + poisonDamage;
+  recordWeaponHit(player, weapon, damage);
   enemy.flash = 0.18;
   if (enemy.hp <= 0) {
     recordDefeat(state, enemy.kind);
     nearest.enemy = null;
     nearest.remaining = config.spawnDelay;
     dropLoot(state, enemy, enemyTypes[enemy.kind]);
-    const leveledUp = gainExperience(player, growth.defeatExperience);
-    state.notice = leveledUp
-      ? { text: `レベルアップ！ Lv.${player.level}`, remaining: 2.5, leveledUp: true }
-      : { text: `${enemyTypes[enemy.kind].name}を撃破（+${growth.defeatExperience} XP）`, remaining: 1.7 };
+    state.notice = { text: `${enemyTypes[enemy.kind].name}を撃破`, remaining: 1.7 };
+  }
+  if (player.level > levelBeforeHit) {
+    state.notice = { text: `レベルアップ！ Lv.${player.level}`, remaining: 2.5, leveledUp: true };
   }
 }
