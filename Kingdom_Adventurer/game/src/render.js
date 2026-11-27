@@ -1,4 +1,4 @@
-import { settings } from './settings.js?v=39';
+import { animalTypes, settings } from './settings.js?v=39';
 import { buildings, cave, field, terrainAt } from './world.js?v=39';
 
 import { modeFor, residentPosition } from './nation-simulation.js?v=38';
@@ -139,6 +139,7 @@ export function createRenderer(canvas) {
     for (const [left, top, width, height, color] of sprite) {
       rect(x + left, y + top, width, height, flash ? '#ffd38b' : color);
     }
+    if (animalTypes[kind]) return;
     rect(x - 11, y - 23, 22, 3, '#30252a');
     rect(x - 11, y - 23, 22 * hp / maxHp, 3, '#f1a678');
   }

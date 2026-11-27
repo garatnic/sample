@@ -13,7 +13,7 @@ import { captureNations, restoreNations } from './nation-save.js?v=38';
 import { startingShopGold } from './shop.js?v=39';
 
 const format = 'kingdom-adventurer';
-const version = 8;
+const version = 9;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -28,7 +28,7 @@ export function makeSave(state, areaStates, clock) {
       const { encounters, lootDrops } = areaStates.get(area);
       return { id: area.id, lootDrops, encounters: encounters.map(({ home, enemy, remaining, generation }) => ({
         id: home.id, remaining, generation,
-        enemy: enemy && { x: enemy.x, y: enemy.y, hp: enemy.hp, cooldown: enemy.cooldown, flee: enemy.flee ?? 0 },
+        enemy: enemy && { x: enemy.x, y: enemy.y, hp: enemy.hp, cooldown: enemy.cooldown, flee: enemy.flee ?? 0, hunted: enemy.hunted ?? false },
       })) };
     }),
     guilds: [...state.guilds], shopGold: state.shopGold,
@@ -110,10 +110,12 @@ function restoreArea(data, area, savedVersion) {
     const maxHp = mobTypes[home.kind].maxHp;
     check(enemy === null || (generation > 0 && position(enemy, area)
       && number(enemy.hp, Number.MIN_VALUE, maxHp) && number(enemy.cooldown)
-      && (legacy || number(enemy.flee, 0, 3))));
+      && (legacy || number(enemy.flee, 0, 3))
+      && (savedVersion < 9 || typeof enemy.hunted === 'boolean')));
     return { home, remaining, generation, enemy: enemy && {
       id: `enemy-${home.id}-${generation}`, kind: home.kind, x: enemy.x, y: enemy.y,
       hp: enemy.hp, maxHp, cooldown: enemy.cooldown, flash: 0, flee: legacy ? 0 : enemy.flee,
+      hunted: savedVersion >= 9 ? enemy.hunted : Boolean(animalTypes[home.kind] && enemy.hp < maxHp),
     } };
   });
   const lootDrops = data.lootDrops.map(drop => {
@@ -150,7 +152,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);

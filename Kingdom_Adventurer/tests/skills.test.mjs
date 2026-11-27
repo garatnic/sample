@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=32';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=32';
 import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=39';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=39';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=39';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=40';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=40';
 import { cave, field, shopDoors, start } from '../game/src/world.js?v=39';
 import { items } from '../game/src/equipment.js?v=39';
 
@@ -105,12 +105,13 @@ test('SKILL-05: passive wildlife flee when hunted and drop materials', () => {
     updateCombat(state, 0.04, true);
     assert.equal(animal.hp, animal.maxHp - 17);
     assert.equal(animal.flee, 3);
+    assert.equal(animal.hunted, true);
     updateCombat(state, 0.04);
     assert.ok(animal.x > 3009);
     assert.equal(player.hp, 100);
     player.x = animal.x;
     player.cooldown = 0;
-    updateCombat(state, 0.001, true);
+    updateCombat(state, 0.001);
     assert.equal(encounters[0].enemy, null);
     assert.equal(state.lootDrops[0].gold, 0);
     assert.ok(state.lootDrops[0].materials.length);

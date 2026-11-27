@@ -56,7 +56,7 @@ export function updateCombat(state, dt, hunt = false) {
       encounter.remaining = Math.max(0, encounter.remaining - dt);
       if (encounter.remaining <= 0) {
         encounter.enemy = { id: `enemy-${home.id}-${++encounter.generation}`,
-          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0, flee: 0 };
+          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0, flee: 0, hunted: false };
       }
     }
 
@@ -95,7 +95,9 @@ export function updateCombat(state, dt, hunt = false) {
   const weapon = items.get(player.weaponId);
   let range = weapon?.range ?? settings.player.range;
   for (const encounter of encounters) {
-    if (!encounter.enemy || (Boolean(animalTypes[encounter.home.kind]) !== hunt)) continue;
+    if (!encounter.enemy) continue;
+    const animal = Boolean(animalTypes[encounter.home.kind]);
+    if (hunt ? !animal : animal && !encounter.enemy.hunted) continue;
     const distance = Math.hypot(player.x - encounter.enemy.x, player.y - encounter.enemy.y);
     if (distance > range) continue;
     range = distance;
@@ -113,7 +115,10 @@ export function updateCombat(state, dt, hunt = false) {
   enemy.hp -= damage + poisonDamage;
   recordWeaponHit(player, weapon, damage);
   enemy.flash = 0.18;
-  if (animalTypes[enemy.kind]) enemy.flee = 3;
+  if (animalTypes[enemy.kind] && damage + poisonDamage > 0) {
+    enemy.hunted = true;
+    enemy.flee = 3;
+  }
   if (enemy.hp <= 0) {
     if (!animalTypes[enemy.kind]) recordDefeat(state, enemy.kind);
     nearest.enemy = null;

@@ -2,10 +2,10 @@ import { createSkills } from './skills.js?v=32';
 import { setupSkillMenu } from './skill-menu.js?v=32';
 import { settings } from './settings.js?v=39';
 import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=39';
-import { createEncounters, inCombat, updateCombat } from './combat.js?v=39';
+import { createEncounters, inCombat, updateCombat } from './combat.js?v=40';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=39';
+import { createRenderer } from './render.js?v=40';
 import { setupGearMenus } from './gear-ui.js?v=39';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=39';
@@ -16,7 +16,7 @@ import { collectLoot } from './loot.js?v=39';
 
 import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=39';
+import { areas, makeSave, restoreSave } from './save-data.js?v=40';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
 import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=38';
@@ -26,7 +26,6 @@ import { setupNationMenu } from './nation-menu.js?v=38';
 import { startingShopGold } from './shop.js?v=39';
 
 let huntRequested = false;
-document.querySelector('#hunt').addEventListener('click', () => { huntRequested = true; });
 window.addEventListener('keydown', event => {
   if (event.code === 'KeyF' && !event.repeat && !document.querySelector('dialog[open]')) huntRequested = true;
 });
@@ -131,6 +130,8 @@ function nearbyCenter() {
 }
 
 function update(dt) {
+  const hunt = huntRequested;
+  huntRequested = false;
   const { player } = state;
   const direction = input.read();
   const { x, y } = player;
@@ -199,8 +200,6 @@ function update(dt) {
     return;
   }
 
-  const hunt = huntRequested;
-  huntRequested = false;
   updateCombat(state, dt, hunt);
   if (outdoors && player.hp > 0) {
     const collected = updateTrees(state, dt);
