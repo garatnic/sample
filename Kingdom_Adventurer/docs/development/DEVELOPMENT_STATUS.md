@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- セーブ・ロード目標仕様を追加。実装は DEV-056、緊急脱出は DEV-057 から着手できる。緊急脱出の詳細仕様は未確定。
+
 - ver.28 / DEV-055 [37d114337509006f706980e7a06fff16ee6e7b37](https://github.com/garatnic/sample/commit/37d114337509006f706980e7a06fff16ee6e7b37)。採取可能な果樹を5本に調整。採取と日次補充を確認。
 
 - ver.27 / DEV-054 [5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba](https://github.com/garatnic/sample/commit/5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba)。果樹の配置、接触採取、残数表示、日次補充を追加。村人との接続時は src/trees.js の食料資源データと takeFruit() を利用する。端末実機は未確認。
