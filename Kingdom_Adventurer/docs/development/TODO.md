@@ -227,7 +227,9 @@
 
   - ver.49 [11052d23320e57df6f3fdb7134c878b5fab222f3](https://github.com/garatnic/sample/commit/11052d23320e57df6f3fdb7134c878b5fab222f3)。MOB-05で出現・抽選・撃破・拾得・保存を確認。
 
-- [ ] DEV-086 民家定員1人、消費2個、消費量ベースの倉庫計算と旧セーブ移行を確認する。関連 CUR-NATION-001〜005、CUR-SYS-004。
+- [x] DEV-086 民家定員1人、消費2個、消費量ベースの倉庫計算と旧セーブ移行を確認する。関連 CUR-NATION-001〜005、CUR-SYS-004。
+
+  - ver.50 [4050fadb347559b59aaef2c4a05e3eeab61c18a7](https://github.com/garatnic/sample/commit/4050fadb347559b59aaef2c4a05e3eeab61c18a7)。27件合格。日次消費、備蓄容量、建築中の旧保存の移行と100日の国家進行を確認。
 
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
