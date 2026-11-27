@@ -1,11 +1,11 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: 2026-11-27 / ver.35 / DEV-069 / 実装コミット `34aa05bb376d858b09ab756bc1426125bd04eee6`。
+基準: 2026-11-27 / ver.36 / DEV-070 / 実装コミット `bfff84c6835aa9ac5cd4df532325c7798ddbc9fd`。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全46仕様・実装ファイル29件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
 
 ## 検証の記録
 
-保存済みテスト9件（SKILL-01〜04、NATION-01〜05）。[テスト索引](../../tests/README.md)、[技能](../../tests/skills.test.mjs)、[国家](../../tests/nations.test.mjs) を参照。
+保存済みテスト10件（SKILL-01〜04、NATION-01〜06）。[テスト索引](../../tests/README.md)、[技能](../../tests/skills.test.mjs)、[国家](../../tests/nations.test.mjs) を参照。
 
 - 保存済み自動テスト — 再実行できるテストのIDとファイルを登録する。
 - 単発実行 — Nodeの確認コードやブラウザ自動操作など、実行した方法と結果を記録する。保存済みテストIDは付けない。
@@ -18,15 +18,15 @@
 | 現行仕様ID | 機能 | 実装ファイル・関数・役割 | 関連現行仕様ID | 関連目標仕様ID | 保存済み自動テスト |
 |---|---|---|---|---|---|
 | `CUR-SYS-001` | 起動 | index.html: module script・版付きstylesheet参照・DOM; package.json: type/private; src/main.js: モジュール初期化; style.css: 基本表示 | CUR-SYS-002, CUR-UI-001 | — | 未登録 |
-| `CUR-SYS-002` | 初期状態 | src/main.js: createPlayer(), startingWeaponId, state; src/equipment.js: items の iron-dagger; src/growth.js: maxHealth(); src/world.js: start; src/settings.js: player.maxHp / currency.startingGold; src/combat.js: createEncounters(); src/trees.js: createTrees(); src/consumables.js: maxMp | CUR-WORLD-002, CUR-COMBAT-001, CUR-LIFE-001, CUR-ITEM-001 | — | 未登録 |
+| `CUR-SYS-002` | 初期状態 | src/main.js: createPlayer(), startingWeaponId, state; src/equipment.js: items の iron-dagger; src/growth.js: maxHealth(); src/world.js: start; src/settings.js: player.maxHp / currency.startingGold; src/combat.js: createEncounters(); src/nation-simulation.js: createNationSimulation(); src/consumables.js: maxMp | CUR-WORLD-002, CUR-COMBAT-001, CUR-LIFE-001, CUR-ITEM-001 | — | 未登録 |
 | `CUR-SYS-003` | フレーム処理 | src/main.js: frame(), update(), previous, requestAnimationFrame; src/input.js: read(); src/world.js: movePlayer(); src/combat.js: updateCombat(); src/render.js: render(); src/loot.js: collectLoot(); src/trees.js: updateTrees(); src/clock.js: gameMinutes(), gameDay(); src/nation-simulation.js: advanceNations() | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-UI-001 | — | 未登録 |
 | `CUR-SYS-005` | ゲーム内時計 | src/clock.js: gameMinutes(), gameDateTime(), gameDay(), nextMorningMinute(); src/main.js: frame(), currentGameMinute(), clockBaseMinute, elapsedPlaySeconds; index.html: #game-clock; style.css: #game-clock; src/main.js: update() のギルド・果樹への日付渡し; src/nation-simulation.js: advanceNations() | CUR-SYS-003 | SYSTEM-002 | 未登録 |
-| `CUR-SYS-004` | セーブ・ロード・削除 | index.html: #open-save/#save-menu; style.css: #open-save のポインター操作; src/main.js: state, applySave(), 宿泊・エリア切替からの自動保存、起動時復元; src/save-data.js: makeSave(), restoreSave(), restoreSkills(), restorePlayer() の旧形式位置補正; src/save-store.js: readSave(), writeSave(), deleteSave(); src/save-menu.js: setupSaveMenu(), JSON取り込み・書き出し・確認; src/combat.js: inCombat(); src/skills.js: createSkills(), skillDefinitions; src/world.js: facilityAt() とエリア・施設ID・移動境界; src/settings.js: 敵設定・復元範囲; src/equipment.js: 装備整合性; src/growth.js: レベルとHP; src/consumables.js: maxMp; src/clock.js: gameDay(); src/trees.js: createTrees(), harvestSeconds; src/nation-save.js: captureNations(), restoreNations(); src/nation-simulation.js: createNationSimulation(); src/shop.js: startingShopGold | CUR-SYS-002, CUR-SYS-005, CUR-WORLD-006, CUR-INN-002, CUR-LIFE-001 | SYSTEM-011 | SKILL-04, NATION-05 |
+| `CUR-SYS-004` | セーブ・ロード・削除 | index.html: #open-save/#save-menu; style.css: #open-save のポインター操作; src/main.js: state, applySave(), 宿泊・エリア切替からの自動保存、起動時復元; src/save-data.js: makeSave(), restoreSave(), restoreSkills(), restorePlayer() の旧形式位置補正; src/save-store.js: readSave(), writeSave(), deleteSave(); src/save-menu.js: setupSaveMenu(), JSON取り込み・書き出し・確認; src/combat.js: inCombat(); src/skills.js: createSkills(), skillDefinitions; src/world.js: facilityAt() とエリア・施設ID・移動境界; src/settings.js: 敵設定・復元範囲; src/equipment.js: 装備整合性; src/growth.js: レベルとHP; src/consumables.js: maxMp; src/clock.js: gameDay(); src/trees.js: findSource(), harvestSeconds; src/nation-save.js: captureNations(), restoreNations(); src/nation-simulation.js: createNationSimulation(); src/shop.js: startingShopGold | CUR-SYS-002, CUR-SYS-005, CUR-WORLD-006, CUR-INN-002, CUR-LIFE-001 | SYSTEM-011 | SKILL-04, NATION-05 |
 | `CUR-WORLD-001` | 固定マップ | src/settings.js: tile/mapWidth/mapHeight; src/world.js: 固定配置・terrainAt(); src/render.js: render() のタイル範囲; src/nation-layout.js: createNationLayouts() | CUR-WORLD-003, CUR-MOVE-002, CUR-UI-002 | — | 未登録 |
 | `CUR-WORLD-002` | 街 | src/world.js: start, inTown(); src/main.js: createPlayer(), frame() の所在地; src/combat.js: updateCombat() の安全判定; src/nation-layout.js: inSettlement() | CUR-COMBAT-002, CUR-UI-001, CUR-LIFE-001 | — | NATION-05 |
 | `CUR-WORLD-003` | 地形 | src/world.js: terrainAt(), inTown(); src/render.js: tile(), colors; src/world.js: movePlayer(), walkable()（地形を衝突に使わない）; src/nation-layout.js: nationTerrainAt() | CUR-WORLD-001, CUR-MOVE-002, CUR-UI-003 | — | 未登録 |
 | `CUR-WORLD-004` | 建物 | src/world.js: buildings, innDoorss, shopDoors, guildDoors, walkable(); src/render.js: building(); src/main.js: update() の施設接触判定; index.html: #inn, #equipment-shop, #guild; src/nation-simulation.js: settlementBuildings(); src/nation-layout.js: createNationLayouts() | CUR-MOVE-002, CUR-INN-001, CUR-UI-003 | — | NATION-05 |
-| `CUR-WORLD-005` | 果樹・採取・日次補充 | src/trees.js: treeLocations, createTrees(), takeFruit(), updateTrees(); src/main.js: update(), 死亡時の採取進捗解除; src/render.js: drawTree(), 採取バー; src/equipment.js: items; src/clock.js: gameDay(), gameMinutes(); src/settings.js: player.radius; src/consumables.js: useItem(); src/shop.js: sellItem() | CUR-SYS-005 | WORLD-006, ECO-008, EXPLORE-006 | 未登録 |
+| `CUR-WORLD-005` | 共有果樹と伐採木 | src/trees.js: updateTrees(), harvestSource(), findSource(), harvestSeconds; src/main.js: update(); src/render.js: drawSource(), drawTree(); src/nation-simulation.js: completeTask(); src/nation-settings.js: harvest; src/settings.js: player.radius; src/equipment.js: items; src/consumables.js: useItem(); src/shop.js: sellItem(); src/save-data.js: makeSave(), restoreSave() | CUR-SYS-004, CUR-NATION-002 | WORLD-006, ECO-008, EXPLORE-006 | NATION-06 |
 | `CUR-WORLD-006` | 岩陰の洞窟 | src/world.js: cave, field, portalRadius, movePlayer(); src/main.js: areaStates, state.area, update(), frame(), 死亡時の復帰; src/combat.js: createEncounters(), updateCombat(); src/render.js: caveTile(), drawPortal(), render(); src/loot.js: collectLoot(), dropLoot(); src/settings.js: tile, enemyTypes | CUR-WORLD-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-007, CUR-LIFE-001 | EXPLORE-002 | 未登録 |
 | `CUR-INPUT-001` | キーボード | src/input.js: directions, createInput(), keys, keydown/keyup/blur, clear(), read(); index.html: footer; style.css: footer/kbd | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001 | — | 未登録 |
 | `CUR-INPUT-002` | スワイプ移動 | src/input.js: createInput(), move(), clearTouch(), clear(), pointerイベント, read(); index.html: canvas; style.css: canvas の touch-action; src/main.js: createInput() 呼出 | CUR-MOVE-001, CUR-UI-005, CUR-INPUT-001 | — | 未登録 |
@@ -60,7 +60,7 @@
 | `CUR-UI-004` | キャラクター・戦闘描画 | src/render.js: actor(), enemySprites, render() の戦利品描画, rect(); src/settings.js: enemyTypes.maxHp（生成時に個体へ設定）; src/main.js: update() の moving/flash/strike; src/combat.js: updateCombat() の flash/strike/hp | CUR-MOVE-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-002 | — | 未登録 |
 | `CUR-UI-005` | ダイアログ・外観 | index.html: #inn/#death・form/button; style.css: :root/dialog/backdrop/button/h1/@media; src/main.js: showModal/close/cancel | CUR-INN-002, CUR-LIFE-001 | — | 未登録 |
 | `CUR-NATION-001` | 国家・都市と配置 | src/nation-layout.js: createNationLayouts(), nationLayouts; src/nation-settings.js: count, spacing, buildingRadius, sourceRadius; src/nation-simulation.js: createNationSimulation(), finishBuilding(); src/world.js: terrainAt(), inTown(); src/settings.js: mapTiles | CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-004 | WORLD-003, WORLD-008, HOUSING-002 | NATION-01, NATION-02 |
-| `CUR-NATION-002` | 自律作業と物流 | src/nation-simulation.js: assignWork(), completeTask(), taskSchedule(); src/nation-layout.js: 資源座標; src/nation-settings.js: harvest, carry, walkingSpeed; src/render.js: drawSource(), drawResident() | CUR-NATION-001, CUR-NATION-003 | NPC-001, ECO-008 | NATION-02, NATION-04 |
+| `CUR-NATION-002` | 自律作業と物流 | src/nation-simulation.js: assignWork(), completeTask(), taskSchedule(); src/nation-layout.js: 資源座標; src/nation-settings.js: harvest, carry, walkingSpeed; src/render.js: drawSource(), drawResident(); src/trees.js: harvestSource() | CUR-NATION-001, CUR-NATION-003 | NPC-001, ECO-008 | NATION-02, NATION-04, NATION-06 |
 | `CUR-NATION-003` | 容量・建築・日次消費 | src/nation-simulation.js: capacity(), advanceNations(), assignWork(), finishBuilding(); src/nation-settings.js: warehouse, house, foodPerResident, reserveDays; src/clock.js: firstMinuteOfDay(); src/main.js: 宿泊時更新 | CUR-NATION-002, CUR-SYS-005, CUR-INN-002 | HOUSING-001, HOUSING-006, SOCIETY-005, SYSTEM-013 | NATION-02, NATION-03, NATION-04 |
 | `CUR-NATION-004` | 距離処理と画面 | src/nation-simulation.js: advanceNations(), modeFor(), residentPosition(); src/nation-settings.js: nearRadius; src/main.js: nearbyCenter(), frame(); src/render.js: render(); src/nation-menu.js: setupNationMenu(); index.html: #open-nations, #nation-menu; style.css: #nation-content, #nation-menu | CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-UI-002 | SYSTEM-012, SYSTEM-014 | NATION-01, NATION-04 |
 
@@ -70,7 +70,7 @@
 |---|---|
 | `index.html` | CUR-SYS-001, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-004, CUR-INPUT-001, CUR-INPUT-002, CUR-GROWTH-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005, CUR-NATION-004 |
 | `package.json` | CUR-SYS-001 |
-| `src/clock.js` | CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-005, CUR-INN-002, CUR-QUEST-001, CUR-NATION-003 |
+| `src/clock.js` | CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-INN-002, CUR-QUEST-001, CUR-NATION-003 |
 | `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-006, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-GROWTH-003, CUR-LIFE-001, CUR-QUEST-001, CUR-ITEM-003, CUR-ITEM-001, CUR-UI-004 |
 | `src/consumables.js` | CUR-SYS-002, CUR-SYS-004, CUR-WORLD-005, CUR-LIFE-001, CUR-ITEM-003, CUR-UI-001 |
 | `src/equipment.js` | CUR-SYS-002, CUR-SYS-004, CUR-WORLD-005, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-GROWTH-003, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-ITEM-001, CUR-ITEM-002 |
@@ -82,18 +82,18 @@
 | `src/nation-layout.js` | CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-NATION-001, CUR-NATION-002 |
 | `src/nation-menu.js` | CUR-NATION-004 |
 | `src/nation-save.js` | CUR-SYS-004 |
-| `src/nation-settings.js` | CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-NATION-004 |
-| `src/nation-simulation.js` | CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-004, CUR-MOVE-002, CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-NATION-004 |
+| `src/nation-settings.js` | CUR-WORLD-005, CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-NATION-004 |
+| `src/nation-simulation.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-004, CUR-WORLD-005, CUR-MOVE-002, CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-NATION-004 |
 | `src/quests.js` | CUR-COMBAT-006, CUR-QUEST-001, CUR-QUEST-002 |
 | `src/render.js` | CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-003, CUR-WORLD-004, CUR-WORLD-005, CUR-WORLD-006, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-NATION-002, CUR-NATION-004 |
-| `src/save-data.js` | CUR-SYS-004 |
+| `src/save-data.js` | CUR-SYS-004, CUR-WORLD-005 |
 | `src/save-menu.js` | CUR-SYS-004 |
 | `src/save-store.js` | CUR-SYS-004 |
 | `src/settings.js` | CUR-SYS-002, CUR-SYS-004, CUR-WORLD-001, CUR-WORLD-005, CUR-WORLD-006, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-UI-001, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-NATION-001 |
 | `src/shop.js` | CUR-SYS-004, CUR-WORLD-005, CUR-COMBAT-007, CUR-SHOP-001, CUR-SHOP-002, CUR-SHOP-003, CUR-ITEM-002 |
 | `src/skill-menu.js` | CUR-GROWTH-002 |
 | `src/skills.js` | CUR-SYS-004, CUR-GROWTH-001, CUR-GROWTH-002, CUR-GROWTH-003 |
-| `src/trees.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-005, CUR-LIFE-001 |
+| `src/trees.js` | CUR-SYS-003, CUR-SYS-004, CUR-WORLD-005, CUR-LIFE-001, CUR-NATION-002 |
 | `src/weapon-skill.js` | CUR-COMBAT-005, CUR-GROWTH-003 |
 | `src/world.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-WORLD-006, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-INN-001, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-001, CUR-UI-003, CUR-NATION-001 |
 | `style.css` | CUR-SYS-001, CUR-SYS-005, CUR-SYS-004, CUR-INPUT-001, CUR-INPUT-002, CUR-GROWTH-002, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005, CUR-NATION-004 |

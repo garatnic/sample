@@ -172,7 +172,9 @@
 
   - ver.35 [34aa05bb376d858b09ab756bc1426125bd04eee6](https://github.com/garatnic/sample/commit/34aa05bb376d858b09ab756bc1426125bd04eee6)。Nodeの保存済み自動テスト9件合格。
 
-- [ ] DEV-070 果樹と伐採木を住民・プレイヤーで共有する。競合、復活、入手品とセーブ互換を検証する。関連 CUR-WORLD-005、CUR-NATION-002、CUR-SYS-004。
+- [x] DEV-070 果樹と伐採木を住民・プレイヤーで共有する。競合、復活、入手品とセーブ互換を検証する。関連 CUR-WORLD-005、CUR-NATION-002、CUR-SYS-004。
+
+  - ver.36 [bfff84c6835aa9ac5cd4df532325c7798ddbc9fd](https://github.com/garatnic/sample/commit/bfff84c6835aa9ac5cd4df532325c7798ddbc9fd)。Nodeの保存済み自動テスト10件合格。
 
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
