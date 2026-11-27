@@ -1,12 +1,12 @@
 import { createSkills } from './skills.js?v=32';
 import { setupSkillMenu } from './skill-menu.js?v=32';
 import { settings } from './settings.js?v=34';
-import { cave, field, guildDoors, innDoor, shopDoors, inTown, movePlayer, portalRadius, start, town } from './world.js?v=34';
-import { createEncounters, inCombat, updateCombat } from './combat.js?v=34';
+import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=35';
+import { createEncounters, inCombat, updateCombat } from './combat.js?v=35';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=34';
-import { setupGearMenus } from './gear-ui.js?v=32';
+import { createRenderer } from './render.js?v=35';
+import { setupGearMenus } from './gear-ui.js?v=35';
 import { exactGameMinutes, gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=27';
 
@@ -16,12 +16,14 @@ import { collectLoot } from './loot.js?v=27';
 
 import { createTrees, updateTrees } from './trees.js?v=28';
 import { items } from './equipment.js?v=32';
-import { areas, makeSave, restoreSave } from './save-data.js?v=34';
+import { areas, makeSave, restoreSave } from './save-data.js?v=35';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
-import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=34';
-import { inSettlement } from './nation-layout.js?v=34';
-import { setupNationMenu } from './nation-menu.js?v=34';
+import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=35';
+import { inSettlement } from './nation-layout.js?v=35';
+import { setupNationMenu } from './nation-menu.js?v=35';
+
+import { startingShopGold } from './shop.js?v=35';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -63,20 +65,17 @@ const state = {
   get encounters() { return areaStates.get(this.area).encounters; },
   get lootDrops() { return areaStates.get(this.area).lootDrops; },
   strike: null, resources: createTrees(gameDay(0)),
-  notice: null, innContact: false, gold: settings.currency.startingGold, shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 100])) };
+  notice: null, innContact: null, gold: settings.currency.startingGold, shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])) };
 Object.assign(state, { guilds: new Map(), guildContact: null });
 function applySave({ areaStates: savedAreas, clock, ...savedState }) {
   Object.assign(state, savedState, { strike: null, notice: null });
   for (const [area, value] of savedAreas) areaStates.set(area, value);
   clockBaseMinute = clock;
   elapsedPlaySeconds = 0;
-  const touching = door => Math.hypot(state.player.x - door.x, state.player.y - door.y) <= 19;
-  const contact = doors => state.area === field
-    ? Object.keys(doors).find(id => touching(doors[id])) ?? null : null;
   state.centerContact = nearbyCenter()?.id ?? null;
-  state.innContact = state.area === field && touching(innDoor);
-  state.shopContact = contact(shopDoors);
-  state.guildContact = contact(guildDoors);
+  state.innContact = nearbyDoor(innDoors);
+  state.shopContact = nearbyDoor(shopDoors);
+  state.guildContact = nearbyDoor(guildDoors);
   input.clear();
 }
 
@@ -103,11 +102,19 @@ death.addEventListener('close', () => {
   state.resources.harvest = null;
   state.strike = null;
   state.notice = null;
-  state.innContact = false;
+  state.innContact = null;
   state.centerContact = null;
   state.shopContact = null;
   state.guildContact = null;
 });
+
+function nearbyDoor(doors) {
+  if (state.area !== field) return null;
+  return Object.keys(doors).find(id => {
+    const door = doors[id];
+    return Math.hypot(state.player.x - door.x, state.player.y - door.y) <= 19;
+  }) ?? null;
+}
 
 function nearbyCenter() {
   if (state.area !== field) return null;
@@ -150,9 +157,10 @@ function update(dt) {
 
   collectLoot(state);
 
-  const touchingInn = outdoors && Math.hypot(player.x - innDoor.x, player.y - innDoor.y) <= 19;
-  if (touchingInn && !state.innContact) {
-    state.innContact = true;
+  const touchingInn = nearbyDoor(innDoors);
+  const enteringInn = touchingInn && touchingInn !== state.innContact;
+  state.innContact = touchingInn;
+  if (enteringInn) {
     input.clear();
     const price = settings.inn.price;
     innConfirm.disabled = state.gold < price;
@@ -163,12 +171,8 @@ function update(dt) {
     inn.showModal();
     return;
   }
-  state.innContact = touchingInn;
 
-  const touchingShop = (outdoors ? Object.keys(shopDoors) : []).find(id => {
-    const door = shopDoors[id];
-    return Math.hypot(player.x - door.x, player.y - door.y) <= 19;
-  }) ?? null;
+  const touchingShop = nearbyDoor(shopDoors);
   const enteringShop = touchingShop && touchingShop !== state.shopContact;
   state.shopContact = touchingShop;
   if (enteringShop) {
@@ -181,10 +185,7 @@ function update(dt) {
     }
   }
 
-  const touchingGuild = (outdoors ? Object.keys(guildDoors) : []).find(id => {
-    const door = guildDoors[id];
-    return Math.hypot(player.x - door.x, player.y - door.y) <= 19;
-  }) ?? null;
+  const touchingGuild = nearbyDoor(guildDoors);
   const enteringGuild = touchingGuild && touchingGuild !== state.guildContact;
   state.guildContact = touchingGuild;
   if (enteringGuild) {
@@ -244,7 +245,7 @@ function frame(time) {
   setText(mp, `MP ${state.player.mp} / ${maxMp}`);
   setText(hp, `${Math.ceil(currentHp * 10) / 10} / ${maxHp}`);
   const city = state.nations.nations.find(nation => inSettlement(nation.cities[0], state.player))?.cities[0];
-  setText(locationLabel, state.area === cave ? cave.name : city?.name ?? (inTown(state.player) ? town.name : '街道とその周辺'));
+  setText(locationLabel, state.area === cave ? cave.name : city?.name ?? '街道とその周辺');
   setText(notice, state.notice?.text ?? '');
   render(state, time, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds));
   requestAnimationFrame(frame);

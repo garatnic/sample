@@ -1,5 +1,5 @@
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
-import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=34';
+import { cave, facilityAt, field, guildDoors, movePlayer, shopDoors } from './world.js?v=35';
 import { enemyTypes, settings } from './settings.js?v=34';
 import { canEquipItem, items } from './equipment.js?v=32';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
@@ -7,11 +7,13 @@ import { maxMp } from './consumables.js?v=27';
 import { gameDay } from './clock.js?v=34';
 import { createTrees, harvestSeconds } from './trees.js?v=28';
 
-import { createNationSimulation } from './nation-simulation.js?v=34';
-import { captureNations, restoreNations } from './nation-save.js?v=34';
+import { createNationSimulation } from './nation-simulation.js?v=35';
+import { captureNations, restoreNations } from './nation-save.js?v=35';
+
+import { startingShopGold } from './shop.js?v=35';
 
 const format = 'kingdom-adventurer';
-const version = 3;
+const version = 4;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -70,7 +72,9 @@ function restorePlayer(data, area, savedVersion) {
   check(position(data, area) && integer(data.level, 1) && integer(data.experience, 0, requiredXp - 1)
     && number(data.hp, Number.MIN_VALUE, maxHealth(data.level)) && number(data.mp, 0, maxMp)
     && number(data.pendingPoison) && number(data.cooldown));
-  const { x, y, hp, mp, level, experience, weaponId, pendingPoison, cooldown } = data;
+  const { hp, mp, level, experience, weaponId, pendingPoison, cooldown } = data;
+  const displaced = savedVersion < version && area === field && facilityAt(data);
+  const { x, y } = displaced ? displaced.door : data;
   const bounded = { x, y };
   movePlayer(bounded, 0, 0, 0, area);
   check(bounded.x === x && bounded.y === y);
@@ -143,7 +147,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
@@ -152,6 +156,8 @@ export function restoreSave(data) {
   const day = gameDay(data.clock);
   const guilds = restoreGuilds(data.guilds, day);
   const shopGold = Object.fromEntries(Object.keys(shopDoors).map(id => {
+    if (data.version < version && !Object.hasOwn(data.shopGold, id)
+      && id !== 'goods-shop' && id !== 'weapon-shop') return [id, startingShopGold];
     check(integer(data.shopGold[id]));
     return [id, data.shopGold[id]];
   }));
@@ -170,6 +176,6 @@ export function restoreSave(data) {
     check(area === field && tree?.remaining > 0 && number(elapsed, 0, harvestSeconds));
     resources.harvest = { tree, elapsed };
   }
-  const nations = data.version === version ? restoreNations(data.nations, data.clock) : createNationSimulation(data.clock);
+  const nations = data.version >= 3 ? restoreNations(data.nations, data.clock) : createNationSimulation(data.clock);
   return { player, area, areaStates, nations, gold: data.gold, guilds, shopGold, resources, clock: data.clock };
 }

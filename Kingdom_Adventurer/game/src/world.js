@@ -1,28 +1,17 @@
 import { settings } from './settings.js?v=34';
 
-import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=34';
+import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=35';
 
-export const town = { id: 'town-crossroads', name: '楡の宿場町', x: 928, y: 608, w: 384, h: 320 };
-export const start = { x: 1112, y: 800 };
-export const buildings = [
-  { id: 'inn-crossroads', x: 1070, y: 666, w: 84, h: 59, kind: 'inn' },
-  { id: 'house-west', x: 972, y: 697, w: 56, h: 48, kind: 'goods-shop' },
-  { id: 'house-east', x: 1204, y: 697, w: 58, h: 49, kind: 'weapon-shop' },
-  { id: 'house-southwest', x: 1007, y: 844, w: 58, h: 47, kind: 'guild' },
-  { id: 'house-southeast', x: 1174, y: 849, w: 66, h: 50, kind: 'annex' },
-];
-const inn = buildings.find(building => building.kind === 'inn');
-export const innDoor = { x: inn.x + inn.w / 2, y: inn.y + inn.h + 12 };
+export const start = { ...nationLayouts[0].arrival };
+export const buildings = nationLayouts.flatMap(city => city.facilities);
 
-export const guildDoors = Object.fromEntries(
-  buildings.filter(building => building.kind === 'guild').map(({ id, x, y, w, h }) =>
-    [id, { x: x + w / 2, y: y + h + 12 }]),
-);
+function doorsFor(matches) {
+  return Object.fromEntries(buildings.filter(matches).map(({ id, door }) => [id, door]));
+}
 
-export const shopDoors = Object.fromEntries(
-  buildings.filter(building => building.kind.endsWith('-shop')).map(({ kind, x, y, w, h }) =>
-    [kind, { x: x + w / 2, y: y + h + 12 }]),
-);
+export const innDoors = doorsFor(b => b.kind === 'inn');
+export const guildDoors = doorsFor(b => b.kind === 'guild');
+export const shopDoors = doorsFor(b => b.kind.endsWith('-shop'));
 
 export const spawns = [
   { id: 'east-road', kind: 'wolf', x: 1436, y: 800 },
@@ -36,8 +25,7 @@ export const spawns = [
 ];
 
 export function inTown({ x, y }) {
-  return (x >= town.x && x <= town.x + town.w && y >= town.y && y <= town.y + town.h)
-    || nationLayouts.some(city => inSettlement(city, { x, y }));
+  return nationLayouts.some(city => inSettlement(city, { x, y }));
 }
 
 export function terrainAt(x, y) {
@@ -48,7 +36,6 @@ export function terrainAt(x, y) {
   const roadY = 800 + fraction * ((easternCity?.y ?? 800) - 800);
   if (Math.abs(y - roadY - (1 - fraction) * Math.sin((x - 1120) / 200) * 37 * Math.min(1, Math.abs(x - 1120) / 300)) < 23
     || (Math.abs(x - 1112) < 18 && y >= 720 && y <= (nationLayouts[0]?.y ?? 928))) return 'road';
-  if (x >= town.x && x <= town.x + town.w && y >= town.y && y <= town.y + town.h) return 'town';
   const woods = Math.sin(x / 177) + Math.cos(y / 123) + Math.sin((x + y) / 271);
   return woods > 0.5 ? 'forest' : 'grass';
 }
@@ -58,10 +45,13 @@ function overlapDepth(b, x, y, radius) {
     y - b.y + radius, b.y + b.h + radius - y);
 }
 
+export function facilityAt({ x, y }) {
+  return buildings.find(b => overlapDepth(b, x, y, settings.player.radius) > 0);
+}
+
 function walkable(x, y, previous, settlementBuildings) {
   const { radius } = settings.player;
-  return !buildings.some(b => x > b.x - radius && x < b.x + b.w + radius
-    && y > b.y - radius && y < b.y + b.h + radius)
+  return !facilityAt({ x, y })
     && !settlementBuildings.some(b => {
       const depth = overlapDepth(b, x, y, radius);
       // A player standing on a just-completed site can always step out.

@@ -1,6 +1,6 @@
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
-import { nationLayouts } from './nation-layout.js?v=34';
-import { actionNames, capacity, createNationSimulation, taskSchedule } from './nation-simulation.js?v=34';
+import { nationLayouts } from './nation-layout.js?v=35';
+import { actionNames, capacity, createNationSimulation, taskSchedule } from './nation-simulation.js?v=35';
 import { nationSettings as config } from './nation-settings.js?v=34';
 
 function requireValid(condition) {

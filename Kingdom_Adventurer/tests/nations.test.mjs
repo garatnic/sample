@@ -1,12 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=35';
+import { buyItem, startingShopGold } from '../game/src/shop.js?v=35';
+import { createEncounters } from '../game/src/combat.js?v=35';
+import { createSkills } from '../game/src/skills.js?v=32';
+import { createTrees } from '../game/src/trees.js?v=28';
+import { refreshGuild } from '../game/src/quests.js?v=27';
 import { settings } from '../game/src/settings.js?v=34';
 import { nationSettings as config } from '../game/src/nation-settings.js?v=34';
-import { nationLayouts } from '../game/src/nation-layout.js?v=34';
-import { field, movePlayer, start, terrainAt } from '../game/src/world.js?v=34';
+import { nationLayouts } from '../game/src/nation-layout.js?v=35';
+import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=35';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=34';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=34';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=35';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=35';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
@@ -128,4 +134,49 @@ test('NATION-04: reserved cargo, capacity recovery and distant city arrival surv
   assert.ok(nation.stock.wood + nation.stock.food <= capacity(nation));
   snapshot.nations[1].stock.wood = 1000;
   assert.throws(() => restoreNations(snapshot, snapshot.minute), /Invalid nation simulation/);
+});
+
+test('NATION-05: all city facilities work independently and version 3 saves migrate', () => {
+  assert.equal(buildings.length, 8);
+  assert.equal(inTown({ x: 1112, y: 800 }), false);
+  assert.deepEqual(start, nationLayouts[0].arrival);
+  for (const city of nationLayouts) {
+    assert.deepEqual(city.facilities.map(b => b.kind), ['inn', 'goods-shop', 'weapon-shop', 'guild']);
+    for (const facility of city.facilities) {
+      assert.ok(inTown(facility.door));
+      const player = { ...facility.door };
+      movePlayer(player, 0, -1, 0.2, field);
+      assert.deepEqual(player, facility.door);
+    }
+  }
+  assert.equal(Object.keys(innDoors).length, 2);
+  const state = {
+    area: field, nations: createNationSimulation(), gold: 50, guilds: new Map(),
+    player: { ...start, level: 1, experience: 0, hp: 100, mp: 100, weaponId: null, cooldown: 0,
+      pendingPoison: 0, inventory: new Map(), armor: new Map(), skills: createSkills() },
+    resources: createTrees(gameDay(0)),
+    shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])),
+  };
+  const easternShop = nationLayouts[1].facilities.find(b => b.kind === 'weapon-shop').id;
+  assert.ok(buyItem(state, easternShop, 'iron-dagger'));
+  assert.equal(state.shopGold[easternShop], 110);
+  assert.equal(state.shopGold['weapon-shop'], 100);
+  for (const id of Object.keys(guildDoors)) refreshGuild(state, id, gameDay(0));
+  assert.equal(state.guilds.size, 2);
+  const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns), lootDrops: [] }]));
+  const current = makeSave(state, areaStates, 0);
+  assert.deepEqual(restoreSave(current).shopGold, state.shopGold);
+
+  current.version = 3;
+  current.guilds = current.guilds.filter(([id]) => id === 'house-southwest');
+  current.shopGold = { 'goods-shop': 63, 'weapon-shop': 105 };
+  const facility = nationLayouts[1].facilities[0];
+  Object.assign(current.player, { x: facility.x + 15, y: facility.y + 15 });
+  const restored = restoreSave(current);
+  assert.equal(restored.shopGold['goods-shop'], 63);
+  assert.equal(restored.shopGold['weapon-shop'], 105);
+  assert.equal(restored.shopGold[easternShop], 100);
+  assert.ok(restored.guilds.has('house-southwest'));
+  assert.deepEqual({ x: restored.player.x, y: restored.player.y }, facility.door);
+  assert.deepEqual(copy(restored.nations), copy(state.nations));
 });

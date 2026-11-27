@@ -1,7 +1,7 @@
 import { settings } from './settings.js?v=34';
-import { buildings, cave, field, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=34';
+import { buildings, cave, field, terrainAt } from './world.js?v=35';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=34';
+import { modeFor, residentPosition } from './nation-simulation.js?v=35';
 
 import { harvestSeconds } from './trees.js?v=28';
 
@@ -93,9 +93,9 @@ export function createRenderer(canvas) {
     }
   }
 
-  function building({ id, x, y, w, h, kind }) {
+  function building({ x, y, w, h, kind, door }) {
     const inn = kind === 'inn';
-    const shop = shopDoors[kind];
+    const shop = kind.endsWith('-shop');
     rect(x + 3, y + 6, w + 4, h, '#363e30');
     rect(x, y + 14, w, h - 14, '#d1b087');
     const roof = { inn: '#85533e', center: '#575381', warehouse: '#7b5638', house: '#5c7451' };
@@ -115,7 +115,6 @@ export function createRenderer(canvas) {
     const labels = { inn: '宿', guild: 'ギルド', 'goods-shop': '道具', 'weapon-shop': '装備',
       center: '国の中心', warehouse: '倉庫' };
     ctx.fillText(labels[kind], x + w / 2, y + 27);
-    const door = inn ? innDoor : guild ? guildDoors[id] : shop ?? { x: x + w / 2, y: y + h + 25 };
     rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');
   }
 

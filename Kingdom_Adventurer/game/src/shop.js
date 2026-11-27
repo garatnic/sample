@@ -1,12 +1,18 @@
+import { buildings, shopDoors } from './world.js?v=35';
 import { equippedId, items, ringSlots, slots } from './equipment.js?v=27';
 
 const equipmentTabs = [...slots];
 export const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['materials', '素材'], ['misc', 'その他']];
 
-export const shops = {
+const shopTypes = {
   'weapon-shop': { name: '装備品屋', tabs: equipmentTabs },
   'goods-shop': { name: '道具屋', tabs: goodsTabs },
 };
+
+export const shops = Object.fromEntries(buildings
+  .filter(b => Object.hasOwn(shopDoors, b.id))
+  .map(b => [b.id, shopTypes[b.kind]]));
+export const startingShopGold = 100;
 
 export function itemGroup(item) {
   return item.slot ?? item.category;
