@@ -1,6 +1,6 @@
 # tests
 
-Node.jsで `node --test tests/skills.test.mjs` を Kingdom_Adventurer 直下から実行する。外部依存なし。
+Node.jsで `node --test tests/*.mjs` を Kingdom_Adventurer 直下から実行する。外部依存なし。
 
 | ID | 対象 |
 |---|---|
@@ -8,3 +8,7 @@ Node.jsで `node --test tests/skills.test.mjs` を Kingdom_Adventurer 直下か�
 | SKILL-02 | 武器の基礎値、攻撃補正、キャラクター必要XPとレベルアップ |
 | SKILL-03 | 戦闘の命中・空振り・素手・討伐報酬・依頼の進捗 |
 | SKILL-04 | セーブの往復、旧形式の移行、不正な技能値の拒否 |
+| NATION-01 | 256×256、国家の初期配置、移動経路・建物衝突と距離判定 |
+| NATION-02 | 100日進行、イベント刻みの整合性、民家・人口・倉庫上限、区画重複 |
+| NATION-03 | 日次消費、重複防止、食料不足と宿泊による経過 |
+| NATION-04 | 在庫満杯からの回復、建築・運搬中の保存復元、遠方からの接近と不正在庫の拒否 |
