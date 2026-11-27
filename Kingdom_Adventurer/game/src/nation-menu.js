@@ -1,5 +1,5 @@
 import { actionNames, capacity, modeFor } from './nation-simulation.js?v=38';
-import { nationSettings as config } from './nation-settings.js?v=34';
+import { nationSettings as config } from './nation-settings.js?v=39';
 
 export function setupNationMenu(state, input, field) {
   const dialog = document.querySelector('#nation-menu');

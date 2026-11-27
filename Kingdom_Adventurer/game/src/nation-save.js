@@ -1,7 +1,7 @@
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
 import { actionNames, capacity, createNationSimulation, gatherAction, nextPick, taskSchedule } from './nation-simulation.js?v=38';
-import { nationSettings as config } from './nation-settings.js?v=34';
+import { nationSettings as config } from './nation-settings.js?v=39';
 
 function requireValid(condition) {
   if (!condition) throw new Error('Invalid nation simulation data');

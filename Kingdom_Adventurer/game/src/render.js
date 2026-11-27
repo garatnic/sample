@@ -1,5 +1,5 @@
-import { settings } from './settings.js?v=34';
-import { buildings, cave, field, terrainAt } from './world.js?v=35';
+import { settings } from './settings.js?v=39';
+import { buildings, cave, field, terrainAt } from './world.js?v=39';
 
 import { modeFor, residentPosition } from './nation-simulation.js?v=38';
 
@@ -10,6 +10,13 @@ const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15], [1,
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
 const enemySprites = {
+  deer: [[-13,-12,20,11,'#99623d'],[-11,-3,3,8,'#593c2c'],[3,-3,3,8,'#593c2c'],
+    [4,-20,5,13,'#99623d'],[7,-22,9,6,'#bb8756'],[8,-26,2,6,'#e5ca96'],[13,-28,2,7,'#e5ca96']],
+  rabbit: [[-8,-9,13,10,'#c2b7a8'],[2,-12,8,8,'#ddd0bd'],[3,-19,3,8,'#ddd0bd'],
+    [7,-18,2,7,'#e8ccbe'],[-11,-7,5,5,'#eee4d6'],[8,-10,2,2,'#3a302c']],
+  fox: [[-12,-9,20,10,'#c66836'],[-22,-9,13,6,'#da7841'],[-24,-9,6,5,'#eee1c8'],
+    [5,-14,9,9,'#db7840'],[5,-18,3,5,'#ad4d2d'],[11,-17,3,5,'#ad4d2d'],[11,-8,6,4,'#f1dec0']],
+
   wolf: [
     [-14, -7, 5, 4, '#495865'], [-8, -1, 4, 6, '#38424f'], [5, -1, 4, 6, '#38424f'],
     [-10, -10, 20, 11, '#8094a6'], [2, -15, 10, 10, '#a8b9c6'],

@@ -1,19 +1,19 @@
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
-import { cave, facilityAt, field, guildDoors, movePlayer, shopDoors } from './world.js?v=35';
-import { enemyTypes, settings } from './settings.js?v=34';
-import { canEquipItem, items } from './equipment.js?v=36';
+import { cave, facilityAt, field, guildDoors, movePlayer, shopDoors } from './world.js?v=39';
+import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=39';
+import { canEquipItem, items } from './equipment.js?v=39';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
-import { maxMp } from './consumables.js?v=36';
+import { maxMp } from './consumables.js?v=39';
 import { gameDay } from './clock.js?v=34';
 import { findSource, harvestSeconds } from './trees.js?v=37';
 
 import { createNationSimulation } from './nation-simulation.js?v=38';
 import { captureNations, restoreNations } from './nation-save.js?v=38';
 
-import { startingShopGold } from './shop.js?v=36';
+import { startingShopGold } from './shop.js?v=39';
 
 const format = 'kingdom-adventurer';
-const version = 7;
+const version = 8;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -28,7 +28,7 @@ export function makeSave(state, areaStates, clock) {
       const { encounters, lootDrops } = areaStates.get(area);
       return { id: area.id, lootDrops, encounters: encounters.map(({ home, enemy, remaining, generation }) => ({
         id: home.id, remaining, generation,
-        enemy: enemy && { x: enemy.x, y: enemy.y, hp: enemy.hp, cooldown: enemy.cooldown },
+        enemy: enemy && { x: enemy.x, y: enemy.y, hp: enemy.hp, cooldown: enemy.cooldown, flee: enemy.flee ?? 0 },
       })) };
     }),
     guilds: [...state.guilds], shopGold: state.shopGold,
@@ -98,18 +98,22 @@ function restorePlayer(data, area, savedVersion) {
   return player;
 }
 
-function restoreArea(data, area) {
-  check(data?.id === area.id && Array.isArray(data.encounters) && data.encounters.length === area.spawns.length
+function restoreArea(data, area, savedVersion) {
+  const legacy = savedVersion < 8;
+  const expected = legacy ? area.spawns.filter(home => !animalTypes[home.kind]) : area.spawns;
+  check(data?.id === area.id && Array.isArray(data.encounters) && data.encounters.length === expected.length
     && Array.isArray(data.lootDrops));
   const encounters = area.spawns.map((home, index) => {
+    if (legacy && animalTypes[home.kind]) return { home, remaining: 0, generation: 0, enemy: null };
     const { id, remaining, generation, enemy } = data.encounters[index];
     check(id === home.id && integer(generation) && number(remaining, 0, settings.enemy.spawnDelay));
-    const maxHp = enemyTypes[home.kind].maxHp;
+    const maxHp = mobTypes[home.kind].maxHp;
     check(enemy === null || (generation > 0 && position(enemy, area)
-      && number(enemy.hp, Number.MIN_VALUE, maxHp) && number(enemy.cooldown)));
+      && number(enemy.hp, Number.MIN_VALUE, maxHp) && number(enemy.cooldown)
+      && (legacy || number(enemy.flee, 0, 3))));
     return { home, remaining, generation, enemy: enemy && {
       id: `enemy-${home.id}-${generation}`, kind: home.kind, x: enemy.x, y: enemy.y,
-      hp: enemy.hp, maxHp, cooldown: enemy.cooldown, flash: 0,
+      hp: enemy.hp, maxHp, cooldown: enemy.cooldown, flash: 0, flee: legacy ? 0 : enemy.flee,
     } };
   });
   const lootDrops = data.lootDrops.map(drop => {
@@ -146,12 +150,12 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, 4, 5, 6, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
   const player = restorePlayer(data.player, area, data.version);
-  const areaStates = new Map(areas.map((entry, index) => [entry, restoreArea(data.areas[index], entry)]));
+  const areaStates = new Map(areas.map((entry, index) => [entry, restoreArea(data.areas[index], entry, data.version)]));
   const day = gameDay(data.clock);
   const guilds = restoreGuilds(data.guilds, day);
   const shopGold = Object.fromEntries(Object.keys(shopDoors).map(id => {

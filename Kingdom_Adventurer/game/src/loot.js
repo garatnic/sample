@@ -1,5 +1,5 @@
-import { items } from './equipment.js?v=36';
-import { settings } from './settings.js?v=34';
+import { items } from './equipment.js?v=39';
+import { settings } from './settings.js?v=39';
 
 const materialDropLimit = 5;
 

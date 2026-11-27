@@ -1,7 +1,7 @@
 import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=37';
 import { exactGameMinutes, firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
-import { nationSettings as config } from './nation-settings.js?v=34';
+import { nationSettings as config } from './nation-settings.js?v=39';
 
 export const actionNames = {
   idle: '待機', gatherWood: '木材収集', gatherFood: '食料収集',

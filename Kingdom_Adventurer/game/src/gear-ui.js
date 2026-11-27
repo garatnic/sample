@@ -1,8 +1,8 @@
-import { playerAttack } from './weapon-skill.js?v=36';
+import { playerAttack } from './weapon-skill.js?v=39';
 import { maxHealth } from './growth.js?v=32';
-import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=36';
-import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=36';
-import { canUseItem, maxMp, useItem } from './consumables.js?v=36';
+import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=39';
+import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=39';
+import { canUseItem, maxMp, useItem } from './consumables.js?v=39';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');

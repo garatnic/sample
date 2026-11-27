@@ -1,4 +1,4 @@
-import { settings } from './settings.js?v=34';
+import { settings } from './settings.js?v=39';
 
 import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=35';
 
@@ -22,6 +22,11 @@ export const spawns = [
   { id: 'east-field', kind: 'crab', x: 1510, y: 925 },
   { id: 'far-grove', kind: 'wolf', x: 1800, y: 580 },
   { id: 'far-west', kind: 'rat', x: 514, y: 650 },
+  ...nationLayouts.flatMap(city => [
+    { id: `${city.id}-deer`, kind: 'deer', x: city.x + 420, y: city.y + 420 },
+    { id: `${city.id}-rabbit`, kind: 'rabbit', x: city.x - 365, y: city.y + 440 },
+    { id: `${city.id}-fox`, kind: 'fox', x: city.x + 380, y: city.y - 315 },
+  ]),
 ];
 
 export function inTown({ x, y }) {

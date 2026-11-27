@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=5c5b24f99368">
+  <link rel="stylesheet" href="./style.css?v=b26d6c3a299a">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,7 +20,7 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.38</h1>
+      <h1>Kingdom Adventurer ver.39</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
@@ -29,6 +29,7 @@
       <button id="open-quests" type="button">クエスト</button>
       <button id="open-skills" type="button" aria-haspopup="dialog">スキル</button>
       <button id="open-nations" type="button" aria-haspopup="dialog">国家</button>
+      <button id="hunt" type="button" title="Fキーでも狩猟">狩猟</button>
       <button id="open-save" type="button" aria-haspopup="dialog">セーブ</button>
     </div>
   </header>
@@ -37,7 +38,7 @@
     <div id="clock-time">08:00</div>
   </div>
   <p id="notice" role="status"></p>
-  <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
+  <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>敵は自動攻撃 / Fで狩猟</span></footer>
   <dialog id="skill-menu" class="gear-menu" aria-labelledby="skill-title">
     <h2 id="skill-title">スキル</h2>
     <div id="skill-groups"></div>
@@ -144,6 +145,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=38"></script>
+  <script type="module" src="./src/main.js?v=39"></script>
 </body>
 </html>

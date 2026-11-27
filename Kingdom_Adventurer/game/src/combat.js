@@ -1,9 +1,9 @@
-import { enemyTypes, settings } from './settings.js?v=34';
-import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=36';
-import { field, inTown } from './world.js?v=35';
-import { attackInterval, defenseRating, items } from './equipment.js?v=36';
-import { recordDefeat } from './quests.js?v=36';
-import { dropLoot } from './loot.js?v=27';
+import { animalTypes, mobTypes, settings } from './settings.js?v=39';
+import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=39';
+import { facilityAt, field, inTown } from './world.js?v=39';
+import { attackInterval, defenseRating, items } from './equipment.js?v=39';
+import { recordDefeat } from './quests.js?v=39';
+import { dropLoot } from './loot.js?v=39';
 
 export function physicalDamage(attack, defense, damageMultiplier) {
   const reductionBasisPoints = Math.min(8000, Math.max(0, defense) * 12);
@@ -23,10 +23,24 @@ function canChase(player, enemy, home, config) {
 export function inCombat({ player, area, encounters, strike }) {
   if (area === field && inTown(player)) return false;
   return Boolean(strike) || encounters.some(({ home, enemy }) =>
-    enemy && canChase(player, enemy, home, settings.enemy));
+    enemy && !animalTypes[home.kind] && canChase(player, enemy, home, settings.enemy));
 }
 
-export function updateCombat(state, dt) {
+function moveAnimal(animal, home, player, type, area, dt) {
+  animal.flee = Math.max(0, animal.flee - dt);
+  const fleeing = animal.flee > 0;
+  const dx = fleeing ? animal.x - player.x : home.x - animal.x;
+  const dy = fleeing ? animal.y - player.y : home.y - animal.y;
+  const distance = Math.hypot(dx, dy);
+  if (!distance && !fleeing) return;
+  const speed = fleeing ? type.speed : type.speed / 3;
+  const step = fleeing ? speed * dt : Math.min(distance, speed * dt);
+  const x = Math.max(10, Math.min(area.width - 10, animal.x + (distance ? dx / distance : 1) * step));
+  const y = Math.max(10, Math.min(area.height - 10, animal.y + (distance ? dy / distance : 0) * step));
+  if (!inTown({ x, y }) && !facilityAt({ x, y })) Object.assign(animal, { x, y });
+}
+
+export function updateCombat(state, dt, hunt = false) {
   const { player, encounters } = state;
   const config = settings.enemy;
   const { playerDamageMultiplier, enemyDamageMultiplier } = settings.difficulty;
@@ -37,18 +51,22 @@ export function updateCombat(state, dt) {
   for (const encounter of encounters) {
     const { home } = encounter;
     const kind = home.kind;
-    const type = enemyTypes[kind];
+    const type = mobTypes[kind];
     if (!encounter.enemy) {
       encounter.remaining = Math.max(0, encounter.remaining - dt);
       if (encounter.remaining <= 0) {
         encounter.enemy = { id: `enemy-${home.id}-${++encounter.generation}`,
-          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0 };
+          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0, flee: 0 };
       }
     }
 
     const enemy = encounter.enemy;
     if (!enemy) continue;
     enemy.flash = Math.max(0, enemy.flash - dt);
+    if (animalTypes[kind]) {
+      moveAnimal(enemy, home, player, type, field, dt);
+      continue;
+    }
     enemy.cooldown = Math.max(0, enemy.cooldown - dt);
     const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
     const chasing = !safe && canChase(player, enemy, home, config);
@@ -77,7 +95,7 @@ export function updateCombat(state, dt) {
   const weapon = items.get(player.weaponId);
   let range = weapon?.range ?? settings.player.range;
   for (const encounter of encounters) {
-    if (!encounter.enemy) continue;
+    if (!encounter.enemy || (Boolean(animalTypes[encounter.home.kind]) !== hunt)) continue;
     const distance = Math.hypot(player.x - encounter.enemy.x, player.y - encounter.enemy.y);
     if (distance > range) continue;
     range = distance;
@@ -91,16 +109,17 @@ export function updateCombat(state, dt) {
   const levelBeforeHit = player.level;
   const poisonDamage = player.pendingPoison ?? 0;
   player.pendingPoison = 0;
-  const damage = physicalDamage(attack, enemyTypes[enemy.kind].defense, playerDamageMultiplier);
+  const damage = physicalDamage(attack, mobTypes[enemy.kind].defense, playerDamageMultiplier);
   enemy.hp -= damage + poisonDamage;
   recordWeaponHit(player, weapon, damage);
   enemy.flash = 0.18;
+  if (animalTypes[enemy.kind]) enemy.flee = 3;
   if (enemy.hp <= 0) {
-    recordDefeat(state, enemy.kind);
+    if (!animalTypes[enemy.kind]) recordDefeat(state, enemy.kind);
     nearest.enemy = null;
     nearest.remaining = config.spawnDelay;
-    dropLoot(state, enemy, enemyTypes[enemy.kind]);
-    state.notice = { text: `${enemyTypes[enemy.kind].name}を撃破`, remaining: 1.7 };
+    dropLoot(state, enemy, mobTypes[enemy.kind]);
+    state.notice = { text: `${mobTypes[enemy.kind].name}を撃破`, remaining: 1.7 };
   }
   if (player.level > levelBeforeHit) {
     state.notice = { text: `レベルアップ！ Lv.${player.level}`, remaining: 2.5, leveledUp: true };

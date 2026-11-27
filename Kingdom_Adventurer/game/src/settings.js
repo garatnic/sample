@@ -18,3 +18,11 @@ export const enemyTypes = {
   crab: { materials: ['crab-shell'], name: '泥ガニ', defense: 60, maxHp: 46, speed: 62, damage: 8, attackDelay: 1.05 },
   spider: { materials: ['spider-silk', 'venom-sac'], name: '小型クモ', defense: 25, maxHp: 34, speed: 86, damage: 7, attackDelay: 0.9 },
 };
+
+export const animalTypes = {
+  deer: { name: 'シカ', maxHp: 34, defense: 0, speed: 145, materials: ['deer-hide', 'antler'] },
+  rabbit: { name: 'ウサギ', maxHp: 20, defense: 0, speed: 155, materials: ['rabbit-fur'] },
+  fox: { name: 'キツネ', maxHp: 26, defense: 0, speed: 150, materials: ['fox-fur'] },
+};
+
+export const mobTypes = { ...enemyTypes, ...animalTypes };
