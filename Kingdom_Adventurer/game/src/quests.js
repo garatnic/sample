@@ -1,5 +1,5 @@
 import { enemyTypes } from './settings.js?v=25';
-import { items } from './equipment.js?v=25';
+import { items } from './equipment.js?v=27';
 
 const templates = [
   { id: 'rats', title: '大ネズミの討伐', targets: { rat: 2 }, reward: 14 },

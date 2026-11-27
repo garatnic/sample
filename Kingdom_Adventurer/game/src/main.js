@@ -1,16 +1,19 @@
 import { settings } from './settings.js';
 import { guildDoors, innDoor, shopDoors, inTown, movePlayer, start, town } from './world.js?v=24';
-import { createEncounters, updateCombat } from './combat.js?v=26';
+import { createEncounters, updateCombat } from './combat.js?v=27';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=25';
-import { setupGearMenus } from './gear-ui.js?v=26';
+import { createRenderer } from './render.js?v=27';
+import { setupGearMenus } from './gear-ui.js?v=27';
 import { gameDateTime, gameDay, gameMinutes } from './clock.js?v=24';
-import { maxMp } from './consumables.js?v=25';
+import { maxMp } from './consumables.js?v=27';
 
-import { setupQuestMenus } from './quests.js?v=26';
+import { setupQuestMenus } from './quests.js?v=27';
 
-import { collectLoot } from './loot.js?v=25';
+import { collectLoot } from './loot.js?v=27';
+
+import { createTrees, updateTrees } from './trees.js?v=27';
+import { items } from './equipment.js?v=27';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -40,7 +43,7 @@ function createPlayer({ level = 1, experience = 0, inventory = new Map(), weapon
   return { id: 'player', ...start, level, experience, inventory, weaponId, armor, hp: maxHealth(level), mp: maxMp, pendingPoison: 0, cooldown: 0, flash: 0, moving: false };
 }
 
-const state = { player: createPlayer(), encounters: createEncounters(), strike: null,
+const state = { player: createPlayer(), encounters: createEncounters(), strike: null, resources: createTrees(gameDay(0)),
   notice: null, innContact: false, gold: settings.currency.startingGold, lootDrops: [], shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 100])) };
 Object.assign(state, { guilds: new Map(), guildContact: null });
 const openGuild = setupQuestMenus(state, input);
@@ -57,6 +60,7 @@ inn.addEventListener('close', () => {
 death.addEventListener('cancel', event => event.preventDefault());
 death.addEventListener('close', () => {
   state.player = createPlayer(state.player);
+  state.resources.harvest = null;
   state.strike = null;
   state.notice = null;
   state.innContact = false;
@@ -119,7 +123,14 @@ function update(dt) {
   }
 
   updateCombat(state, dt);
+  if (player.hp > 0) {
+    const fruit = updateTrees(state.resources, player, dt, gameDay(gameMinutes(elapsedPlaySeconds)));
+    if (fruit && !state.notice?.leveledUp) {
+      state.notice = { text: `${items.get(fruit).name}を1個採取しました`, remaining: 1.2 };
+    }
+  }
   if (player.hp === 0) {
+    state.resources.harvest = null;
     input.clear();
     player.moving = false;
     death.showModal();

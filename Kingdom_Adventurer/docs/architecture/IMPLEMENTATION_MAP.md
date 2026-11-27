@@ -46,6 +46,8 @@
 | `CUR-UI-004` | キャラクター・戦闘描画 | src/render.js: actor(), enemySprites, render() の戦利品描画, rect(); src/settings.js: enemyTypes.maxHp（生成時に個体へ設定）; src/main.js: update() の moving/flash/strike; src/combat.js: updateCombat() の flash/strike/hp | CUR-MOVE-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-UI-002 | 未登録 |
 | `CUR-UI-005` | ダイアログ・外観 | index.html: #inn/#death・form/button; style.css: :root/dialog/backdrop/button/h1/@media; src/main.js: showModal/close/cancel | CUR-INN-002, CUR-LIFE-001 | 未登録 |
 
+| `CUR-WORLD-005` | 果樹・採取・日次補充 | src/trees.js: createTrees(), takeFruit(), updateTrees(); src/main.js: update(); src/render.js: drawTree(); src/equipment.js: items | CUR-SYS-005, WORLD-006, ECO-008, EXPLORE-006 | DEV-054 |
+
 ## ファイルから仕様を探す（逆引き）
 
 | ファイル | 関連現行仕様ID |
@@ -67,6 +69,8 @@
 | `src/quests.js` | CUR-QUEST-001, CUR-QUEST-002 |
 | `src/clock.js` | CUR-SYS-005 |
 | `src/loot.js` | CUR-COMBAT-007, CUR-SYS-003 |
+
+- `src/trees.js`、`src/main.js`、`src/render.js`、`src/equipment.js` → CUR-WORLD-005。
 
 ## 更新方法
 

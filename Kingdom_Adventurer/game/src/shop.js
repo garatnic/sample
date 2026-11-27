@@ -1,4 +1,4 @@
-import { equippedId, items, ringSlots, slots } from './equipment.js?v=25';
+import { equippedId, items, ringSlots, slots } from './equipment.js?v=27';
 
 const equipmentTabs = [...slots];
 export const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['materials', '素材'], ['misc', 'その他']];

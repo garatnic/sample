@@ -1,6 +1,10 @@
 import { settings } from './settings.js';
 import { buildings, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=24';
 
+import { harvestSeconds } from './trees.js?v=27';
+
+const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15]];
+
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
 const enemySprites = {
@@ -51,6 +55,19 @@ export function createRenderer(canvas) {
     } else {
       rect(px + 4 + variation, py + 8 + variation, 5, 2,
         { road: '#aa936c', town: '#aaa47a', grass: '#75945f' }[terrain]);
+    }
+  }
+
+  function drawTree({ x, y, itemId, remaining, capacity }) {
+    rect(x - 15, y + 1, 30, 6, '#263d3288');
+    rect(x - 4, y - 17, 8, 21, '#765037');
+    rect(x - 17, y - 29, 34, 15, '#274c36');
+    rect(x - 12, y - 39, 24, 23, '#46794a');
+    rect(x - 19, y - 30, 33, 12, '#568451');
+    const visibleFruit = Math.ceil(remaining / capacity * fruitOffsets.length);
+    for (const [dx, dy] of fruitOffsets.slice(0, visibleFruit)) {
+      rect(x + dx, y + dy, 5, 5, itemId === 'apple' ? '#ec6658' : '#efbc76');
+      rect(x + dx + 1, y + dy, 2, 1, '#fff0c9');
     }
   }
 
@@ -117,6 +134,10 @@ export function createRenderer(canvas) {
         tile(x, y, size);
       }
     }
+    for (const tree of state.resources.trees) {
+      if (tree.x >= left - 20 && tree.x <= left + width + 20
+        && tree.y >= top - 8 && tree.y <= top + height + 40) drawTree(tree);
+    }
     for (const entry of buildings) building(entry);
     for (const { x, y, materials } of state.lootDrops) {
       rect(x - 5, y - 5, 10, 10, '#654319');
@@ -127,6 +148,12 @@ export function createRenderer(canvas) {
       if (enemy) actor(enemy, false, time);
     }
     actor(player, true, time);
+    const harvest = state.resources.harvest;
+    if (harvest) {
+      const { x, y } = harvest.tree;
+      rect(x - 22, y - 51, 44, 8, '#202a21');
+      rect(x - 20, y - 49, 40 * Math.min(1, harvest.elapsed / harvestSeconds), 4, '#f3cd75');
+    }
     if (strike) {
       ctx.beginPath();
       ctx.moveTo(player.x, player.y - 8);
