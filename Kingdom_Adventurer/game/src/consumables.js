@@ -1,4 +1,4 @@
-import { items } from './equipment.js?v=27';
+import { items } from './equipment.js?v=36';
 import { maxHealth } from './growth.js?v=5';
 
 export const maxMp = 100;

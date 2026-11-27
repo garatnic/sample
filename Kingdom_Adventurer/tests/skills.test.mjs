@@ -2,13 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=32';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=32';
-import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=32';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=35';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=35';
+import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=36';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=36';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=36';
 import { cave, field, shopDoors, start } from '../game/src/world.js?v=35';
-import { createTrees } from '../game/src/trees.js?v=28';
-import { gameDay } from '../game/src/clock.js?v=30';
-import { items } from '../game/src/equipment.js?v=32';
+import { items } from '../game/src/equipment.js?v=36';
 
 const id = 'one-handed';
 const required = skillDefinitions.get(id).requiredXp;
@@ -78,7 +76,7 @@ test('SKILL-04: JSON and ver.1 migration preserve progress and reject invalid sk
   player.inventory.set('iron-sword', 1);
   player.skills.set(id, { value: 22, experience: 18 });
   const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns), lootDrops: [] }]));
-  const state = { player, area: field, gold: 42, guilds: new Map(), resources: createTrees(gameDay(0)),
+  const state = { player, area: field, gold: 42, guilds: new Map(), harvest: null,
     shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 97])) };
   const data = JSON.parse(JSON.stringify(makeSave(state, areaStates, 0)));
   assert.deepEqual(restoreSave(data).player.skills, player.skills);

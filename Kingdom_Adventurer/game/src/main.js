@@ -2,28 +2,28 @@ import { createSkills } from './skills.js?v=32';
 import { setupSkillMenu } from './skill-menu.js?v=32';
 import { settings } from './settings.js?v=34';
 import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=35';
-import { createEncounters, inCombat, updateCombat } from './combat.js?v=35';
+import { createEncounters, inCombat, updateCombat } from './combat.js?v=36';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=35';
-import { setupGearMenus } from './gear-ui.js?v=35';
+import { createRenderer } from './render.js?v=36';
+import { setupGearMenus } from './gear-ui.js?v=36';
 import { exactGameMinutes, gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=34';
-import { maxMp } from './consumables.js?v=27';
+import { maxMp } from './consumables.js?v=36';
 
-import { setupQuestMenus } from './quests.js?v=27';
+import { setupQuestMenus } from './quests.js?v=36';
 
 import { collectLoot } from './loot.js?v=27';
 
-import { createTrees, updateTrees } from './trees.js?v=28';
-import { items } from './equipment.js?v=32';
-import { areas, makeSave, restoreSave } from './save-data.js?v=35';
+import { updateTrees } from './trees.js?v=36';
+import { items } from './equipment.js?v=36';
+import { areas, makeSave, restoreSave } from './save-data.js?v=36';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
-import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=35';
+import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=36';
 import { inSettlement } from './nation-layout.js?v=35';
-import { setupNationMenu } from './nation-menu.js?v=35';
+import { setupNationMenu } from './nation-menu.js?v=36';
 
-import { startingShopGold } from './shop.js?v=35';
+import { startingShopGold } from './shop.js?v=36';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -64,7 +64,7 @@ const state = {
   centerContact: null,
   get encounters() { return areaStates.get(this.area).encounters; },
   get lootDrops() { return areaStates.get(this.area).lootDrops; },
-  strike: null, resources: createTrees(gameDay(0)),
+  strike: null, harvest: null,
   notice: null, innContact: null, gold: settings.currency.startingGold, shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])) };
 Object.assign(state, { guilds: new Map(), guildContact: null });
 function applySave({ areaStates: savedAreas, clock, ...savedState }) {
@@ -99,7 +99,7 @@ death.addEventListener('cancel', event => event.preventDefault());
 death.addEventListener('close', () => {
   state.player = createPlayer(state.player);
   state.area = field;
-  state.resources.harvest = null;
+  state.harvest = null;
   state.strike = null;
   state.notice = null;
   state.innContact = null;
@@ -139,7 +139,7 @@ function update(dt) {
   if (Math.hypot(player.x - portal.x, player.y - portal.y) <= portalRadius) {
     state.area = outdoors ? cave : field;
     Object.assign(player, outdoors ? cave.caveArrival : cave.fieldArrival);
-    state.resources.harvest = null;
+    state.harvest = null;
     state.strike = null;
     state.notice = null;
     player.moving = false;
@@ -195,13 +195,13 @@ function update(dt) {
 
   updateCombat(state, dt);
   if (outdoors && player.hp > 0) {
-    const fruit = updateTrees(state.resources, player, dt, gameDay(currentGameMinute()));
-    if (fruit && !state.notice?.leveledUp) {
-      state.notice = { text: `${items.get(fruit).name}を1個採取しました`, remaining: 1.2 };
+    const collected = updateTrees(state, dt);
+    if (collected && !state.notice?.leveledUp) {
+      state.notice = { text: `${items.get(collected.itemId).name}を${collected.quantity}個入手しました`, remaining: 1.2 };
     }
   }
   if (player.hp === 0) {
-    state.resources.harvest = null;
+    state.harvest = null;
     input.clear();
     player.moving = false;
     death.showModal();

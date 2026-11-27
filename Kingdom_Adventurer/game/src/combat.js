@@ -1,8 +1,8 @@
 import { enemyTypes, settings } from './settings.js?v=34';
-import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=32';
+import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=36';
 import { field, inTown } from './world.js?v=35';
-import { attackInterval, defenseRating, items } from './equipment.js?v=32';
-import { recordDefeat } from './quests.js?v=27';
+import { attackInterval, defenseRating, items } from './equipment.js?v=36';
+import { recordDefeat } from './quests.js?v=36';
 import { dropLoot } from './loot.js?v=27';
 
 export function physicalDamage(attack, defense, damageMultiplier) {

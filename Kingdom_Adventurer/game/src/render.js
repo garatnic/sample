@@ -1,9 +1,9 @@
 import { settings } from './settings.js?v=34';
 import { buildings, cave, field, terrainAt } from './world.js?v=35';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=35';
+import { modeFor, residentPosition } from './nation-simulation.js?v=36';
 
-import { harvestSeconds } from './trees.js?v=28';
+import { harvestSeconds } from './trees.js?v=36';
 
 const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15]];
 
@@ -80,15 +80,15 @@ export function createRenderer(canvas) {
     ctx.fillText(outdoors ? '洞窟入口' : '出口', x, y - 48);
   }
 
-  function drawTree({ x, y, itemId, remaining, capacity }) {
+  function drawTree({ x, y }, ripe) {
     rect(x - 15, y + 1, 30, 6, '#263d3288');
     rect(x - 4, y - 17, 8, 21, '#765037');
     rect(x - 17, y - 29, 34, 15, '#274c36');
     rect(x - 12, y - 39, 24, 23, '#46794a');
     rect(x - 19, y - 30, 33, 12, '#568451');
-    const visibleFruit = Math.ceil(remaining / capacity * fruitOffsets.length);
+    const visibleFruit = ripe ? fruitOffsets.length : 0;
     for (const [dx, dy] of fruitOffsets.slice(0, visibleFruit)) {
-      rect(x + dx, y + dy, 5, 5, itemId === 'apple' ? '#ec6658' : '#efbc76');
+      rect(x + dx, y + dy, 5, 5, '#ec6658');
       rect(x + dx + 1, y + dy, 2, 1, '#fff0c9');
     }
   }
@@ -146,16 +146,14 @@ export function createRenderer(canvas) {
 
   function drawSource(source, minute) {
     const { x, y, kind } = source;
-    if (source.readyAt > minute) {
-      rect(x - 4, y - 4, 8, 5, '#766049');
-    } else if (kind === 'wood') {
+    if (kind === 'food') {
+      drawTree(source, source.readyAt <= minute);
+    } else if (source.readyAt > minute) {
+      rect(x - 6, y - 6, 12, 8, '#766049');
+    } else {
       rect(x - 3, y - 18, 6, 20, '#765037');
       rect(x - 11, y - 28, 22, 16, '#214e37');
       rect(x - 8, y - 31, 16, 11, '#52885b');
-    } else {
-      rect(x - 9, y - 8, 18, 9, '#3d6d37');
-      rect(x - 6, y - 9, 4, 4, '#eca656');
-      rect(x + 3, y - 11, 4, 4, '#eca656');
     }
   }
 
@@ -183,10 +181,6 @@ export function createRenderer(canvas) {
       for (let x = Math.max(0, Math.floor(left / size)); x * size < Math.min(area.width, left + width); x++) {
         drawTile(x, y, size);
       }
-    }
-    for (const tree of outdoors ? state.resources.trees : []) {
-      if (tree.x >= left - 20 && tree.x <= left + width + 20
-        && tree.y >= top - 8 && tree.y <= top + height + 40) drawTree(tree);
     }
     const visible = ({ x, y }) =>
       x >= left - 100 && x <= left + width + 100 && y >= top - 80 && y <= top + height + 80;
@@ -221,11 +215,11 @@ export function createRenderer(canvas) {
       if (enemy) actor(enemy, false, time);
     }
     actor(player, true, time);
-    const harvest = outdoors && state.resources.harvest;
+    const harvest = outdoors && state.harvest;
     if (harvest) {
-      const { x, y } = harvest.tree;
+      const { x, y } = harvest.source;
       rect(x - 22, y - 51, 44, 8, '#202a21');
-      rect(x - 20, y - 49, 40 * Math.min(1, harvest.elapsed / harvestSeconds), 4, '#f3cd75');
+      rect(x - 20, y - 49, 40 * Math.min(1, harvest.elapsed / harvestSeconds[harvest.source.kind]), 4, '#f3cd75');
     }
     if (strike) {
       ctx.beginPath();

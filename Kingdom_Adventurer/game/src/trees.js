@@ -1,50 +1,43 @@
 import { settings } from './settings.js?v=34';
+import { nationSettings as config } from './nation-settings.js?v=34';
 
-const capacity = 20;
-export const harvestSeconds = 1;
 const contactRadius = settings.player.radius + 8;
+export const harvestSeconds = { food: 1, wood: 2 };
 
-const treeLocations = [
-  { id: 'tree-3-2', x: 350, y: 237, itemId: 'apple' },
-  { id: 'tree-7-9', x: 733, y: 907, itemId: 'tree-nut' },
-  { id: 'tree-13-5', x: 1303, y: 536, itemId: 'apple' },
-  { id: 'tree-14-11', x: 1374, y: 1087, itemId: 'tree-nut' },
-  { id: 'tree-17-6', x: 1661, y: 615, itemId: 'apple' },
-];
-
-export function createTrees(day) {
-  const trees = treeLocations.map(location => ({
-    ...location, category: 'food', remaining: capacity, capacity,
-  }));
-  return { trees, day, harvest: null };
-}
-
-export function takeFruit(tree, inventory) {
-  if (tree.remaining <= 0) return false;
-  inventory.set(tree.itemId, (inventory.get(tree.itemId) ?? 0) + 1);
-  tree.remaining--;
-  return true;
-}
-
-export function updateTrees(resources, player, dt, day) {
-  if (resources.day !== day) {
-    resources.day = day;
-    for (const tree of resources.trees) tree.remaining = tree.capacity;
-    resources.harvest = null;
+export function findSource(simulation, matches) {
+  for (const nation of simulation.nations) {
+    for (const city of nation.cities) {
+      const source = city.sources.find(matches);
+      if (source) return { source, nation };
+    }
   }
+  return null;
+}
 
-  const tree = resources.trees.find(entry => entry.remaining > 0
-    && Math.hypot(player.x - entry.x, player.y - entry.y) <= contactRadius);
-  if (!tree) {
-    resources.harvest = null;
+export function harvestSource(source, minute) {
+  if (source.readyAt > minute) return 0;
+  const { regrow, yield: amount } = config.harvest[source.kind];
+  source.readyAt = minute + regrow;
+  return Math.min(amount, config.carry);
+}
+
+export function updateTrees(state, dt) {
+  const { player, nations } = state;
+  const site = findSource(nations, source => source.readyAt <= nations.minute
+    && Math.hypot(player.x - source.x, player.y - source.y) <= contactRadius);
+  if (!site) {
+    state.harvest = null;
     return null;
   }
-  if (resources.harvest?.tree !== tree) resources.harvest = { tree, elapsed: 0 };
-  resources.harvest.elapsed += dt;
-  if (resources.harvest.elapsed + 1e-9 < harvestSeconds) return null;
+  const { source, nation } = site;
+  if (state.harvest?.source !== source) state.harvest = { source, elapsed: 0 };
+  state.harvest.elapsed += dt;
+  if (state.harvest.elapsed + 1e-9 < harvestSeconds[source.kind]) return null;
 
-  takeFruit(tree, player.inventory);
-  resources.harvest.elapsed = Math.max(0, resources.harvest.elapsed - harvestSeconds);
-  if (tree.remaining === 0) resources.harvest = null;
-  return tree.itemId;
+  const quantity = harvestSource(source, nations.minute);
+  nation.nextMinute = Math.min(nation.nextMinute, source.readyAt);
+  const itemId = source.kind === 'food' ? 'apple' : 'wood';
+  player.inventory.set(itemId, (player.inventory.get(itemId) ?? 0) + quantity);
+  state.harvest = null;
+  return { itemId, quantity };
 }

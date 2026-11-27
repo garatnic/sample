@@ -1,6 +1,6 @@
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
-import { actionNames, capacity, createNationSimulation, taskSchedule } from './nation-simulation.js?v=35';
+import { actionNames, capacity, createNationSimulation, taskSchedule } from './nation-simulation.js?v=36';
 import { nationSettings as config } from './nation-settings.js?v=34';
 
 function requireValid(condition) {
@@ -98,8 +98,7 @@ export function restoreNations(data, minute) {
           requireValid(carrying === null);
           if (action === 'gatherFood' || action === 'gatherWood') {
             const source = city.sources.find(s => s.id === targetId);
-            requireValid(source?.kind === (action === 'gatherFood' ? 'food' : 'wood')
-              && source.readyAt <= task.depart && !claimed.has(targetId));
+            requireValid(source?.kind === (action === 'gatherFood' ? 'food' : 'wood') && !claimed.has(targetId));
             target = source;
             workMinutes = config.harvest[source.kind].minutes;
             claimed.add(targetId);

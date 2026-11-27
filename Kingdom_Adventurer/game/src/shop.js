@@ -1,5 +1,5 @@
 import { buildings, shopDoors } from './world.js?v=35';
-import { equippedId, items, ringSlots, slots } from './equipment.js?v=27';
+import { equippedId, items, ringSlots, slots } from './equipment.js?v=36';
 
 const equipmentTabs = [...slots];
 export const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['materials', '素材'], ['misc', 'その他']];

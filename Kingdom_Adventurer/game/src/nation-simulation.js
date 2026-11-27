@@ -1,3 +1,4 @@
+import { harvestSource } from './trees.js?v=36';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
 import { nationSettings as config } from './nation-settings.js?v=34';
@@ -106,9 +107,9 @@ function completeTask(nation, city, resident, minute) {
   switch (resident.action) {
     case 'gatherFood':
     case 'gatherWood': {
-      const harvest = config.harvest[target.kind];
-      target.readyAt = minute + harvest.regrow;
-      resident.carrying = { kind: target.kind, quantity: Math.min(harvest.yield, config.carry) };
+      const quantity = harvestSource(target, minute);
+      if (!quantity) break;
+      resident.carrying = { kind: target.kind, quantity };
       const storage = city.buildings.filter(b => b.kind === 'warehouse')
         .sort((a, b) => Math.hypot(a.door.x - x, a.door.y - y) - Math.hypot(b.door.x - x, b.door.y - y))[0];
       startTask(resident, city, 'haul', storage, minute);

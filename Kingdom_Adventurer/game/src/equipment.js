@@ -40,6 +40,7 @@ export const items = new Map([
   ['bronze-ring', { slot: 'ring', name: '青銅の指輪', price: 10, defense: 0 }],
   ['healing-potion', { category: 'medicine', name: '回復薬', price: 8, effect: { hp: 25 } }],
   ['weak-poison', { category: 'medicine', name: '弱い毒', price: 6, effect: { poison: 8 } }],
+  ['wood', { category: 'materials', name: '木材', price: 2, sellOnly: true }],
   ['apple', { category: 'food', name: 'リンゴ', price: 2, effect: { hp: 1 }, sellOnly: true }],
   ['tree-nut', { category: 'food', name: '木の実', price: 2, effect: { hp: 1 }, sellOnly: true }],
   ['bread', { category: 'food', name: 'パン', price: 4, effect: { hp: 2, mp: 1 } }],

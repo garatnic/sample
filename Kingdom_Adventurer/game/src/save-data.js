@@ -1,23 +1,23 @@
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
 import { cave, facilityAt, field, guildDoors, movePlayer, shopDoors } from './world.js?v=35';
 import { enemyTypes, settings } from './settings.js?v=34';
-import { canEquipItem, items } from './equipment.js?v=32';
+import { canEquipItem, items } from './equipment.js?v=36';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
-import { maxMp } from './consumables.js?v=27';
+import { maxMp } from './consumables.js?v=36';
 import { gameDay } from './clock.js?v=34';
-import { createTrees, harvestSeconds } from './trees.js?v=28';
+import { findSource, harvestSeconds } from './trees.js?v=36';
 
-import { createNationSimulation } from './nation-simulation.js?v=35';
-import { captureNations, restoreNations } from './nation-save.js?v=35';
+import { createNationSimulation } from './nation-simulation.js?v=36';
+import { captureNations, restoreNations } from './nation-save.js?v=36';
 
-import { startingShopGold } from './shop.js?v=35';
+import { startingShopGold } from './shop.js?v=36';
 
 const format = 'kingdom-adventurer';
-const version = 4;
+const version = 5;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
-  const { player, resources } = state;
+  const { player, harvest } = state;
   return structuredClone({
     format, version, clock, nations: captureNations(state.nations ?? createNationSimulation(clock)), area: state.area.id, gold: state.gold,
     player: { x: player.x, y: player.y, hp: player.hp, mp: player.mp,
@@ -32,8 +32,7 @@ export function makeSave(state, areaStates, clock) {
       })) };
     }),
     guilds: [...state.guilds], shopGold: state.shopGold,
-    resources: { day: resources.day, trees: resources.trees.map(({ id, remaining }) => [id, remaining]),
-      harvest: resources.harvest && { id: resources.harvest.tree.id, elapsed: resources.harvest.elapsed } },
+    harvest: harvest ? { id: harvest.source.id, elapsed: harvest.elapsed } : null,
   });
 }
 
@@ -73,7 +72,7 @@ function restorePlayer(data, area, savedVersion) {
     && number(data.hp, Number.MIN_VALUE, maxHealth(data.level)) && number(data.mp, 0, maxMp)
     && number(data.pendingPoison) && number(data.cooldown));
   const { hp, mp, level, experience, weaponId, pendingPoison, cooldown } = data;
-  const displaced = savedVersion < version && area === field && facilityAt(data);
+  const displaced = savedVersion < 4 && area === field && facilityAt(data);
   const { x, y } = displaced ? displaced.door : data;
   const bounded = { x, y };
   movePlayer(bounded, 0, 0, 0, area);
@@ -147,7 +146,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, 4, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
@@ -156,26 +155,18 @@ export function restoreSave(data) {
   const day = gameDay(data.clock);
   const guilds = restoreGuilds(data.guilds, day);
   const shopGold = Object.fromEntries(Object.keys(shopDoors).map(id => {
-    if (data.version < version && !Object.hasOwn(data.shopGold, id)
+    if (data.version < 4 && !Object.hasOwn(data.shopGold, id)
       && id !== 'goods-shop' && id !== 'weapon-shop') return [id, startingShopGold];
     check(integer(data.shopGold[id]));
     return [id, data.shopGold[id]];
   }));
-  check(integer(data.resources?.day, gameDay(0), day));
-  const resources = createTrees(data.resources.day);
-  const trees = entries(data.resources.trees);
-  check(trees.size === resources.trees.length);
-  for (const tree of resources.trees) {
-    const remaining = trees.get(tree.id);
-    check(integer(remaining, 0, tree.capacity));
-    tree.remaining = remaining;
-  }
-  if (data.resources.harvest !== null) {
-    const { id, elapsed } = data.resources.harvest;
-    const tree = resources.trees.find(entry => entry.id === id);
-    check(area === field && tree?.remaining > 0 && number(elapsed, 0, harvestSeconds));
-    resources.harvest = { tree, elapsed };
-  }
   const nations = data.version >= 3 ? restoreNations(data.nations, data.clock) : createNationSimulation(data.clock);
-  return { player, area, areaStates, nations, gold: data.gold, guilds, shopGold, resources, clock: data.clock };
+  let harvest = null;
+  if (data.version === version && data.harvest !== null) {
+    const source = findSource(nations, entry => entry.id === data.harvest?.id)?.source;
+    check(area === field && source && source.readyAt <= data.clock
+      && number(data.harvest.elapsed, 0, harvestSeconds[source.kind]));
+    harvest = { source, elapsed: data.harvest.elapsed };
+  }
+  return { player, area, areaStates, nations, gold: data.gold, guilds, shopGold, harvest, clock: data.clock };
 }

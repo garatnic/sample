@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=35';
-import { buyItem, startingShopGold } from '../game/src/shop.js?v=35';
-import { createEncounters } from '../game/src/combat.js?v=35';
+import { updateTrees } from '../game/src/trees.js?v=36';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=36';
+import { buyItem, startingShopGold } from '../game/src/shop.js?v=36';
+import { createEncounters } from '../game/src/combat.js?v=36';
 import { createSkills } from '../game/src/skills.js?v=32';
-import { createTrees } from '../game/src/trees.js?v=28';
-import { refreshGuild } from '../game/src/quests.js?v=27';
+import { refreshGuild } from '../game/src/quests.js?v=36';
 import { settings } from '../game/src/settings.js?v=34';
 import { nationSettings as config } from '../game/src/nation-settings.js?v=34';
 import { nationLayouts } from '../game/src/nation-layout.js?v=35';
 import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=35';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=35';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=35';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=36';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=36';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
@@ -154,7 +154,7 @@ test('NATION-05: all city facilities work independently and version 3 saves migr
     area: field, nations: createNationSimulation(), gold: 50, guilds: new Map(),
     player: { ...start, level: 1, experience: 0, hp: 100, mp: 100, weaponId: null, cooldown: 0,
       pendingPoison: 0, inventory: new Map(), armor: new Map(), skills: createSkills() },
-    resources: createTrees(gameDay(0)),
+    harvest: null,
     shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])),
   };
   const easternShop = nationLayouts[1].facilities.find(b => b.kind === 'weapon-shop').id;
@@ -179,4 +179,45 @@ test('NATION-05: all city facilities work independently and version 3 saves migr
   assert.ok(restored.guilds.has('house-southwest'));
   assert.deepEqual({ x: restored.player.x, y: restored.player.y }, facility.door);
   assert.deepEqual(copy(restored.nations), copy(state.nations));
+});
+
+test('NATION-06: player and residents compete for the same fruit and timber', () => {
+  const nations = createNationSimulation();
+  const nation = nations.nations[0];
+  nation.stock.food = 0;
+  advanceNations(nations, 1);
+  const city = nation.cities[0];
+  const worker = city.residents.find(person => person.action === 'gatherFood');
+  const fruit = city.sources.find(source => source.id === worker.targetId);
+  const state = { nations, player: { ...fruit, inventory: new Map() }, harvest: null };
+  assert.deepEqual(updateTrees(state, 1), { itemId: 'apple', quantity: 8 });
+  assert.equal(fruit.readyAt, 26);
+  assert.equal(updateTrees(state, 1), null);
+  const restored = restoreNations(copy(nations), 1);
+  assert.equal(restored.nations[0].cities[0].sources.find(s => s.id === fruit.id).readyAt, 26);
+  advanceNations(nations, worker.task.end);
+  assert.equal(worker.carrying, null, 'a resident cannot deliver fruit already picked by the player');
+  assert.equal(fruit.readyAt, 26);
+
+  const timber = city.sources.find(s => s.kind === 'wood' && s.readyAt <= nations.minute);
+  Object.assign(state.player, timber);
+  assert.equal(updateTrees(state, 1), null);
+  assert.deepEqual(updateTrees(state, 1), { itemId: 'wood', quantity: 8 });
+  assert.equal(timber.readyAt, nations.minute + 30);
+  assert.equal(state.player.inventory.get('wood'), 8);
+
+  const separate = createNationSimulation();
+  const other = separate.nations[0];
+  other.stock.food = 0;
+  advanceNations(separate, 1);
+  const otherCity = other.cities[0];
+  const picker = otherCity.residents.find(p => p.action === 'gatherFood');
+  const hungryTree = otherCity.sources.find(source => source.id === picker.targetId);
+  advanceNations(separate, picker.task.end);
+  assert.deepEqual(picker.carrying, { kind: 'food', quantity: 8 });
+  const secondPlayer = { nations: separate, player: { ...hungryTree, inventory: new Map() }, harvest: null };
+  assert.equal(updateTrees(secondPlayer, 1), null, 'the resident already picked the fruit');
+  const regrowth = hungryTree.readyAt;
+  advanceNations(separate, regrowth);
+  assert.deepEqual(updateTrees(secondPlayer, 1), { itemId: 'apple', quantity: 8 });
 });
