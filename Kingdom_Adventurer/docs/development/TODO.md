@@ -176,7 +176,9 @@
 
   - ver.36 [bfff84c6835aa9ac5cd4df532325c7798ddbc9fd](https://github.com/garatnic/sample/commit/bfff84c6835aa9ac5cd4df532325c7798ddbc9fd)。Nodeの保存済み自動テスト10件合格。
 
-- [ ] DEV-071 プレイヤーの採集を1個ずつに変更し、1本8個の共有残量・再生・保存を検証する。関連 CUR-WORLD-005、CUR-NATION-002、CUR-SYS-004。
+- [x] DEV-071 プレイヤーの採集を1個ずつに変更し、1本8個の共有残量・再生・保存を検証する。関連 CUR-WORLD-005、CUR-NATION-002、CUR-SYS-004。
+
+  - ver.37 [4bf43ef131bf37dda3fcbefca24643fc740c3faa](https://github.com/garatnic/sample/commit/4bf43ef131bf37dda3fcbefca24643fc740c3faa)。Nodeの保存済み自動テスト10件合格。
 
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。

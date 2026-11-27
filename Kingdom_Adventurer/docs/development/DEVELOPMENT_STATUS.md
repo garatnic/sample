@@ -1,11 +1,13 @@
 # 現在の開発状況
 
-実装基準は 2026-11-27 / ver.36 / DEV-070 / 実装コミット `bfff84c6835aa9ac5cd4df532325c7798ddbc9fd`。Phase 1の最小ゲームは完了し、Phase 2の反復開発中。
+実装基準は 2026-11-27 / ver.37 / DEV-071 / 実装コミット `4bf43ef131bf37dda3fcbefca24643fc740c3faa`。Phase 1の最小ゲームは完了し、Phase 2の反復開発中。
 
 - DEV-058の管理資料監査で、現行仕様39件と実装ファイル18件の対応、Phase 1以降のゲーム変更28コミットの履歴登録を静的確認した。保存済み自動テストは0件。検証済みの作業と未検証の範囲は各記録を参照。
 - 次回の DEV-067 は公開ブラウザで第二国家の戸口まで移動し、建物・住民表示とスマートフォン実機を確認するところから再開する。世界の次段階は DEV-068 と既存の各分野の TODO を参照。
 
 ## 作業履歴・当時の引き継ぎ
+
+- ver.37 / DEV-071 [4bf43ef131bf37dda3fcbefca24643fc740c3faa](https://github.com/garatnic/sample/commit/4bf43ef131bf37dda3fcbefca24643fc740c3faa)。採集バーごとに1個取得し、住民と共有する8個の残量を保存する。自動テスト10件合格。
 
 - ver.36 / DEV-070 [bfff84c6835aa9ac5cd4df532325c7798ddbc9fd](https://github.com/garatnic/sample/commit/bfff84c6835aa9ac5cd4df532325c7798ddbc9fd)。果樹と伐採木を住民とプレイヤーで共有し、採取競合と復活を同期する。保存形式5。自動テスト10件合格。
 
