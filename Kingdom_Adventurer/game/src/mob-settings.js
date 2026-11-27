@@ -13,7 +13,7 @@ export const mobSettings = {
   terrain: {
     forest: { animal: { deer: 4, rabbit: 2, fox: 3 }, enemy: { wolf: 3, spider: 4 } },
     grass: { animal: { deer: 3, rabbit: 5, fox: 1 }, enemy: { wolf: 3, rat: 5, crab: 1 } },
-    road: { animal: { rabbit: 2, fox: 1 }, enemy: {} },
+    road: { animal: { rabbit: 2, fox: 1 }, enemy: { bandit: 1 } },
     town: { animal: {}, enemy: {} },
   },
 };

@@ -13,6 +13,8 @@ export const settings = {
 };
 
 export const enemyTypes = {
+  bandit: { name: '盗賊', humanoid: true, gold: 5, equipmentPriceLimit: 10,
+    defense: 15, maxHp: 42, speed: 92, damage: 9, attackDelay: 0.9 },
   wolf: { materials: ['wolf-hide', 'wolf-fang'], name: 'オオカミ', defense: 15, maxHp: 42, speed: 108, damage: 9, attackDelay: 0.82 },
   rat: { materials: ['rat-meat', 'small-bone'], name: '大ネズミ', defense: 0, maxHp: 26, speed: 98, damage: 5, attackDelay: 0.72 },
   crab: { materials: ['crab-shell'], name: '泥ガニ', defense: 60, maxHp: 46, speed: 62, damage: 8, attackDelay: 1.05 },

@@ -1,4 +1,4 @@
-import { gainExperience } from './growth.js?v=32';
+import { gainExperience } from './growth.js?v=49';
 
 export const initialSkill = 15;
 export const maxSkill = 100;

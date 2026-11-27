@@ -1,7 +1,7 @@
-import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=47';
+import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=49';
 import { exactGameMinutes, firstMinuteOfDay, gameDay } from './clock.js?v=34';
-import { nationLayouts } from './nation-layout.js?v=47';
-import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=47';
+import { nationLayouts } from './nation-layout.js?v=49';
+import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=49';
 import { nationSettings as config } from './nation-settings.js?v=47';
 
 export const actionNames = {

@@ -1,4 +1,4 @@
-import { enemyTypes } from './settings.js?v=39';
+import { enemyTypes } from './settings.js?v=49';
 import { items } from './equipment.js?v=39';
 
 const templates = [

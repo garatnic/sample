@@ -1,5 +1,5 @@
-import { attackDamage } from './growth.js?v=32';
-import { gainSkillExperience, initialSkill } from './skills.js?v=48';
+import { attackDamage } from './growth.js?v=49';
+import { gainSkillExperience, initialSkill } from './skills.js?v=49';
 
 const oneHanded = 'one-handed';
 

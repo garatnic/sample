@@ -1,4 +1,4 @@
-import { nationLayouts } from './nation-layout.js?v=47';
+import { nationLayouts } from './nation-layout.js?v=49';
 import { nationSettings as config } from './nation-settings.js?v=47';
 
 export const resources = ['food', 'wood'];

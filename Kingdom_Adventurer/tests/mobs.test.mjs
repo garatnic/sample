@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createSkills } from '../game/src/skills.js?v=48';
+import { createSkills } from '../game/src/skills.js?v=49';
 import { nextMorningMinute } from '../game/src/clock.js?v=34';
-import { createEncounters } from '../game/src/combat.js?v=48';
-import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=48';
-import { mobSettings } from '../game/src/mob-settings.js?v=41';
-import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=47';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=48';
-import { mobTypes } from '../game/src/settings.js?v=39';
-import { cave, field, inTown, legacyFieldSpawns, shopDoors, start, terrainAt } from '../game/src/world.js?v=47';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=49';
+import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=49';
+import { mobSettings } from '../game/src/mob-settings.js?v=49';
+import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=49';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=49';
+import { mobTypes } from '../game/src/settings.js?v=49';
+import { collectLoot, dropLoot } from '../game/src/loot.js?v=49';
+import { items } from '../game/src/equipment.js?v=39';
+import { cave, field, inTown, legacyFieldSpawns, shopDoors, start, terrainAt } from '../game/src/world.js?v=49';
 
 function rng(seed = 28) {
   return () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
@@ -121,4 +123,38 @@ test('MOB-04: overnight replenishment remains finite, and old cave and field ind
   assert.deepEqual([deer.kind, deer.hp, deer.flee, deer.hunted], ['deer', 8, 2, true]);
   assert.equal(restored.areaStates.get(cave).encounters[0].remaining, 5);
   assert.equal(restored.areaStates.get(field).encounters.length, 0);
+});
+
+test('MOB-05: road bandits drop gold and one inexpensive equipment item that survives reload', () => {
+  const nations = createNationSimulation();
+  const world = createMobWorld(0);
+  advanceMobWorld(world, nations, 0, null, rng());
+  const bandits = [...world.mobs.values()].filter(mob => mob.kind === 'bandit');
+  assert.ok(bandits.length > 0);
+  assert.ok(bandits.every(mob => terrainAt(mob.x, mob.y) === 'road' && mobGroup(mob.kind) === 'enemy'));
+
+  const loot = { lootDrops: [] };
+  for (let id = 1; id <= 20; id++) dropLoot(loot, { ...bandits[0], id: `field-${id}` }, mobTypes.bandit);
+  assert.ok(new Set(loot.lootDrops.map(drop => drop.equipment)).size > 1);
+  assert.ok(loot.lootDrops.every(drop => drop.gold === 5 && items.get(drop.equipment).slot
+    && items.get(drop.equipment).price <= 10 && drop.materials.length === 0));
+
+  const bandit = animalAt(1, 'bandit', 3000, 3000);
+  bandit.hp = 1;
+  const state = gameState(nations, createMobWorld(0, { individuals: [bandit], nextId: 2 }));
+  Object.assign(state, { area: field, lootDrops: [] });
+  Object.assign(state.player, { x: 3012, y: 3000 });
+  updateCombat(state, 0);
+  assert.equal(state.mobWorld.mobs.size, 0);
+  assert.equal(state.lootDrops.length, 1);
+  const [drop] = state.lootDrops;
+  const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns),
+    lootDrops: area === field ? state.lootDrops : [] }]));
+  const restored = restoreSave(JSON.parse(JSON.stringify(makeSave(state, areaStates, 0))));
+  const loaded = { ...restored, lootDrops: restored.areaStates.get(field).lootDrops };
+  assert.deepEqual(loaded.lootDrops, [drop]);
+  collectLoot(loaded);
+  collectLoot(loaded);
+  assert.equal(loaded.gold, 35);
+  assert.equal(loaded.player.inventory.get(drop.equipment), 1);
 });

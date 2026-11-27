@@ -1,18 +1,18 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=48';
-import { mobSettings } from './mob-settings.js?v=41';
-import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=48';
-import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=47';
-import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=39';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=49';
+import { mobSettings } from './mob-settings.js?v=49';
+import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
+import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=49';
+import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=49';
 import { canEquipItem, items } from './equipment.js?v=39';
-import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
-import { maxMp } from './consumables.js?v=39';
+import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
+import { maxMp } from './consumables.js?v=49';
 import { gameDay } from './clock.js?v=34';
-import { findSource, harvestSeconds } from './trees.js?v=47';
+import { findSource, harvestSeconds } from './trees.js?v=49';
 
-import { createNationSimulation } from './nation-simulation.js?v=47';
-import { captureNations, restoreNations } from './nation-save.js?v=47';
+import { createNationSimulation } from './nation-simulation.js?v=49';
+import { captureNations, restoreNations } from './nation-save.js?v=49';
 
-import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=47';
+import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=49';
 
 const format = 'kingdom-adventurer';
 const version = 11;
@@ -131,7 +131,10 @@ function restoreArea(data, area, savedVersion) {
   const lootDrops = data.lootDrops.map(drop => {
     check(position(drop, area) && integer(drop.gold) && Array.isArray(drop.materials)
       && drop.materials.length <= 5 && drop.materials.every(id => items.get(id)?.category === 'materials'));
-    return { x: drop.x, y: drop.y, gold: drop.gold, materials: [...drop.materials] };
+    const { equipment } = drop;
+    check(equipment === undefined || Boolean(items.get(equipment)?.slot));
+    return { x: drop.x, y: drop.y, gold: drop.gold, materials: [...drop.materials],
+      ...(equipment === undefined ? {} : { equipment }) };
   });
   return { encounters, lootDrops };
 }

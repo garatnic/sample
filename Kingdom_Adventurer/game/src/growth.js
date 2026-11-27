@@ -1,4 +1,4 @@
-import { settings } from './settings.js?v=39';
+import { settings } from './settings.js?v=49';
 
 export const growth = {
   hpPerLevel: 10,

@@ -1,16 +1,22 @@
-import { mobsIn } from './mob-world.js?v=48';
-import { animalTypes, settings } from './settings.js?v=39';
-import { buildings, cave, field, terrainAt } from './world.js?v=47';
+import { mobsIn } from './mob-world.js?v=49';
+import { animalTypes, settings } from './settings.js?v=49';
+import { buildings, cave, field, terrainAt } from './world.js?v=49';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=47';
+import { modeFor, residentPosition } from './nation-simulation.js?v=49';
 
-import { harvestSeconds, sourceQuantity } from './trees.js?v=47';
+import { harvestSeconds, sourceQuantity } from './trees.js?v=49';
 
 const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15], [1, -21], [11, -32], [-15, -21]];
 
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
 const enemySprites = {
+  bandit: [
+    [-6, -5, 5, 6, '#352c2a'], [1, -5, 5, 6, '#352c2a'],
+    [-8, -17, 16, 13, '#734438'], [-6, -25, 12, 9, '#4d3236'],
+    [-4, -22, 8, 6, '#c18b67'], [-8, -10, 16, 2, '#a67843'],
+    [8, -15, 3, 10, '#b9b5aa'],
+  ],
   deer: [[-13,-12,20,11,'#99623d'],[-11,-3,3,8,'#593c2c'],[3,-3,3,8,'#593c2c'],
     [4,-20,5,13,'#99623d'],[7,-22,9,6,'#bb8756'],[8,-26,2,6,'#e5ca96'],[13,-28,2,7,'#e5ca96']],
   rabbit: [[-8,-9,13,10,'#c2b7a8'],[2,-12,8,8,'#ddd0bd'],[3,-19,3,8,'#ddd0bd'],
@@ -214,9 +220,9 @@ export function createRenderer(canvas) {
       }
     }
     drawPortal(outdoors ? cave.entrance : cave.exit, outdoors);
-    for (const { x, y, materials } of state.lootDrops) {
+    for (const { x, y, materials, equipment } of state.lootDrops) {
       rect(x - 5, y - 5, 10, 10, '#654319');
-      rect(x - 4, y - 4, 8, 8, materials.length ? '#bc8a55' : '#f2bc35');
+      rect(x - 4, y - 4, 8, 8, materials.length || equipment ? '#bc8a55' : '#f2bc35');
       rect(x - 2, y - 3, 3, 2, '#fff1a0');
     }
     if (outdoors && state.mobWorld) {
