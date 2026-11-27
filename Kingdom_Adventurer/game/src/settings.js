@@ -1,7 +1,10 @@
+const tile = 32;
+
 export const settings = {
-  tile: 32,
-  mapWidth: 2240,
-  mapHeight: 1568,
+  tile,
+  mapTiles: 256,
+  get mapWidth() { return this.mapTiles * this.tile; },
+  get mapHeight() { return this.mapTiles * this.tile; },
   player: { maxHp: 100, speed: 180, range: 16, damage: 17, radius: 10 },
   difficulty: { playerDamageMultiplier: 1, enemyDamageMultiplier: 1 },
   currency: { startingGold: 10, pickupRadius: 18 },

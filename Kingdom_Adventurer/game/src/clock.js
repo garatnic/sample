@@ -3,7 +3,11 @@ const realSecondsPerGameHour = 75;
 const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
 export function gameMinutes(elapsedSeconds) {
-  return Math.floor(elapsedSeconds * 60 / realSecondsPerGameHour);
+  return Math.floor(exactGameMinutes(elapsedSeconds));
+}
+
+export function exactGameMinutes(elapsedSeconds) {
+  return elapsedSeconds * 60 / realSecondsPerGameHour;
 }
 
 export function gameDay(minute) {
@@ -24,4 +28,8 @@ export function gameDateTime(minute) {
     date: `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日（${weekday}）`,
     time: `${hours}:${minutes}`,
   };
+}
+
+export function firstMinuteOfDay(day) {
+  return (day * 86_400_000 - startTime) / 60_000;
 }

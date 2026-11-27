@@ -1,0 +1,16 @@
+export const nationSettings = {
+  count: 2,
+  spacing: { x: 5152, y: 2432 },
+  buildingRadius: 288,
+  initialStock: { wood: 36, food: 25 },
+  house: { initial: 5, max: 20, residents: 2, cost: 24, minutes: 48 },
+  warehouse: { initial: 1, max: 4, capacity: 120, cost: 32, minutes: 64, threshold: 0.75 },
+  sourcesPerResource: 12,
+  sourceRadius: 448,
+  harvest: { wood: { yield: 8, minutes: 5, regrow: 30 }, food: { yield: 8, minutes: 4, regrow: 25 } },
+  carry: 8,
+  foodPerResident: 1,
+  reserveDays: 2,
+  walkingSpeed: 48,
+  nearRadius: 1450,
+};

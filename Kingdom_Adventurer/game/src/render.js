@@ -1,5 +1,7 @@
-import { settings } from './settings.js';
-import { buildings, cave, field, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=29';
+import { settings } from './settings.js?v=34';
+import { buildings, cave, field, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=34';
+
+import { modeFor, residentPosition } from './nation-simulation.js?v=34';
 
 import { harvestSeconds } from './trees.js?v=28';
 
@@ -96,20 +98,24 @@ export function createRenderer(canvas) {
     const shop = shopDoors[kind];
     rect(x + 3, y + 6, w + 4, h, '#363e30');
     rect(x, y + 14, w, h - 14, '#d1b087');
-    rect(x - 3, y, w + 6, h - 17, inn ? '#85533e' : '#666c51');
+    const roof = { inn: '#85533e', center: '#575381', warehouse: '#7b5638', house: '#5c7451' };
+    rect(x - 3, y, w + 6, h - 17, roof[kind] ?? '#666c51');
     rect(x - 3, y + 5, w + 6, 4, inn ? '#a77353' : '#81886b');
     rect(x - 3, y + h - 22, w + 6, 5, '#4c4637');
     rect(x + w / 2 - 7, y + h - 17, 14, 17, '#443729');
     rect(x + 8, y + h - 13, 8, 7, '#e3ce93');
     rect(x + w - 16, y + h - 13, 8, 7, '#e3ce93');
     const guild = kind === 'guild';
-    if (!inn && !shop && !guild) return;
+    const civic = kind === 'center' || kind === 'warehouse';
+    if (!inn && !shop && !guild && !civic) return;
     rect(x + w / 2 - 17, y + 10, 34, 24, '#f0dbad');
     ctx.fillStyle = '#493821';
     ctx.textAlign = 'center';
-    ctx.font = guild ? 'bold 10px system-ui' : 'bold 15px system-ui';
-    ctx.fillText(inn ? '宿' : guild ? 'ギルド' : kind === 'goods-shop' ? '道具' : '装備', x + w / 2, y + 28);
-    const door = inn ? innDoor : guild ? guildDoors[id] : shop;
+    ctx.font = guild || civic ? 'bold 10px system-ui' : 'bold 15px system-ui';
+    const labels = { inn: '宿', guild: 'ギルド', 'goods-shop': '道具', 'weapon-shop': '装備',
+      center: '国の中心', warehouse: '倉庫' };
+    ctx.fillText(labels[kind], x + w / 2, y + 27);
+    const door = inn ? innDoor : guild ? guildDoors[id] : shop ?? { x: x + w / 2, y: y + h + 25 };
     rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');
   }
 
@@ -132,7 +138,29 @@ export function createRenderer(canvas) {
     rect(x - 11, y - 23, 22 * hp / maxHp, 3, '#f1a678');
   }
 
-  return function render(state, time) {
+  function drawResident({ x, y }, carrying, tint) {
+    rect(x - 7, y + 2, 14, 4, '#24352c88');
+    rect(x - 5, y - 9, 10, 12, tint);
+    rect(x - 4, y - 15, 8, 7, '#ecc18e');
+    if (carrying) rect(x + 4, y - 7, 6, 7, carrying.kind === 'wood' ? '#8b5832' : '#dcb759');
+  }
+
+  function drawSource(source, minute) {
+    const { x, y, kind } = source;
+    if (source.readyAt > minute) {
+      rect(x - 4, y - 4, 8, 5, '#766049');
+    } else if (kind === 'wood') {
+      rect(x - 3, y - 18, 6, 20, '#765037');
+      rect(x - 11, y - 28, 22, 16, '#214e37');
+      rect(x - 8, y - 31, 16, 11, '#52885b');
+    } else {
+      rect(x - 9, y - 8, 18, 9, '#3d6d37');
+      rect(x - 6, y - 9, 4, 4, '#eca656');
+      rect(x + 3, y - 11, 4, 4, '#eca656');
+    }
+  }
+
+  return function render(state, time, minute) {
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     const ratio = Math.min(devicePixelRatio || 1, 2);
@@ -161,7 +189,29 @@ export function createRenderer(canvas) {
       if (tree.x >= left - 20 && tree.x <= left + width + 20
         && tree.y >= top - 8 && tree.y <= top + height + 40) drawTree(tree);
     }
-    for (const entry of outdoors ? buildings : []) building(entry);
+    const visible = ({ x, y }) =>
+      x >= left - 100 && x <= left + width + 100 && y >= top - 80 && y <= top + height + 80;
+    for (const entry of outdoors ? buildings : []) {
+      if (visible(entry)) building(entry);
+    }
+    if (outdoors) {
+      for (const [index, nation] of state.nations.nations.entries()) {
+        for (const city of nation.cities) {
+          if (modeFor(city, player) !== 'near') continue;
+          for (const source of city.sources) if (visible(source)) drawSource(source, minute);
+          for (const entry of city.buildings) if (visible(entry)) building(entry);
+          const site = city.project?.site;
+          if (site && visible(site)) {
+            rect(site.x, site.y, site.w, site.h, '#bfa16d66');
+            rect(site.x, site.y + site.h - 5, site.w, 5, '#dec087');
+          }
+          for (const resident of city.residents) {
+            const position = residentPosition(city, resident, minute);
+            if (visible(position)) drawResident(position, resident.carrying, index === 0 ? '#80663e' : '#76608c');
+          }
+        }
+      }
+    }
     drawPortal(outdoors ? cave.entrance : cave.exit, outdoors);
     for (const { x, y, materials } of state.lootDrops) {
       rect(x - 5, y - 5, 10, 10, '#654319');

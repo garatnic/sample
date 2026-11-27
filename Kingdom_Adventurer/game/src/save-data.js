@@ -1,20 +1,23 @@
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
-import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=29';
-import { enemyTypes, settings } from './settings.js?v=25';
+import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=34';
+import { enemyTypes, settings } from './settings.js?v=34';
 import { canEquipItem, items } from './equipment.js?v=32';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { maxMp } from './consumables.js?v=27';
-import { gameDay } from './clock.js?v=30';
+import { gameDay } from './clock.js?v=34';
 import { createTrees, harvestSeconds } from './trees.js?v=28';
 
+import { createNationSimulation } from './nation-simulation.js?v=34';
+import { captureNations, restoreNations } from './nation-save.js?v=34';
+
 const format = 'kingdom-adventurer';
-const version = 2;
+const version = 3;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
   const { player, resources } = state;
   return structuredClone({
-    format, version, clock, area: state.area.id, gold: state.gold,
+    format, version, clock, nations: captureNations(state.nations ?? createNationSimulation(clock)), area: state.area.id, gold: state.gold,
     player: { x: player.x, y: player.y, hp: player.hp, mp: player.mp,
       level: player.level, experience: player.experience, weaponId: player.weaponId,
       inventory: [...player.inventory], armor: [...player.armor], skills: [...player.skills],
@@ -140,7 +143,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
@@ -167,5 +170,6 @@ export function restoreSave(data) {
     check(area === field && tree?.remaining > 0 && number(elapsed, 0, harvestSeconds));
     resources.harvest = { tree, elapsed };
   }
-  return { player, area, areaStates, gold: data.gold, guilds, shopGold, resources, clock: data.clock };
+  const nations = data.version === version ? restoreNations(data.nations, data.clock) : createNationSimulation(data.clock);
+  return { player, area, areaStates, nations, gold: data.gold, guilds, shopGold, resources, clock: data.clock };
 }

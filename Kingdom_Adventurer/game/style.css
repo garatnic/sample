@@ -65,7 +65,7 @@ button {
   footer { display: none; }
 }
 
-#open-inventory, #open-items, #open-quests, #open-save, #open-skills { pointer-events: auto; }
+#open-inventory, #open-items, #open-quests, #open-save, #open-skills, #open-nations { pointer-events: auto; }
 button:disabled { opacity: .55; cursor: default; }
 .gear-menu { width: 28rem; max-height: calc(100dvh - 4rem); overflow: auto; }
 .gear-menu ul { display: grid; gap: .55rem; padding: 0; }
@@ -249,3 +249,23 @@ header .hud-mp { margin: 0; color: #b6dbef; font-variant-numeric: tabular-nums; 
 .equipment-menu.inventory-goods { width: min(30rem, calc(100vw - 1rem)); }
 .inventory-goods .equipment-layout { display: block; }
 .inventory-goods .equipment-stats, .inventory-goods .equipment-body { display: none; }
+
+#nation-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 0.75rem;
+}
+
+#nation-content dl {
+  display: grid;
+  grid-template-columns: minmax(5.5em, auto) 1fr;
+  gap: 0.25rem 0.6rem;
+}
+
+#nation-content dd {
+  margin: 0;
+}
+
+#nation-menu {
+  width: 44rem;
+}

@@ -1,13 +1,13 @@
 import { createSkills } from './skills.js?v=32';
 import { setupSkillMenu } from './skill-menu.js?v=32';
-import { settings } from './settings.js';
-import { cave, field, guildDoors, innDoor, shopDoors, inTown, movePlayer, portalRadius, start, town } from './world.js?v=29';
-import { createEncounters, inCombat, updateCombat } from './combat.js?v=32';
+import { settings } from './settings.js?v=34';
+import { cave, field, guildDoors, innDoor, shopDoors, inTown, movePlayer, portalRadius, start, town } from './world.js?v=34';
+import { createEncounters, inCombat, updateCombat } from './combat.js?v=34';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=29';
+import { createRenderer } from './render.js?v=34';
 import { setupGearMenus } from './gear-ui.js?v=32';
-import { gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=30';
+import { exactGameMinutes, gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=27';
 
 import { setupQuestMenus } from './quests.js?v=27';
@@ -16,8 +16,12 @@ import { collectLoot } from './loot.js?v=27';
 
 import { createTrees, updateTrees } from './trees.js?v=28';
 import { items } from './equipment.js?v=32';
-import { areas, makeSave, restoreSave } from './save-data.js?v=32';
+import { areas, makeSave, restoreSave } from './save-data.js?v=34';
 import { setupSaveMenu } from './save-menu.js?v=31';
+
+import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=34';
+import { inSettlement } from './nation-layout.js?v=34';
+import { setupNationMenu } from './nation-menu.js?v=34';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -54,6 +58,8 @@ const startingWeaponId = 'iron-dagger';
 const state = {
   player: createPlayer({ inventory: new Map([[startingWeaponId, 1]]), weaponId: startingWeaponId }),
   area: field,
+  nations: createNationSimulation(),
+  centerContact: null,
   get encounters() { return areaStates.get(this.area).encounters; },
   get lootDrops() { return areaStates.get(this.area).lootDrops; },
   strike: null, resources: createTrees(gameDay(0)),
@@ -67,6 +73,7 @@ function applySave({ areaStates: savedAreas, clock, ...savedState }) {
   const touching = door => Math.hypot(state.player.x - door.x, state.player.y - door.y) <= 19;
   const contact = doors => state.area === field
     ? Object.keys(doors).find(id => touching(doors[id])) ?? null : null;
+  state.centerContact = nearbyCenter()?.id ?? null;
   state.innContact = state.area === field && touching(innDoor);
   state.shopContact = contact(shopDoors);
   state.guildContact = contact(guildDoors);
@@ -84,6 +91,7 @@ inn.addEventListener('close', () => {
     state.player.flash = 0;
     clockBaseMinute = nextMorningMinute(currentGameMinute());
     elapsedPlaySeconds = 0;
+    advanceNations(state.nations, clockBaseMinute);
     state.notice = { text: `翌朝6時になり、HPが全回復しました（−${settings.inn.price}G）`, remaining: 2 };
     void saves.autoSave();
   }
@@ -96,15 +104,24 @@ death.addEventListener('close', () => {
   state.strike = null;
   state.notice = null;
   state.innContact = false;
+  state.centerContact = null;
   state.shopContact = null;
   state.guildContact = null;
 });
+
+function nearbyCenter() {
+  if (state.area !== field) return null;
+  return state.nations.nations.find(nation => {
+    const { door } = nation.cities[0].buildings.find(b => b.kind === 'center');
+    return Math.hypot(state.player.x - door.x, state.player.y - door.y) <= 19;
+  });
+}
 
 function update(dt) {
   const { player } = state;
   const direction = input.read();
   const { x, y } = player;
-  movePlayer(player, direction.x, direction.y, dt, state.area);
+  movePlayer(player, direction.x, direction.y, dt, state.area, state.area === field ? settlementBuildings(state.nations) : []);
   player.moving = x !== player.x || y !== player.y;
   player.flash = Math.max(0, player.flash - dt);
   if (state.notice && (state.notice.remaining -= dt) <= 0) state.notice = null;
@@ -120,6 +137,14 @@ function update(dt) {
     state.notice = null;
     player.moving = false;
     void saves.autoSave();
+    return;
+  }
+
+  const center = nearbyCenter();
+  const enteringCenter = center && center.id !== state.centerContact;
+  state.centerContact = center?.id ?? null;
+  if (enteringCenter) {
+    openNation(center);
     return;
   }
 
@@ -200,6 +225,7 @@ function frame(time) {
   previous = time;
   if (!document.querySelector('dialog[open]') && state.player.hp > 0) {
     elapsedPlaySeconds += dt;
+    advanceNations(state.nations, currentGameMinute());
     update(dt);
   }
   const minute = currentGameMinute();
@@ -217,9 +243,10 @@ function frame(time) {
   setText(gold, `${state.gold}G`);
   setText(mp, `MP ${state.player.mp} / ${maxMp}`);
   setText(hp, `${Math.ceil(currentHp * 10) / 10} / ${maxHp}`);
-  setText(locationLabel, state.area === cave ? cave.name : inTown(state.player) ? town.name : '街道とその周辺');
+  const city = state.nations.nations.find(nation => inSettlement(nation.cities[0], state.player))?.cities[0];
+  setText(locationLabel, state.area === cave ? cave.name : city?.name ?? (inTown(state.player) ? town.name : '街道とその周辺'));
   setText(notice, state.notice?.text ?? '');
-  render(state, time);
+  render(state, time, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds));
   requestAnimationFrame(frame);
 }
 
@@ -232,6 +259,7 @@ const saves = setupSaveMenu({
   notify: saveNotice,
 });
 await saves.loadOnStart();
+const openNation = setupNationMenu(state, input, field);
 const openGuild = setupQuestMenus(state, input);
 const openShop = setupGearMenus(state, input);
 setupSkillMenu(state, input);

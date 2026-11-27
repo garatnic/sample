@@ -1,4 +1,6 @@
-import { settings } from './settings.js';
+import { settings } from './settings.js?v=34';
+
+import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=34';
 
 export const town = { id: 'town-crossroads', name: '楡の宿場町', x: 928, y: 608, w: 384, h: 320 };
 export const start = { x: 1112, y: 800 };
@@ -7,7 +9,7 @@ export const buildings = [
   { id: 'house-west', x: 972, y: 697, w: 56, h: 48, kind: 'goods-shop' },
   { id: 'house-east', x: 1204, y: 697, w: 58, h: 49, kind: 'weapon-shop' },
   { id: 'house-southwest', x: 1007, y: 844, w: 58, h: 47, kind: 'guild' },
-  { id: 'house-southeast', x: 1174, y: 849, w: 66, h: 50, kind: 'house' },
+  { id: 'house-southeast', x: 1174, y: 849, w: 66, h: 50, kind: 'annex' },
 ];
 const inn = buildings.find(building => building.kind === 'inn');
 export const innDoor = { x: inn.x + inn.w / 2, y: inn.y + inn.h + 12 };
@@ -34,21 +36,37 @@ export const spawns = [
 ];
 
 export function inTown({ x, y }) {
-  return x >= town.x && x <= town.x + town.w && y >= town.y && y <= town.y + town.h;
+  return (x >= town.x && x <= town.x + town.w && y >= town.y && y <= town.y + town.h)
+    || nationLayouts.some(city => inSettlement(city, { x, y }));
 }
 
 export function terrainAt(x, y) {
-  if (Math.abs(y - 800 - Math.sin((x - 1120) / 200) * 37 * Math.min(1, Math.abs(x - 1120) / 300)) < 23
-    || (Math.abs(x - 1112) < 18 && y >= 720)) return 'road';
-  if (inTown({ x, y })) return 'town';
+  const civicTerrain = nationTerrainAt(x, y);
+  if (civicTerrain) return civicTerrain;
+  const easternCity = nationLayouts[1];
+  const fraction = easternCity ? Math.max(0, Math.min(1, (x - 2240) / (easternCity.x - 2240))) : 0;
+  const roadY = 800 + fraction * ((easternCity?.y ?? 800) - 800);
+  if (Math.abs(y - roadY - (1 - fraction) * Math.sin((x - 1120) / 200) * 37 * Math.min(1, Math.abs(x - 1120) / 300)) < 23
+    || (Math.abs(x - 1112) < 18 && y >= 720 && y <= (nationLayouts[0]?.y ?? 928))) return 'road';
+  if (x >= town.x && x <= town.x + town.w && y >= town.y && y <= town.y + town.h) return 'town';
   const woods = Math.sin(x / 177) + Math.cos(y / 123) + Math.sin((x + y) / 271);
   return woods > 0.5 ? 'forest' : 'grass';
 }
 
-function walkable(x, y) {
+function overlapDepth(b, x, y, radius) {
+  return Math.min(x - b.x + radius, b.x + b.w + radius - x,
+    y - b.y + radius, b.y + b.h + radius - y);
+}
+
+function walkable(x, y, previous, settlementBuildings) {
   const { radius } = settings.player;
   return !buildings.some(b => x > b.x - radius && x < b.x + b.w + radius
-    && y > b.y - radius && y < b.y + b.h + radius);
+    && y > b.y - radius && y < b.y + b.h + radius)
+    && !settlementBuildings.some(b => {
+      const depth = overlapDepth(b, x, y, radius);
+      // A player standing on a just-completed site can always step out.
+      return depth > 0 && depth > overlapDepth(b, previous.x, previous.y, radius);
+    });
 }
 
 export const cave = {
@@ -70,12 +88,12 @@ export const cave = {
 export const field = { id: 'field', width: settings.mapWidth, height: settings.mapHeight, spawns };
 export const portalRadius = 19;
 
-export function movePlayer(player, dx, dy, dt, area = field) {
+export function movePlayer(player, dx, dy, dt, area = field, settlementBuildings = []) {
   const length = Math.max(1, Math.hypot(dx, dy));
   const step = settings.player.speed * dt / length;
   const margin = settings.player.radius + (area === cave ? settings.tile : 0);
   const x = Math.max(margin, Math.min(area.width - margin, player.x + dx * step));
   const y = Math.max(margin, Math.min(area.height - margin, player.y + dy * step));
-  if (area === cave || walkable(x, player.y)) player.x = x;
-  if (area === cave || walkable(player.x, y)) player.y = y;
+  if (area === cave || walkable(x, player.y, player, settlementBuildings)) player.x = x;
+  if (area === cave || walkable(player.x, y, player, settlementBuildings)) player.y = y;
 }

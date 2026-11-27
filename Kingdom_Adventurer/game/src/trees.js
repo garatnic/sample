@@ -1,4 +1,4 @@
-import { settings } from './settings.js';
+import { settings } from './settings.js?v=34';
 
 const capacity = 20;
 export const harvestSeconds = 1;
