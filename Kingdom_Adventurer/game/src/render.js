@@ -1,10 +1,10 @@
-import { mobsIn } from './mob-world.js?v=49';
+import { mobsIn } from './mob-world.js?v=50';
 import { animalTypes, settings } from './settings.js?v=49';
-import { buildings, cave, field, terrainAt } from './world.js?v=49';
+import { buildings, cave, field, terrainAt } from './world.js?v=50';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=49';
+import { modeFor, residentPosition } from './nation-simulation.js?v=50';
 
-import { harvestSeconds, sourceQuantity } from './trees.js?v=49';
+import { harvestSeconds, sourceQuantity } from './trees.js?v=50';
 
 const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15], [1, -21], [11, -32], [-15, -21]];
 

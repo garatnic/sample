@@ -2,15 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createSkills } from '../game/src/skills.js?v=49';
 import { nextMorningMinute } from '../game/src/clock.js?v=34';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=49';
-import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=49';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=50';
+import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=50';
 import { mobSettings } from '../game/src/mob-settings.js?v=49';
-import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=49';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=49';
+import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=50';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=50';
 import { mobTypes } from '../game/src/settings.js?v=49';
 import { collectLoot, dropLoot } from '../game/src/loot.js?v=49';
 import { items } from '../game/src/equipment.js?v=39';
-import { cave, field, inTown, legacyFieldSpawns, shopDoors, start, terrainAt } from '../game/src/world.js?v=49';
+import { cave, field, inTown, legacyFieldSpawns, shopDoors, start, terrainAt } from '../game/src/world.js?v=50';
 
 function rng(seed = 28) {
   return () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
@@ -112,6 +112,9 @@ test('MOB-04: overnight replenishment remains finite, and old cave and field ind
   const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns), lootDrops: [] }]));
   const old = makeSave(gameState(createNationSimulation(), createMobWorld(0)), areaStates, 0);
   old.version = 9;
+  for (const nation of old.nations.nations) {
+    nation.residents = nation.residents.flatMap(person => [person, { ...person, id: person.id.replace(/-1$/, "-2") }]);
+  }
   delete old.mobs;
   old.areas[0].encounters = legacyFieldSpawns.map(({ id, x, y }, index) => ({
     id, remaining: 0, generation: index === 8 ? 1 : 0,

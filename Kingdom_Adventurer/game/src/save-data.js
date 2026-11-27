@@ -1,21 +1,21 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=49';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=50';
 import { mobSettings } from './mob-settings.js?v=49';
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
-import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=49';
+import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=50';
 import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=49';
 import { canEquipItem, items } from './equipment.js?v=39';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
 import { maxMp } from './consumables.js?v=49';
 import { gameDay } from './clock.js?v=34';
-import { findSource, harvestSeconds } from './trees.js?v=49';
+import { findSource, harvestSeconds } from './trees.js?v=50';
 
-import { createNationSimulation } from './nation-simulation.js?v=49';
-import { captureNations, restoreNations } from './nation-save.js?v=49';
+import { createNationSimulation } from './nation-simulation.js?v=50';
+import { captureNations, restoreNations } from './nation-save.js?v=50';
 
-import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=49';
+import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=50';
 
 const format = 'kingdom-adventurer';
-const version = 11;
+const version = 12;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -198,7 +198,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);

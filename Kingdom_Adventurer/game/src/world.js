@@ -1,6 +1,6 @@
 import { settings } from './settings.js?v=49';
 
-import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=49';
+import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=50';
 
 export const start = { ...nationLayouts[0].arrival };
 export const buildings = nationLayouts.flatMap(city => city.facilities);

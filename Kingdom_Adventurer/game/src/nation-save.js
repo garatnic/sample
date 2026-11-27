@@ -1,8 +1,8 @@
 import { mobSettings } from './mob-settings.js?v=49';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
-import { nationLayouts } from './nation-layout.js?v=49';
-import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=49';
-import { nationSettings as config } from './nation-settings.js?v=47';
+import { nationLayouts } from './nation-layout.js?v=50';
+import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=50';
+import { nationSettings as config } from './nation-settings.js?v=50';
 
 function requireValid(condition) {
   if (!condition) throw new Error('Invalid nation simulation data');
@@ -37,7 +37,9 @@ export function captureNations(simulation) {
   };
 }
 
-export function restoreNations(data, minute, saveVersion = 11) {
+export function restoreNations(data, minute, saveVersion = 12) {
+  const legacyHousing = saveVersion < 12;
+  const savedHouseCapacity = legacyHousing ? 2 : config.house.residents;
   const legacy = saveVersion < 6;
   const legacyTasks = saveVersion < 7;
   const simulation = createNationSimulation(minute);
@@ -68,8 +70,8 @@ export function restoreNations(data, minute, saveVersion = 11) {
     }
     requireValid(expected.every(b => city.buildings.some(entry => entry.id === b.id && entry.kind === b.kind))
       && counts.house <= config.house.max && counts.warehouse <= config.warehouse.max
-      && (saveVersion >= 10 ? saved.residents.length <= counts.house * config.house.residents
-        : saved.residents.length === counts.house * config.house.residents));
+      && (saveVersion >= 10 ? saved.residents.length <= counts.house * savedHouseCapacity
+        : saved.residents.length === counts.house * savedHouseCapacity));
     const limit = capacity(nation);
     requireValid(integer(saved.stock?.wood, 0, limit) && integer(saved.stock?.food, 0, limit - saved.stock.wood));
     nation.stock = { wood: saved.stock.wood, food: saved.stock.food };
@@ -98,7 +100,7 @@ export function restoreNations(data, minute, saveVersion = 11) {
     const claimed = new Set();
     city.residents = saved.residents.map(person => {
       const home = city.buildings.find(b => b.id === person?.homeId && b.kind === 'house');
-      requireValid(home && !people.has(person.id) && Array.from({ length: config.house.residents },
+      requireValid(home && !people.has(person.id) && Array.from({ length: savedHouseCapacity },
         (_, i) => `${home.id}-resident-${i + 1}`).includes(person.id)
         && positions.some(point => point.x === person.x && point.y === person.y)
         && Object.hasOwn(actionNames, person.action));
@@ -170,17 +172,35 @@ export function restoreNations(data, minute, saveVersion = 11) {
       return { id, homeId, x, y, action, targetId, carrying, task, role, wanderUntil, gatherLimit, gatherGeneration, ...combatState, nationId: nation.id, cityId: city.id };
     });
     requireValid(!city.project || city.residents.some(p => p.id === city.project.workerId && p.targetId === city.project.site.id));
+    const nextEvent = () => Math.min(firstMinuteOfDay(gameDay(minute) + 1),
+      ...city.residents.filter(p => p.task).map(p => p.task.end),
+      ...city.sources.filter(s => s.readyAt > minute).map(s => s.readyAt));
+    const initial = saved.nextMinute === minute && !city.project && city.residents.every(p => p.action === 'idle');
+    const pendingDecision = saved.nextMinute === minute
+      && (initial || saveVersion >= 11 && city.residents.some(p => p.action === 'idle'));
+    requireValid(legacyTasks || saved.nextMinute === nextEvent() || pendingDecision);
+
+    if (legacyHousing) {
+      const byHome = new Map();
+      for (const person of city.residents) {
+        const occupant = byHome.get(person.homeId);
+        if (!occupant || person.id === city.project?.workerId
+          || (occupant.id !== city.project?.workerId && person.id < occupant.id)) {
+          byHome.set(person.homeId, person);
+        }
+      }
+      city.residents = [...byHome.values()];
+      for (const person of city.residents) {
+        const id = `${person.homeId}-resident-1`;
+        if (city.project?.workerId === person.id) city.project.workerId = id;
+        person.id = id;
+      }
+    }
     assignRoles(city);
     const demand = refreshNationDemand(nation, minute);
     requireValid(nation.stock.wood + nation.stock.food + demand.reserved.wood + demand.reserved.food <= limit);
-    const eventMinute = Math.min(firstMinuteOfDay(gameDay(minute) + 1),
-      ...city.residents.filter(p => p.task).map(p => p.task.end),
-      ...city.sources.filter(s => s.readyAt > minute).map(s => s.readyAt));
     const hasIdle = city.residents.some(person => person.action === 'idle');
-    const initial = saved.nextMinute === minute && !city.project && city.residents.every(p => p.action === 'idle');
-    const pendingDecision = saved.nextMinute === minute && (initial || saveVersion >= 11 && hasIdle);
-    requireValid(legacyTasks || saved.nextMinute === eventMinute || pendingDecision);
-    nation.nextMinute = pendingDecision || saveVersion < 11 && hasIdle ? minute : eventMinute;
+    nation.nextMinute = hasIdle && (pendingDecision || legacyHousing) ? minute : nextEvent();
   }
   return simulation;
 }

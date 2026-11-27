@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
 import { items } from '../game/src/equipment.js?v=39';
-import { start, shopDoors } from '../game/src/world.js?v=49';
-import { nationLayouts } from '../game/src/nation-layout.js?v=49';
-import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=49';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=49';
-import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=49';
-import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=49';
-import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=49';
+import { start, shopDoors } from '../game/src/world.js?v=50';
+import { nationLayouts } from '../game/src/nation-layout.js?v=50';
+import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=50';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=50';
+import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=50';
+import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=50';
+import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=50';
 
 const midnight = firstMinuteOfDay(gameDay(0) + 1);
 const makeShops = () => ({
@@ -173,8 +173,8 @@ test('ECON-05: bulk trades conserve player, shop and treasury gold during partia
 
 test('ECON-06: warehouse capacity thresholds depend on population and completed warehouses', () => {
   for (const [population, needed, requiredWarehouses] of [
-    [10, 132, 2], [15, 182, 2], [20, 232, 2], [25, 282, 3],
-    [30, 332, 3], [35, 382, 4], [40, 432, 4],
+    [5, 132, 2], [7, 172, 2], [10, 232, 2], [12, 272, 3],
+    [15, 332, 3], [17, 372, 4], [20, 432, 4],
   ]) {
     const [nation] = createNationSimulation().nations;
     const [city] = nation.cities;
@@ -183,7 +183,7 @@ test('ECON-06: warehouse capacity thresholds depend on population and completed 
     for (let warehouses = 1; warehouses <= 4; warehouses++) {
       nation.stock = { food: 90 * warehouses, wood: 0 };
       const targets = reserves(nation);
-      assert.equal(targets.requiredCapacity, warehouses < 4 ? needed : population * 10);
+      assert.equal(targets.requiredCapacity, warehouses < 4 ? needed : population * 20);
       assert.equal(targets.plans.get(city.id).kind, warehouses < requiredWarehouses ? 'warehouse' : 'house');
       assert.equal(targets.buildingWood, warehouses < requiredWarehouses ? 32 : 24);
       if (warehouses < 4) city.buildings.push({ ...plots[warehouses - 1], kind: 'warehouse' });

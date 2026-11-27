@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { updateTrees } from '../game/src/trees.js?v=49';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=49';
-import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=49';
-import { createEncounters } from '../game/src/combat.js?v=49';
+import { updateTrees } from '../game/src/trees.js?v=50';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=50';
+import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=50';
+import { createEncounters } from '../game/src/combat.js?v=50';
 import { createSkills } from '../game/src/skills.js?v=49';
 import { refreshGuild } from '../game/src/quests.js?v=49';
 import { settings } from '../game/src/settings.js?v=49';
-import { nationSettings as config } from '../game/src/nation-settings.js?v=47';
-import { nationLayouts } from '../game/src/nation-layout.js?v=49';
-import { buildings, field, guildDoors, inTown, innDoors, legacyFieldSpawns, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=49';
+import { nationSettings as config } from '../game/src/nation-settings.js?v=50';
+import { nationLayouts } from '../game/src/nation-layout.js?v=50';
+import { buildings, field, guildDoors, inTown, innDoors, legacyFieldSpawns, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=50';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=49';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=49';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=50';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=50';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
@@ -27,7 +27,7 @@ test('NATION-01: expansion, accessible national centers, initial placements and 
   for (const nation of simulation.nations) {
     const [city] = nation.cities;
     assert.deepEqual(['center', 'warehouse', 'house'].map(kind => count(city, kind)), [1, 1, 5]);
-    assert.equal(city.residents.length, 10);
+    assert.equal(city.residents.length, 5);
     for (const person of city.residents) {
       assert.ok(city.buildings.some(b => b.id === person.homeId && b.kind === 'house'));
     }
@@ -68,9 +68,9 @@ test('NATION-02: long-run quotas, capacity, parcels and exact event batching', (
   for (const nation of jumped.nations) {
     const [city] = nation.cities;
     assert.equal(count(city, 'house'), 20);
-    assert.equal(city.residents.length, 40);
+    assert.equal(city.residents.length, 20);
     assert.equal(count(city, 'warehouse'), config.warehouse.max);
-    assert.equal(new Set(city.residents.map(p => p.id)).size, 40);
+    assert.equal(new Set(city.residents.map(p => p.id)).size, 20);
     assert.ok(nation.stock.food > 0);
     assert.ok(nation.stock.wood + nation.stock.food <= capacity(nation));
     for (const [index, a] of city.buildings.entries()) {
@@ -91,7 +91,7 @@ test('NATION-03: midnight and lodging advance once per elapsed day, including fo
   advanceNations(simulation, midnight);
   assert.equal(nation.stock.food, 5);
   assert.equal(hungry.stock.food, 0);
-  assert.equal(hungry.cities[0].residents.length, 10);
+  assert.equal(hungry.cities[0].residents.length, 5);
   advanceNations(simulation, midnight);
   assert.equal(nation.stock.food, 5);
   const morning = nextMorningMinute(midnight);
@@ -130,7 +130,7 @@ test('NATION-04: reserved cargo, capacity recovery and distant city arrival surv
   advanceNations(full, 10_000);
   const [nation] = full.nations;
   assert.ok(count(nation.cities[0], 'warehouse') > 1);
-  assert.equal(nation.cities[0].residents.length, 40);
+  assert.equal(nation.cities[0].residents.length, 20);
   assert.ok(nation.stock.wood + nation.stock.food <= capacity(nation));
   snapshot.nations[1].stock.wood = 1000;
   assert.throws(() => restoreNations(snapshot, snapshot.minute), /Invalid nation simulation/);
@@ -169,6 +169,9 @@ test('NATION-05: all city facilities work independently and version 3 saves migr
   assert.deepEqual(restoreSave(current).shopGold, state.shopGold);
 
   current.version = 3;
+  for (const nation of current.nations.nations) {
+    nation.residents = nation.residents.flatMap(person => [person, { ...person, id: person.id.replace(/-1$/, '-2') }]);
+  }
   current.areas[0].encounters = legacyFieldSpawns.slice(0, 8).map(({ id }) => ({ id, enemy: null, remaining: 0, generation: 0 }));
   current.guilds = current.guilds.filter(([id]) => id === 'house-southwest');
   current.shopGold = { 'goods-shop': 63, 'weapon-shop': 105 };
@@ -301,4 +304,26 @@ test('NATION-07: shop stock, overnight settlements, and saved inventories', () =
   const reload = restoreSave(overnightSave);
   assert.equal(reload.shopGold['weapon-shop'], 1);
   assert.equal(reload.shopStock['weapon-shop'].has('iron-dagger'), false);
+});
+
+test('NATION-08: old two-person households migrate once and preserve an active builder', () => {
+  const simulation = createNationSimulation();
+  advanceNations(simulation, 1);
+  const snapshot = copy(simulation);
+  const nation = snapshot.nations[0];
+  const worker = nation.residents.find(person => person.id === nation.project.workerId);
+  const originalId = worker.id;
+  const home = nation.buildings.find(building => building.id === worker.homeId);
+  const door = nationLayouts[0].plots.find(plot => plot.id === home.id).door;
+  worker.id = worker.id.replace(/-1$/, '-2');
+  nation.project.workerId = worker.id;
+  nation.residents.push({ ...worker, ...door, id: originalId, action: 'idle', targetId: null, task: null });
+  assert.throws(() => restoreNations(snapshot, snapshot.minute), /Invalid nation simulation/);
+  const restored = restoreNations(snapshot, snapshot.minute, 11);
+  const [city] = restored.nations[0].cities;
+  assert.equal(city.residents.length, 5);
+  assert.equal(city.project.workerId, originalId);
+  assert.equal(city.residents.find(person => person.id === originalId).action, worker.action);
+  assert.deepEqual(restored.nations[0].stock, nation.stock);
+  assert.deepEqual(copy(restoreNations(copy(restored), restored.minute)), copy(restored));
 });

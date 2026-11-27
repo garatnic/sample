@@ -1,5 +1,5 @@
 import { settings } from './settings.js?v=49';
-import { nationSettings as config } from './nation-settings.js?v=47';
+import { nationSettings as config } from './nation-settings.js?v=50';
 
 const contactRadius = settings.player.radius + 8;
 export const harvestSeconds = { food: 1, wood: 2 };
