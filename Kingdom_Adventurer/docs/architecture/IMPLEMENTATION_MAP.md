@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: 2026-11-27 / ver.31 / DEV-056 / 実装コミット `aeba7fca18c61d791665565467037f17f5cd317e`。
+基準: 2026-11-27 / ver.31 / DEV-056 / 実装コミット `28972e901561ad7006869257d587e78a38cac5cd`。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全40仕様・実装ファイル21件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
 
 ## 検証の記録
@@ -21,7 +21,7 @@
 | `CUR-SYS-002` | 初期状態 | src/main.js: createPlayer(), state; src/growth.js: maxHealth(); src/world.js: start; src/settings.js: player.maxHp / currency.startingGold; src/combat.js: createEncounters(); src/trees.js: createTrees(); src/consumables.js: maxMp | CUR-WORLD-002, CUR-COMBAT-001, CUR-LIFE-001 | — | 未登録 |
 | `CUR-SYS-003` | フレーム処理 | src/main.js: frame(), update(), previous, requestAnimationFrame; src/input.js: read(); src/world.js: movePlayer(); src/combat.js: updateCombat(); src/render.js: render(); src/loot.js: collectLoot(); src/trees.js: updateTrees(); src/clock.js: gameMinutes(), gameDay() | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-UI-001 | — | 未登録 |
 | `CUR-SYS-005` | ゲーム内時計 | src/clock.js: gameMinutes(), gameDateTime(), gameDay(), nextMorningMinute(); src/main.js: frame(), currentGameMinute(), clockBaseMinute, elapsedPlaySeconds; index.html: #game-clock; style.css: #game-clock; src/main.js: update() のギルド・果樹への日付渡し | CUR-SYS-003 | SYSTEM-002 | 未登録 |
-| `CUR-SYS-004` | セーブ・ロード・削除 | index.html: #open-save/#save-menu; src/main.js: state, applySave(), 宿泊・エリア切替からの自動保存、起動時復元; src/save-data.js: makeSave(), restoreSave(); src/save-store.js: readSave(), writeSave(), deleteSave(); src/save-menu.js: setupSaveMenu(), JSON取り込み・書き出し・確認; src/combat.js: inCombat(); src/world.js: エリア・施設IDと移動境界; src/settings.js: 敵設定・復元範囲; src/equipment.js: 装備整合性; src/growth.js: レベルとHP; src/consumables.js: maxMp; src/clock.js: gameDay(); src/trees.js: createTrees(), harvestSeconds | CUR-SYS-002, CUR-SYS-005, CUR-WORLD-006, CUR-INN-002, CUR-LIFE-001 | SYSTEM-011 | 未登録 |
+| `CUR-SYS-004` | セーブ・ロード・削除 | index.html: #open-save/#save-menu; style.css: #open-save のポインター操作; src/main.js: state, applySave(), 宿泊・エリア切替からの自動保存、起動時復元; src/save-data.js: makeSave(), restoreSave(); src/save-store.js: readSave(), writeSave(), deleteSave(); src/save-menu.js: setupSaveMenu(), JSON取り込み・書き出し・確認; src/combat.js: inCombat(); src/world.js: エリア・施設IDと移動境界; src/settings.js: 敵設定・復元範囲; src/equipment.js: 装備整合性; src/growth.js: レベルとHP; src/consumables.js: maxMp; src/clock.js: gameDay(); src/trees.js: createTrees(), harvestSeconds | CUR-SYS-002, CUR-SYS-005, CUR-WORLD-006, CUR-INN-002, CUR-LIFE-001 | SYSTEM-011 | 未登録 |
 | `CUR-WORLD-001` | 固定マップ | src/settings.js: tile/mapWidth/mapHeight; src/world.js: 固定配置・terrainAt(); src/render.js: render() のタイル範囲 | CUR-WORLD-003, CUR-MOVE-002, CUR-UI-002 | — | 未登録 |
 | `CUR-WORLD-002` | 街 | src/world.js: town, start, inTown(); src/main.js: createPlayer(), frame() の所在地; src/combat.js: updateCombat() の安全判定 | CUR-COMBAT-002, CUR-UI-001, CUR-LIFE-001 | — | 未登録 |
 | `CUR-WORLD-003` | 地形 | src/world.js: terrainAt(), inTown(); src/render.js: tile(), colors; src/world.js: movePlayer(), walkable()（地形を衝突に使わない） | CUR-WORLD-001, CUR-MOVE-002, CUR-UI-003 | — | 未登録 |
@@ -82,7 +82,7 @@
 | `src/shop.js` | CUR-WORLD-005, CUR-COMBAT-007, CUR-SHOP-001, CUR-SHOP-002, CUR-SHOP-003, CUR-ITEM-002 |
 | `src/trees.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-005, CUR-LIFE-001, CUR-SYS-004 |
 | `src/world.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-INN-001, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-001, CUR-UI-003, CUR-WORLD-006, CUR-SYS-004 |
-| `style.css` | CUR-SYS-001, CUR-SYS-005, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005 |
+| `style.css` | CUR-SYS-001, CUR-SYS-005, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005, CUR-SYS-004 |
 
 ## 更新方法
 

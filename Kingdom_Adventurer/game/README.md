@@ -6,9 +6,11 @@ WASD・矢印キー・ゲームパッド左スティックで移動します。�
 
 ローカルでは `Kingdom_Adventurer/game` で `python -m http.server 8000` を実行し、ブラウザで [http://localhost:8000/](http://localhost:8000/) を開きます。
 
-ブラウザ標準の JavaScript ES Modules・Canvas 2D を使用します。依存ライブラリやビルドは不要です。地形・配置は `src/world.js`、数値は `src/settings.js`、表示は `src/render.js`、入力は `src/input.js`、敵の更新は `src/combat.js` にあります。ページを再読み込みすると初期状態から始まります。
+ブラウザ標準の JavaScript ES Modules・Canvas 2D を使用します。依存ライブラリやビルドは不要です。地形・配置は `src/world.js`、数値は `src/settings.js`、表示は `src/render.js`、入力は `src/input.js`、敵の更新は `src/combat.js` にあります。保存枠があれば、ページを開き直すと最後のセーブから再開します。
 
 宿の右手にある「装備」の看板の建物は装備品屋です。入口に近づくと全商品が表示され、部位タブで絞り込めます。画面左上の▾で詳細を開き、「装備」から武器と防具を部位別に装備・解除できます。所持数や重量の上限はありません。
+
+画面左上の▾から「セーブ」を開くと、手動セーブ・ロード・JSONの書き出しと取り込み・保存枠の削除ができます。宿泊後と洞窟の出入りでオートセーブされます。削除後も現在のプレイは続けられます。
 
 ## CSS更新時
 
