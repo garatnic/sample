@@ -1,4 +1,4 @@
-import { actionNames, capacity, modeFor } from './nation-simulation.js?v=38';
+import { actionNames, capacity, modeFor } from './nation-simulation.js?v=41';
 import { nationSettings as config } from './nation-settings.js?v=39';
 
 export function setupNationMenu(state, input, field) {

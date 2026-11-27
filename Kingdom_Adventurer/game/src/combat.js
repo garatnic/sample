@@ -1,6 +1,7 @@
 import { animalTypes, mobTypes, settings } from './settings.js?v=39';
 import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=39';
-import { facilityAt, field, inTown } from './world.js?v=39';
+import { field } from './world.js?v=41';
+import { mobsIn, moveNearbyMobs, removeMob } from './mob-world.js?v=41';
 import { attackInterval, defenseRating, items } from './equipment.js?v=39';
 import { recordDefeat } from './quests.js?v=39';
 import { dropLoot } from './loot.js?v=39';
@@ -20,64 +21,64 @@ function canChase(player, enemy, home, config) {
     && Math.hypot(player.x - home.x, player.y - home.y) < config.leash;
 }
 
-export function inCombat({ player, area, encounters, strike }) {
-  if (area === field && inTown(player)) return false;
-  return Boolean(strike) || encounters.some(({ home, enemy }) =>
-    enemy && !animalTypes[home.kind] && canChase(player, enemy, home, settings.enemy));
+function* localEncounters(state) {
+  if (state.area !== field || !state.mobWorld) {
+    yield* state.encounters;
+    return;
+  }
+  const { x, y } = state.player;
+  const range = settings.enemy.aggro;
+  for (const enemy of mobsIn(state.mobWorld, x - range, y - range, x + range, y + range)) {
+    yield { enemy };
+  }
 }
 
-function moveAnimal(animal, home, player, type, area, dt) {
-  animal.flee = Math.max(0, animal.flee - dt);
-  const fleeing = animal.flee > 0;
-  const dx = fleeing ? animal.x - player.x : home.x - animal.x;
-  const dy = fleeing ? animal.y - player.y : home.y - animal.y;
-  const distance = Math.hypot(dx, dy);
-  if (!distance && !fleeing) return;
-  const speed = fleeing ? type.speed : type.speed / 3;
-  const step = fleeing ? speed * dt : Math.min(distance, speed * dt);
-  const x = Math.max(10, Math.min(area.width - 10, animal.x + (distance ? dx / distance : 1) * step));
-  const y = Math.max(10, Math.min(area.height - 10, animal.y + (distance ? dy / distance : 0) * step));
-  if (!inTown({ x, y }) && !facilityAt({ x, y })) Object.assign(animal, { x, y });
+export function inCombat(state) {
+  if (state.strike) return true;
+  for (const { home, enemy } of localEncounters(state)) {
+    if (!enemy || animalTypes[enemy.kind]) continue;
+    if (home ? canChase(state.player, enemy, home, settings.enemy)
+      : Math.hypot(state.player.x - enemy.x, state.player.y - enemy.y) < settings.enemy.aggro) return true;
+  }
+  return false;
 }
 
 export function updateCombat(state, dt, hunt = false) {
-  const { player, encounters } = state;
+  const { player } = state;
   const config = settings.enemy;
   const { playerDamageMultiplier, enemyDamageMultiplier } = settings.difficulty;
   const outdoors = (state.area ?? field) === field;
-  const safe = outdoors && inTown(player);
+  if (outdoors && state.mobWorld) moveNearbyMobs(state.mobWorld, player, dt);
+  const encounters = [...localEncounters(state)];
   player.cooldown = Math.max(0, player.cooldown - dt);
 
   for (const encounter of encounters) {
     const { home } = encounter;
-    const kind = home.kind;
-    const type = mobTypes[kind];
-    if (!encounter.enemy) {
+    if (home && !encounter.enemy) {
       encounter.remaining = Math.max(0, encounter.remaining - dt);
       if (encounter.remaining <= 0) {
+        const type = mobTypes[home.kind];
         encounter.enemy = { id: `enemy-${home.id}-${++encounter.generation}`,
-          kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0, flee: 0, hunted: false };
+          kind: home.kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0, flee: 0, hunted: false };
       }
     }
-
     const enemy = encounter.enemy;
-    if (!enemy) continue;
-    enemy.flash = Math.max(0, enemy.flash - dt);
-    if (animalTypes[kind]) {
-      moveAnimal(enemy, home, player, type, field, dt);
-      continue;
+    if (!enemy || animalTypes[enemy.kind]) continue;
+    const type = mobTypes[enemy.kind];
+    if (home) {
+      enemy.flash = Math.max(0, enemy.flash - dt);
+      enemy.cooldown = Math.max(0, enemy.cooldown - dt);
     }
-    enemy.cooldown = Math.max(0, enemy.cooldown - dt);
     const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-    const chasing = !safe && canChase(player, enemy, home, config);
-    if (chasing && distance <= config.reach) {
+    const chasing = home ? canChase(player, enemy, home, config) : distance < config.aggro;
+    if (chasing && distance <= config.reach + 1e-6) {
       if (enemy.cooldown === 0) {
         player.hp = Math.max(0, player.hp - physicalDamage(type.damage, defenseRating(player), enemyDamageMultiplier));
         player.flash = 0.22;
         enemy.cooldown = type.attackDelay;
         if (player.hp === 0) return;
       }
-    } else {
+    } else if (home) {
       const goal = chasing ? player : home;
       const dx = goal.x - enemy.x;
       const dy = goal.y - enemy.y;
@@ -85,18 +86,18 @@ export function updateCombat(state, dt, hunt = false) {
       if (length > 0) {
         const step = Math.min(type.speed * dt, length) / length;
         const next = { x: enemy.x + dx * step, y: enemy.y + dy * step };
-        if (!outdoors || !inTown(next)) Object.assign(enemy, next);
+        Object.assign(enemy, next);
       }
     }
   }
 
-  if (safe || player.cooldown > 0) return;
+  if (player.cooldown > 0) return;
   let nearest = null;
   const weapon = items.get(player.weaponId);
   let range = weapon?.range ?? settings.player.range;
   for (const encounter of encounters) {
     if (!encounter.enemy) continue;
-    const animal = Boolean(animalTypes[encounter.home.kind]);
+    const animal = Boolean(animalTypes[encounter.enemy.kind]);
     if (hunt ? !animal : animal && !encounter.enemy.hunted) continue;
     const distance = Math.hypot(player.x - encounter.enemy.x, player.y - encounter.enemy.y);
     if (distance > range) continue;
@@ -121,8 +122,12 @@ export function updateCombat(state, dt, hunt = false) {
   }
   if (enemy.hp <= 0) {
     if (!animalTypes[enemy.kind]) recordDefeat(state, enemy.kind);
-    nearest.enemy = null;
-    nearest.remaining = config.spawnDelay;
+    if (nearest.home) {
+      nearest.enemy = null;
+      nearest.remaining = config.spawnDelay;
+    } else {
+      removeMob(state.mobWorld, enemy);
+    }
     dropLoot(state, enemy, mobTypes[enemy.kind]);
     state.notice = { text: `${mobTypes[enemy.kind].name}を撃破`, remaining: 1.7 };
   }

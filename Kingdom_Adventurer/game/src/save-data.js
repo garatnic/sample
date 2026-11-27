@@ -1,5 +1,7 @@
+import { createMobWorld, indexSettlement } from './mob-world.js?v=41';
+import { mobSettings } from './mob-settings.js?v=41';
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
-import { cave, facilityAt, field, guildDoors, movePlayer, shopDoors } from './world.js?v=39';
+import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=41';
 import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=39';
 import { canEquipItem, items } from './equipment.js?v=39';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
@@ -7,23 +9,27 @@ import { maxMp } from './consumables.js?v=39';
 import { gameDay } from './clock.js?v=34';
 import { findSource, harvestSeconds } from './trees.js?v=37';
 
-import { createNationSimulation } from './nation-simulation.js?v=38';
-import { captureNations, restoreNations } from './nation-save.js?v=38';
+import { createNationSimulation } from './nation-simulation.js?v=41';
+import { captureNations, restoreNations } from './nation-save.js?v=41';
 
-import { startingShopGold } from './shop.js?v=39';
+import { startingShopGold } from './shop.js?v=41';
 
 const format = 'kingdom-adventurer';
-const version = 9;
+const version = 10;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
   const { player, harvest } = state;
+  const world = state.mobWorld ?? createMobWorld(clock);
   return structuredClone({
     format, version, clock, nations: captureNations(state.nations ?? createNationSimulation(clock)), area: state.area.id, gold: state.gold,
     player: { x: player.x, y: player.y, hp: player.hp, mp: player.mp,
       level: player.level, experience: player.experience, weaponId: player.weaponId,
       inventory: [...player.inventory], armor: [...player.armor], skills: [...player.skills],
       pendingPoison: player.pendingPoison, cooldown: player.cooldown },
+    mobs: { minute: world.minute, tick: world.tick, nextId: world.nextId,
+      individuals: [...world.mobs.values()].map(({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn }) =>
+        ({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn })) },
     areas: areas.map(area => {
       const { encounters, lootDrops } = areaStates.get(area);
       return { id: area.id, lootDrops, encounters: encounters.map(({ home, enemy, remaining, generation }) => ({
@@ -100,10 +106,11 @@ function restorePlayer(data, area, savedVersion) {
 
 function restoreArea(data, area, savedVersion) {
   const legacy = savedVersion < 8;
-  const expected = legacy ? area.spawns.filter(home => !animalTypes[home.kind]) : area.spawns;
+  const slots = area === field && savedVersion < 10 ? legacyFieldSpawns : area.spawns;
+  const expected = legacy ? slots.filter(home => !animalTypes[home.kind]) : slots;
   check(data?.id === area.id && Array.isArray(data.encounters) && data.encounters.length === expected.length
     && Array.isArray(data.lootDrops));
-  const encounters = area.spawns.map((home, index) => {
+  const encounters = slots.map((home, index) => {
     if (legacy && animalTypes[home.kind]) return { home, remaining: 0, generation: 0, enemy: null };
     const { id, remaining, generation, enemy } = data.encounters[index];
     check(id === home.id && integer(generation) && number(remaining, 0, settings.enemy.spawnDelay));
@@ -124,6 +131,39 @@ function restoreArea(data, area, savedVersion) {
     return { x: drop.x, y: drop.y, gold: drop.gold, materials: [...drop.materials] };
   });
   return { encounters, lootDrops };
+}
+
+function restoreMobs(data, fieldState, clock, savedVersion) {
+  if (savedVersion < 10) {
+    const individuals = fieldState.encounters.flatMap(({ enemy }) => enemy ? [enemy] : []);
+    for (const [index, mob] of individuals.entries()) {
+      Object.assign(mob, { id: `field-${index + 1}`, angle: 0, turnIn: 0 });
+      mob.x = Math.max(10, Math.min(field.width - 10, mob.x));
+      mob.y = Math.max(10, Math.min(field.height - 10, mob.y));
+    }
+    fieldState.encounters = [];
+    return createMobWorld(clock, { individuals, nextId: individuals.length + 1 });
+  }
+  const chunkSpan = mobSettings.chunkTiles * settings.tile;
+  const chunkCount = Math.ceil(field.width / chunkSpan) * Math.ceil(field.height / chunkSpan);
+  const maximum = chunkCount * (Math.ceil(mobSettings.animal.local * mobSettings.animal.worldMaximumFactor)
+    + Math.ceil(mobSettings.enemy.local * mobSettings.enemy.worldMaximumFactor));
+  check(record(data) && number(data.minute, Math.max(0, clock - mobSettings.tickMinutes - 1e-6), clock)
+    && integer(data.tick) && integer(data.nextId, 1) && Array.isArray(data.individuals)
+    && data.individuals.length <= maximum);
+  const ids = new Set();
+  const individuals = data.individuals.map(mob => {
+    const numericId = typeof mob?.id === 'string' ? Number(mob.id.slice(6)) : 0;
+    check(integer(numericId, 1, data.nextId - 1) && mob.id === `field-${numericId}` && !ids.has(mob.id)
+      && Object.hasOwn(mobTypes, mob.kind) && position(mob, field) && mob.x < field.width && mob.y < field.height
+      && number(mob.hp, Number.MIN_VALUE, mobTypes[mob.kind].maxHp) && number(mob.cooldown, 0, 10)
+      && number(mob.flash, 0, 1) && number(mob.flee, 0, 3) && typeof mob.hunted === 'boolean'
+      && number(mob.angle, 0, 2 * Math.PI) && Number.isFinite(mob.turnIn) && mob.turnIn <= 60 && mob.turnIn >= -1);
+    ids.add(mob.id);
+    const { id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn } = mob;
+    return { id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn, maxHp: mobTypes[kind].maxHp };
+  });
+  return createMobWorld(clock, { minute: data.minute, tick: data.tick, nextId: data.nextId, individuals });
 }
 
 function restoreGuilds(data, day) {
@@ -152,7 +192,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, 9, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
@@ -174,5 +214,7 @@ export function restoreSave(data) {
       && number(data.harvest.elapsed, 0, harvestSeconds[source.kind]));
     harvest = { source, elapsed: data.harvest.elapsed };
   }
-  return { player, area, areaStates, nations, gold: data.gold, guilds, shopGold, harvest, clock: data.clock };
+  const mobWorld = restoreMobs(data.mobs, areaStates.get(field), data.clock, data.version);
+  indexSettlement(mobWorld, nations);
+  return { player, area, areaStates, nations, mobWorld, gold: data.gold, guilds, shopGold, harvest, clock: data.clock };
 }

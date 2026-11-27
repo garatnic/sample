@@ -13,7 +13,8 @@ export const innDoors = doorsFor(b => b.kind === 'inn');
 export const guildDoors = doorsFor(b => b.kind === 'guild');
 export const shopDoors = doorsFor(b => b.kind.endsWith('-shop'));
 
-export const spawns = [
+// Fixed slot definitions used only to read pre-chunk saves.
+export const legacyFieldSpawns = [
   { id: 'east-road', kind: 'wolf', x: 1436, y: 800 },
   { id: 'west-road', kind: 'rat', x: 812, y: 800 },
   { id: 'north-grove', kind: 'spider', x: 1112, y: 460 },
@@ -80,7 +81,7 @@ export const cave = {
   ],
 };
 
-export const field = { id: 'field', width: settings.mapWidth, height: settings.mapHeight, spawns };
+export const field = { id: 'field', width: settings.mapWidth, height: settings.mapHeight, spawns: [] };
 export const portalRadius = 19;
 
 export function movePlayer(player, dx, dy, dt, area = field, settlementBuildings = []) {

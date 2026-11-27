@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { updateTrees } from '../game/src/trees.js?v=37';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=40';
-import { buyItem, startingShopGold } from '../game/src/shop.js?v=39';
-import { createEncounters } from '../game/src/combat.js?v=40';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=41';
+import { buyItem, startingShopGold } from '../game/src/shop.js?v=41';
+import { createEncounters } from '../game/src/combat.js?v=41';
 import { createSkills } from '../game/src/skills.js?v=32';
 import { refreshGuild } from '../game/src/quests.js?v=39';
 import { settings } from '../game/src/settings.js?v=39';
 import { nationSettings as config } from '../game/src/nation-settings.js?v=39';
 import { nationLayouts } from '../game/src/nation-layout.js?v=35';
-import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=39';
+import { buildings, field, guildDoors, inTown, innDoors, legacyFieldSpawns, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=41';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=38';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=38';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=41';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=41';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
@@ -168,7 +168,7 @@ test('NATION-05: all city facilities work independently and version 3 saves migr
   assert.deepEqual(restoreSave(current).shopGold, state.shopGold);
 
   current.version = 3;
-  current.areas[0].encounters = current.areas[0].encounters.slice(0, 8);
+  current.areas[0].encounters = legacyFieldSpawns.slice(0, 8).map(({ id }) => ({ id, enemy: null, remaining: 0, generation: 0 }));
   current.guilds = current.guilds.filter(([id]) => id === 'house-southwest');
   current.shopGold = { 'goods-shop': 63, 'weapon-shop': 105 };
   const facility = nationLayouts[1].facilities[0];

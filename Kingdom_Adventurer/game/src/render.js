@@ -1,7 +1,8 @@
+import { mobsIn } from './mob-world.js?v=41';
 import { animalTypes, settings } from './settings.js?v=39';
-import { buildings, cave, field, terrainAt } from './world.js?v=39';
+import { buildings, cave, field, terrainAt } from './world.js?v=41';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=38';
+import { modeFor, residentPosition } from './nation-simulation.js?v=41';
 
 import { harvestSeconds, sourceQuantity } from './trees.js?v=37';
 
@@ -218,8 +219,14 @@ export function createRenderer(canvas) {
       rect(x - 4, y - 4, 8, 8, materials.length ? '#bc8a55' : '#f2bc35');
       rect(x - 2, y - 3, 3, 2, '#fff1a0');
     }
-    for (const { enemy } of encounters) {
-      if (enemy) actor(enemy, false, time);
+    if (outdoors && state.mobWorld) {
+      for (const enemy of mobsIn(state.mobWorld, left - 100, top - 80, left + width + 100, top + height + 80)) {
+        if (visible(enemy)) actor(enemy, false, time);
+      }
+    } else {
+      for (const { enemy } of encounters) {
+        if (enemy) actor(enemy, false, time);
+      }
     }
     actor(player, true, time);
     const harvest = outdoors && state.harvest;

@@ -153,7 +153,7 @@ function assignWork(nation, city, minute, limits) {
   const { stock } = nation;
   const layout = nationLayouts.find(entry => entry.cityId === city.id);
   const warehouseCount = city.buildings.filter(b => b.kind === 'warehouse').length;
-  const houseCount = city.residents.length / config.house.residents;
+  const houseCount = city.buildings.filter(b => b.kind === 'house').length;
   const dailyFood = city.residents.length * config.foodPerResident;
   const canExpandStorage = warehouseCount < config.warehouse.max;
   const storageReserve = canExpandStorage ? config.warehouse.cost : 0;
@@ -204,8 +204,8 @@ function assignWork(nation, city, minute, limits) {
   }
 }
 
-export function advanceNations(simulation, toMinute) {
-  if (toMinute <= simulation.minute) return;
+export function advanceNations(simulation, toMinute, refresh = false) {
+  if (toMinute < simulation.minute || (!refresh && toMinute === simulation.minute)) return;
   for (const nation of simulation.nations) {
     for (let minute = nation.nextMinute; minute <= toMinute;) {
       const day = gameDay(minute);
@@ -236,4 +236,13 @@ export function advanceNations(simulation, toMinute) {
 
 export function settlementBuildings(simulation) {
   return simulation.nations.flatMap(nation => nation.cities.flatMap(city => city.buildings));
+}
+
+export function removeResident(nation, city, resident, minute) {
+  if (city.project?.workerId === resident.id) {
+    city.project = null;
+  }
+  city.residents.splice(city.residents.indexOf(resident), 1);
+  // Re-evaluate jobs and their claims at the next simulation step.
+  nation.nextMinute = Math.min(nation.nextMinute, minute);
 }

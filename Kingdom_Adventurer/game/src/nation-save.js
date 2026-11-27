@@ -1,6 +1,7 @@
+import { mobSettings } from './mob-settings.js?v=41';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
-import { actionNames, capacity, createNationSimulation, gatherAction, nextPick, taskSchedule } from './nation-simulation.js?v=38';
+import { actionNames, capacity, createNationSimulation, gatherAction, nextPick, taskSchedule } from './nation-simulation.js?v=41';
 import { nationSettings as config } from './nation-settings.js?v=39';
 
 function requireValid(condition) {
@@ -27,8 +28,8 @@ export function captureNations(simulation) {
         sources: city.sources.map(({ readyAt }) => readyAt),
         sourceRemaining: city.sources.map(({ remaining }) => remaining),
         project: city.project && { id: city.project.site.id, kind: city.project.site.kind, workerId: city.project.workerId },
-        residents: city.residents.map(({ id, homeId, x, y, action, targetId, carrying, task }) =>
-          ({ id, homeId, x, y, action, targetId, carrying, task })),
+        residents: city.residents.map(({ id, homeId, x, y, action, targetId, carrying, task, hp, cooldown }) =>
+          ({ id, homeId, x, y, action, targetId, carrying, task, hp, cooldown })),
         nextMinute: nation.nextMinute,
       };
     }),
@@ -66,7 +67,8 @@ export function restoreNations(data, minute, saveVersion = 7) {
     }
     requireValid(expected.every(b => city.buildings.some(entry => entry.id === b.id && entry.kind === b.kind))
       && counts.house <= config.house.max && counts.warehouse <= config.warehouse.max
-      && saved.residents.length === counts.house * config.house.residents);
+      && (saveVersion >= 10 ? saved.residents.length <= counts.house * config.house.residents
+        : saved.residents.length === counts.house * config.house.residents));
     const limit = capacity(nation);
     requireValid(integer(saved.stock?.wood, 0, limit) && integer(saved.stock?.food, 0, limit - saved.stock.wood));
     nation.stock = { wood: saved.stock.wood, food: saved.stock.food };
@@ -134,7 +136,18 @@ export function restoreNations(data, minute, saveVersion = 7) {
           if (gatherAction(action)) task = { ...task, end: nextPick(Math.max(task.startWork, minute), target.kind) };
         }
       }
-      return { id, homeId, x, y, action, targetId, carrying, task, nationId: nation.id, cityId: city.id };
+      const combatState = {};
+      if (saveVersion >= 10) {
+        if (person.hp !== undefined) {
+          requireValid(time(person.hp, Number.MIN_VALUE, mobSettings.resident.hp));
+          combatState.hp = person.hp;
+        }
+        if (person.cooldown !== undefined) {
+          requireValid(time(person.cooldown, 0, mobSettings.resident.interval));
+          combatState.cooldown = person.cooldown;
+        }
+      }
+      return { id, homeId, x, y, action, targetId, carrying, task, ...combatState, nationId: nation.id, cityId: city.id };
     });
     requireValid(!city.project || city.residents.some(p => p.id === city.project.workerId && p.targetId === city.project.site.id));
     requireValid(nation.stock.wood + nation.stock.food + reserved <= limit);

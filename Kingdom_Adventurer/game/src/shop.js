@@ -1,4 +1,4 @@
-import { buildings, shopDoors } from './world.js?v=39';
+import { buildings, shopDoors } from './world.js?v=41';
 import { equippedId, items, ringSlots, slots } from './equipment.js?v=39';
 
 const equipmentTabs = [...slots];

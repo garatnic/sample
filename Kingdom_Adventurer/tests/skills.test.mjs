@@ -1,11 +1,12 @@
+import { createMobWorld } from '../game/src/mob-world.js?v=41';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=32';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=32';
 import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=39';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=40';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=40';
-import { cave, field, shopDoors, start } from '../game/src/world.js?v=39';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=41';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=41';
+import { cave, field, legacyFieldSpawns, shopDoors, start } from '../game/src/world.js?v=41';
 import { items } from '../game/src/equipment.js?v=39';
 
 const id = 'one-handed';
@@ -82,7 +83,7 @@ test('SKILL-04: JSON and ver.1 migration preserve progress and reject invalid sk
   assert.deepEqual(restoreSave(data).player.skills, player.skills);
   const old = structuredClone(data);
   old.version = 1;
-  old.areas[0].encounters = old.areas[0].encounters.slice(0, 8);
+  old.areas[0].encounters = legacyFieldSpawns.slice(0, 8).map(({ id }) => ({ id, enemy: null, remaining: 0, generation: 0 }));
   old.player.experience = 30;
   delete old.player.skills;
   const restored = restoreSave(old);
@@ -96,10 +97,12 @@ test('SKILL-04: JSON and ver.1 migration preserve progress and reject invalid sk
 test('SKILL-05: passive wildlife flee when hunted and drop materials', () => {
   for (const kind of ['deer', 'rabbit', 'fox']) {
     const player = { ...character(), x: 3000, y: 3000 };
-    const encounters = createEncounters([{ id: kind, kind, x: 3009, y: 3000 }]);
-    const state = { player, area: field, encounters, guilds: new Map(), lootDrops: [] };
+    const maxHp = { deer: 34, rabbit: 20, fox: 26 }[kind];
+    const animal = { id: 'field-1', kind, x: 3009, y: 3000, hp: maxHp, maxHp,
+      flash: 0, cooldown: 0, flee: 0, hunted: false, angle: 0, turnIn: 5 };
+    const mobWorld = createMobWorld(0, { individuals: [animal] });
+    const state = { player, area: field, mobWorld, guilds: new Map(), lootDrops: [] };
     updateCombat(state, 0.04);
-    const animal = encounters[0].enemy;
     assert.equal(animal.hp, animal.maxHp);
     assert.equal(player.hp, 100);
     updateCombat(state, 0.04, true);
@@ -112,7 +115,7 @@ test('SKILL-05: passive wildlife flee when hunted and drop materials', () => {
     player.x = animal.x;
     player.cooldown = 0;
     updateCombat(state, 0.001);
-    assert.equal(encounters[0].enemy, null);
+    assert.equal(mobWorld.mobs.size, 0);
     assert.equal(state.lootDrops[0].gold, 0);
     assert.ok(state.lootDrops[0].materials.length);
   }
