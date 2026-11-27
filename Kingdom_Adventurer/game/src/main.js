@@ -50,7 +50,10 @@ function createPlayer({ level = 1, experience = 0, inventory = new Map(), weapon
 const areaStates = new Map(areas.map(area => [
   area, { encounters: createEncounters(area.spawns), lootDrops: [] },
 ]));
-const state = { player: createPlayer(), area: field,
+const startingWeaponId = 'iron-dagger';
+const state = {
+  player: createPlayer({ inventory: new Map([[startingWeaponId, 1]]), weaponId: startingWeaponId }),
+  area: field,
   get encounters() { return areaStates.get(this.area).encounters; },
   get lootDrops() { return areaStates.get(this.area).lootDrops; },
   strike: null, resources: createTrees(gameDay(0)),
