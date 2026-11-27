@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: 2026-11-28 / ver.47 / DEV-083 / 実装コミット `29e208c8482b1c3ef93bd251195d39f7f50e71b6`。
+基準: 2026-11-28 / ver.48 / DEV-084 / 実装コミット `a43636a7fe58b8ef4d1301d911efaf88368ac63b`。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全50仕様・実装ファイル33件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
 
 ## 検証の記録

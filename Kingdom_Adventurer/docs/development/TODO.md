@@ -219,7 +219,9 @@
 
   - ver.47 [29e208c8482b1c3ef93bd251195d39f7f50e71b6](https://github.com/garatnic/sample/commit/29e208c8482b1c3ef93bd251195d39f7f50e71b6)。自動テスト24件合格。ECON-06/07で容量、満杯からの回復、日次処理と復元を確認。NATION-02で100日後に各国人口40人、民家20軒、倉庫4軒。
 
-- [ ] DEV-084 両手武器の命中XPを実装する。関連 CUR-GROWTH-001〜003、CUR-SYS-004。
+- [x] DEV-084 両手武器の命中XPを実装する。関連 CUR-GROWTH-001〜003、CUR-SYS-004。
+
+  - ver.48 [a43636a7fe58b8ef4d1301d911efaf88368ac63b](https://github.com/garatnic/sample/commit/a43636a7fe58b8ef4d1301d911efaf88368ac63b)。SKILL-07と既存テストで命中XP、技能上昇、セーブ復元を確認。
 
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
