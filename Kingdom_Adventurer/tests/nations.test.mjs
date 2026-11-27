@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { updateTrees } from '../game/src/trees.js?v=37';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=43';
-import { buyItem, startingShopGold } from '../game/src/shop.js?v=41';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=44';
+import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=44';
 import { createEncounters } from '../game/src/combat.js?v=43';
 import { createSkills } from '../game/src/skills.js?v=32';
 import { refreshGuild } from '../game/src/quests.js?v=39';
@@ -155,6 +155,7 @@ test('NATION-05: all city facilities work independently and version 3 saves migr
     player: { ...start, level: 1, experience: 0, hp: 100, mp: 100, weaponId: null, cooldown: 0,
       pendingPoison: 0, inventory: new Map(), armor: new Map(), skills: createSkills() },
     harvest: null,
+    shopStock: createShopStock(),
     shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])),
   };
   const easternShop = nationLayouts[1].facilities.find(b => b.kind === 'weapon-shop').id;
@@ -246,4 +247,46 @@ test('NATION-06: player and residents compete for the same fruit and timber', ()
   const regrowth = hungryTree.readyAt;
   advanceNations(separate, regrowth);
   assert.deepEqual(updateTrees(secondPlayer, 1), { itemId: 'apple', quantity: 1 });
+});
+
+test('NATION-07: shop stock, overnight settlements, and saved inventories', () => {
+  const player = { ...start, level: 1, experience: 0, hp: 100, mp: 100, weaponId: null, cooldown: 0,
+    pendingPoison: 0, inventory: new Map([['apple', 3]]), armor: new Map(), skills: createSkills() };
+  const state = { player, area: field, gold: 100, guilds: new Map(), harvest: null, shopStock: createShopStock(),
+    shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])) };
+  assert.equal(buyItem(state, 'weapon-shop', 'iron-dagger'), true);
+  assert.equal(buyItem(state, 'weapon-shop', 'iron-dagger'), false);
+  assert.equal(state.shopStock['weapon-shop'].has('iron-dagger'), false);
+  for (let i = 0; i < 3; i++) assert.equal(sellItem(state, 'goods-shop', 'apple'), true);
+  assert.equal(state.shopStock['goods-shop'].get('apple'), 3);
+  assert.equal(buyItem(state, 'goods-shop', 'apple'), true);
+  assert.equal(state.shopStock['goods-shop'].get('apple'), 2);
+
+  const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns), lootDrops: [] }]));
+  const save = makeSave(state, areaStates, 0);
+  const reloaded = restoreSave(JSON.parse(JSON.stringify(save)));
+  assert.deepEqual(reloaded.shopStock, state.shopStock);
+  const old = structuredClone(save);
+  delete old.shopStock;
+  const legacy = restoreSave(old);
+  assert.deepEqual(legacy.shopStock, createShopStock());
+  assert.deepEqual(legacy.shopGold, state.shopGold);
+  const damaged = structuredClone(save);
+  damaged.shopStock['goods-shop'].push(['apple', 0]);
+  assert.throws(() => restoreSave(damaged));
+
+  settleShops(reloaded);
+  assert.equal(reloaded.shopGold['weapon-shop'], 105);
+  assert.equal(reloaded.shopGold['goods-shop'], 103);
+  assert.deepEqual(reloaded.shopStock, createShopStock());
+  settleShops(reloaded);
+  assert.equal(reloaded.shopGold['weapon-shop'], 105);
+  assert.equal(reloaded.shopGold['goods-shop'], 103);
+
+  // A store that has spent the day's takings still bears the replenishment cost.
+  buyItem(reloaded, 'weapon-shop', 'iron-dagger');
+  reloaded.shopGold['weapon-shop'] = 1;
+  settleShops(reloaded);
+  assert.equal(reloaded.shopGold['weapon-shop'], -4);
+  assert.equal(restoreSave(makeSave(reloaded, areaStates, 0)).shopGold['weapon-shop'], -4);
 });

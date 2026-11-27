@@ -12,7 +12,7 @@ import { findSource, harvestSeconds } from './trees.js?v=37';
 import { createNationSimulation } from './nation-simulation.js?v=41';
 import { captureNations, restoreNations } from './nation-save.js?v=41';
 
-import { startingShopGold } from './shop.js?v=41';
+import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=44';
 
 const format = 'kingdom-adventurer';
 const version = 10;
@@ -39,6 +39,8 @@ export function makeSave(state, areaStates, clock) {
       })) };
     }),
     guilds: [...state.guilds], shopGold: state.shopGold,
+    shopStock: Object.fromEntries(Object.entries(state.shopStock ?? createShopStock())
+      .map(([id, stock]) => [id, [...stock]])),
     harvest: harvest ? { id: harvest.source.id, elapsed: harvest.elapsed } : null,
   });
 }
@@ -204,9 +206,25 @@ export function restoreSave(data) {
   const shopGold = Object.fromEntries(Object.keys(shopDoors).map(id => {
     if (data.version < 4 && !Object.hasOwn(data.shopGold, id)
       && id !== 'goods-shop' && id !== 'weapon-shop') return [id, startingShopGold];
-    check(integer(data.shopGold[id]));
+    check(Number.isSafeInteger(data.shopGold[id]));
     return [id, data.shopGold[id]];
   }));
+  const shopStock = createShopStock();
+  if (data.version === version && Object.hasOwn(data, 'shopStock')) {
+    check(record(data.shopStock) && Object.keys(data.shopStock).length === Object.keys(shopStock).length);
+    for (const shopId of Object.keys(shopStock)) {
+      const entries = data.shopStock[shopId];
+      check(Array.isArray(entries) && entries.length <= items.size);
+      const stock = new Map();
+      for (const entry of entries) {
+        check(Array.isArray(entry) && entry.length === 2);
+        const [id, count] = entry;
+        check(acceptsItem(shopId, items.get(id)) && integer(count, 1) && !stock.has(id));
+        stock.set(id, count);
+      }
+      shopStock[shopId] = stock;
+    }
+  }
   const nations = data.version >= 3 ? restoreNations(data.nations, data.clock, data.version) : createNationSimulation(data.clock);
   let harvest = null;
   if (data.version >= 5 && data.harvest !== null) {
@@ -221,5 +239,5 @@ export function restoreSave(data) {
   check(Array.isArray(explored) && explored.length <= mobWorld.chunks.length
     && explored.every(id => integer(id, 0, mobWorld.chunks.length - 1)));
   const exploredChunks = new Set(explored);
-  return { player, area, areaStates, nations, mobWorld, exploredChunks, gold: data.gold, guilds, shopGold, harvest, clock: data.clock };
+  return { player, area, areaStates, nations, mobWorld, exploredChunks, gold: data.gold, guilds, shopGold, shopStock, harvest, clock: data.clock };
 }

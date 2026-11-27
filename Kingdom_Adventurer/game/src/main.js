@@ -7,7 +7,7 @@ import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './co
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=42';
 import { createRenderer } from './render.js?v=43';
-import { setupGearMenus } from './gear-ui.js?v=41';
+import { setupGearMenus } from './gear-ui.js?v=44';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=39';
 
@@ -17,7 +17,7 @@ import { collectLoot } from './loot.js?v=39';
 
 import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=43';
+import { areas, makeSave, restoreSave } from './save-data.js?v=44';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=41';
@@ -25,7 +25,7 @@ import { advanceMobWorld, createMobWorld } from './mob-world.js?v=43';
 import { inSettlement } from './nation-layout.js?v=35';
 import { setupNationMenu } from './nation-menu.js?v=41';
 
-import { startingShopGold } from './shop.js?v=41';
+import { createShopStock, settleShops, startingShopGold } from './shop.js?v=44';
 
 let huntRequested = false;
 window.addEventListener('keydown', event => {
@@ -80,7 +80,7 @@ const state = {
   get encounters() { return areaStates.get(this.area).encounters; },
   get lootDrops() { return areaStates.get(this.area).lootDrops; },
   strike: null, harvest: null,
-  notice: null, innContact: null, gold: settings.currency.startingGold, shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])) };
+  notice: null, innContact: null, gold: settings.currency.startingGold, shopContact: null, shopStock: createShopStock(), shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, startingShopGold])) };
 Object.assign(state, { guilds: new Map(), guildContact: null });
 function applySave({ areaStates: savedAreas, clock, ...savedState }) {
   Object.assign(state, savedState, { strike: null, notice: null });
@@ -112,6 +112,7 @@ inn.querySelector('form').addEventListener('submit', async event => {
   const buttons = [...inn.querySelectorAll('button')];
   for (const button of buttons) button.disabled = true;
   setText(innOffer, '翌朝まで休んでいます…');
+  const dayBeforeRest = gameDay(currentGameMinute());
   const morning = nextMorningMinute(currentGameMinute());
   // Break time skips into small steps so the dialog remains responsive on mobile.
   while (state.nations.minute < morning) {
@@ -123,6 +124,7 @@ inn.querySelector('form').addEventListener('submit', async event => {
     clockBaseMinute = state.nations.minute;
     elapsedPlaySeconds = 0;
   }
+  if (gameDay(morning) !== dayBeforeRest) settleShops(state);
   state.player.hp = maxHealth(state.player.level);
   state.player.flash = 0;
   state.notice = { text: `翌朝6時になり、HPが全回復しました（−${settings.inn.price}G）`, remaining: 2 };
@@ -265,7 +267,9 @@ function frame(time) {
   const dt = Math.min((time - previous) / 1000, 0.04);
   previous = time;
   if (!document.querySelector('dialog[open]') && state.player.hp > 0) {
+    const previousDay = gameDay(currentGameMinute());
     elapsedPlaySeconds += dt;
+    if (gameDay(currentGameMinute()) !== previousDay) settleShops(state);
     advanceMobWorld(state.mobWorld, state.nations, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds),
       state.area === field ? state.player : null);
     update(dt);

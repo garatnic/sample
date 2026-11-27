@@ -1,7 +1,7 @@
 import { playerAttack } from './weapon-skill.js?v=39';
 import { maxHealth } from './growth.js?v=32';
 import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=39';
-import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=41';
+import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=44';
 import { canUseItem, maxMp, useItem } from './consumables.js?v=39';
 
 export function setupGearMenus(state, input) {
@@ -95,8 +95,8 @@ export function setupGearMenus(state, input) {
     let focusTarget = buying ? buyButton : sellButton;
     for (const [id, item] of items) {
       if (!acceptsItem(shopId, item) || (shopFilter !== 'all' && shopFilter !== itemGroup(item))) continue;
-      const quantity = state.player.inventory.get(id) ?? 0;
-      if (buying ? item.sellOnly : quantity === 0) continue;
+      const quantity = (buying ? state.shopStock[shopId] : state.player.inventory).get(id) ?? 0;
+      if (!quantity) continue;
       const price = buying ? item.price : salePrice(item);
       const equipped = !buying && sellableQuantity(state.player, id) <= 0;
       const entry = document.createElement('li');
@@ -105,7 +105,7 @@ export function setupGearMenus(state, input) {
       disclosure.dataset.itemId = id;
       disclosure.open = expandedId === id;
       const summary = document.createElement('summary');
-      summary.textContent = quantity > 0 ? `${item.name}（${quantity}）` : item.name;
+      summary.textContent = `${item.name}（${buying ? "在庫" : "所持"} ${quantity}）`;
       const facts = document.createElement('p');
       const group = shops[shopId].tabs.find(([key]) => key === itemGroup(item))[1];
       const stats = itemStats(item) || effectText(item.effect);

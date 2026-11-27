@@ -22,9 +22,43 @@ export function acceptsItem(shopId, item) {
   return Boolean(item && shops[shopId]?.tabs.some(([group]) => group === itemGroup(item)));
 }
 
+const defaultCatalogs = Object.fromEntries(Object.keys(shops).map(shopId => [
+  shopId, [...items].filter(([, item]) => acceptsItem(shopId, item) && !item.sellOnly).map(([id]) => id),
+]));
+
+function defaultStock(shopId) {
+  return new Map(defaultCatalogs[shopId].map(id => [id, 1]));
+}
+
+export function createShopStock() {
+  return Object.fromEntries(Object.keys(shops).map(id => [id, defaultStock(id)]));
+}
+
+export function settleShops(state) {
+  for (const shopId of Object.keys(shops)) {
+    const current = state.shopStock[shopId];
+    const baseline = defaultStock(shopId);
+    let change = 0;
+    for (const [id, target] of baseline) {
+      const shortage = Math.max(0, target - (current.get(id) ?? 0));
+      change -= shortage * salePrice(items.get(id));
+    }
+    for (const [id, count] of current) {
+      if (!baseline.has(id)) change += items.get(id).price * count;
+    }
+    state.shopGold[shopId] += change;
+    state.shopStock[shopId] = baseline;
+  }
+}
+
 export function buyItem(state, shopId, id) {
   const item = items.get(id);
-  if (!acceptsItem(shopId, item) || item.sellOnly || state.gold < item.price) return false;
+  if (!acceptsItem(shopId, item) || state.gold < item.price) return false;
+  const stock = state.shopStock[shopId];
+  const count = stock.get(id) ?? 0;
+  if (!count) return false;
+  if (count === 1) stock.delete(id);
+  else stock.set(id, count - 1);
   const inventory = state.player.inventory;
   inventory.set(id, (inventory.get(id) ?? 0) + 1);
   state.gold -= item.price;
@@ -55,6 +89,8 @@ export function sellItem(state, shopId, id) {
   const count = inventory.get(id);
   if (count === 1) inventory.delete(id);
   else inventory.set(id, count - 1);
+  const stock = state.shopStock[shopId];
+  stock.set(id, (stock.get(id) ?? 0) + 1);
   state.shopGold[shopId] -= price;
   state.gold += price;
   return true;
