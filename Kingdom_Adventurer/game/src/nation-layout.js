@@ -1,5 +1,5 @@
 import { settings } from './settings.js?v=39';
-import { nationSettings as config } from './nation-settings.js?v=45';
+import { nationSettings as config } from './nation-settings.js?v=47';
 
 const names = [['楡の国', '楡の宿場町'], ['紫峰の国', '紫峰の開拓町']];
 const origin = { x: 1112, y: 1856 };

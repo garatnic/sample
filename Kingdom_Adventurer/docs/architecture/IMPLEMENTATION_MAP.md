@@ -5,7 +5,7 @@
 
 ## 検証の記録
 
-保存済みテスト22件（SKILL-01〜06、NATION-01〜07、MOB-01〜04、ECON-01〜05）。[テスト索引](../../tests/README.md)、[技能](../../tests/skills.test.mjs)、[国家](../../tests/nations.test.mjs)、[MOB](../../tests/mobs.test.mjs)、[国家経済](../../tests/economy.test.mjs) を参照。
+保存済みテスト24件（SKILL-01〜06、NATION-01〜07、MOB-01〜04、ECON-01〜07）。[テスト索引](../../tests/README.md)、[技能](../../tests/skills.test.mjs)、[国家](../../tests/nations.test.mjs)、[MOB](../../tests/mobs.test.mjs)、[国家経済](../../tests/economy.test.mjs) を参照。
 
 - 保存済み自動テスト — 再実行できるテストのIDとファイルを登録する。
 - 単発実行 — Nodeの確認コードやブラウザ自動操作など、実行した方法と結果を記録する。保存済みテストIDは付けない。
@@ -64,10 +64,10 @@
 | `CUR-UI-006` | 世界地図 | index.html: #open-map/#world-map; style.css: #world-map; src/world-map.js: discoverLocation(), setupWorldMap(); src/main.js: update(), applySave(); src/save-data.js: exploredChunks; src/mob-world.js: chunkAt(), 地形タイル; src/world.js: cave.entrance | CUR-WORLD-007, CUR-SYS-004, CUR-UI-001 | EXPLORE-001 | 未登録 |
 | `CUR-NATION-001` | 国家・都市と配置 | src/nation-layout.js: createNationLayouts(), nationLayouts; src/nation-settings.js: count, spacing, buildingRadius, sourceRadius; src/nation-simulation.js: createNationSimulation(), finishBuilding(); src/world.js: terrainAt(), inTown(); src/settings.js: mapTiles | CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-004 | WORLD-003, WORLD-008, HOUSING-002 | NATION-01, NATION-02 |
 | `CUR-NATION-002` | 自律作業と物流 | src/nation-simulation.js: assignWork(), completeTask(), taskSchedule(), nextPick(), assignRoles(), refreshNationDemand(), continueWander(); src/nation-economy.js: updateNationDemand(), storageRoom(); src/nation-layout.js: 資源座標; src/nation-settings.js: harvest, carry, walkingSpeed, specialists, leisureCurve, wanderRadius, leisureMinutes, retryMinutes; src/render.js: drawSource(), drawResident(); src/trees.js: harvestSource(); src/mob-world.js: residentCombat() | CUR-NATION-001, CUR-NATION-003 | NPC-001, ECO-008 | NATION-02, NATION-04, NATION-06, MOB-03, ECON-01, ECON-02 |
-| `CUR-NATION-003` | 容量・建築・日次消費 | src/nation-simulation.js: advanceNations(), assignWork(), finishBuilding(); src/nation-economy.js: capacity(), reserves(), storageRoom(); src/nation-settings.js: warehouse, house, dailyPerResident, minimumDays, targetDays, surplusCapacity; src/clock.js: firstMinuteOfDay(); src/main.js: 宿泊時更新 | CUR-NATION-002, CUR-SYS-005, CUR-INN-002 | HOUSING-001, HOUSING-006, SOCIETY-005, SYSTEM-013 | NATION-02, NATION-03, NATION-04, ECON-02, ECON-04 |
+| `CUR-NATION-003` | 容量・建築・日次消費 | src/nation-simulation.js: advanceNations(), assignWork(), finishBuilding(); src/nation-economy.js: capacity(), targetsFor(), reserves(), storageRoom(); src/nation-settings.js: warehouse, house, dailyPerResident, minimumDays, targetDays; src/clock.js: firstMinuteOfDay(); src/main.js: 宿泊時更新 | CUR-NATION-002, CUR-SYS-005, CUR-INN-002 | HOUSING-001, HOUSING-006, SOCIETY-005, SYSTEM-013 | NATION-02, NATION-03, NATION-04, ECON-02, ECON-04, ECON-06, ECON-07 |
 | `CUR-NATION-004` | 距離処理と画面 | src/nation-simulation.js: advanceNations(), modeFor(), residentPosition(); src/nation-settings.js: nearRadius; src/main.js: nearbyCenter(), frame(); src/render.js: render(); src/nation-menu.js: setupNationMenu(); index.html: #open-nations, #nation-menu; style.css: #nation-content, #nation-menu | CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-NATION-005, CUR-UI-002 | SYSTEM-012, SYSTEM-014 | NATION-01, NATION-04 |
 
-| `CUR-NATION-005` | 国庫・余剰換金 | src/nation-economy.js: settleNationDay(), reserves(); src/nation-simulation.js: createNationSimulation(), advanceNations(); src/nation-settings.js: initialTreasury, surplusPrice; src/shop.js: settleShops(); src/main.js: settleNationShops(); src/nation-save.js: captureNations(), restoreNations(); src/nation-menu.js: setupNationMenu() | CUR-NATION-003, CUR-NATION-004, CUR-SHOP-004, CUR-SYS-005 | NATION-016 | ECON-02, ECON-03, ECON-04, ECON-05 |
+| `CUR-NATION-005` | 国庫・余剰換金 | src/nation-economy.js: settleNationDay(), reserves(); src/nation-simulation.js: createNationSimulation(), advanceNations(); src/nation-settings.js: initialTreasury, surplusPrice; src/shop.js: settleShops(); src/main.js: settleNationShops(); src/nation-save.js: captureNations(), restoreNations(); src/nation-menu.js: setupNationMenu() | CUR-NATION-003, CUR-NATION-004, CUR-SHOP-004, CUR-SYS-005 | NATION-016 | ECON-02, ECON-03, ECON-04, ECON-05, ECON-07 |
 
 ## ファイルから仕様を探す（逆引き）
 

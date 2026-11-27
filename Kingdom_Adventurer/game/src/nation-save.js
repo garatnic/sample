@@ -1,8 +1,8 @@
 import { mobSettings } from './mob-settings.js?v=41';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
-import { nationLayouts } from './nation-layout.js?v=35';
-import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=45';
-import { nationSettings as config } from './nation-settings.js?v=45';
+import { nationLayouts } from './nation-layout.js?v=47';
+import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=47';
+import { nationSettings as config } from './nation-settings.js?v=47';
 
 function requireValid(condition) {
   if (!condition) throw new Error('Invalid nation simulation data');

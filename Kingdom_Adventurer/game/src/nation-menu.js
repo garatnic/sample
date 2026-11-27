@@ -1,5 +1,5 @@
-import { actionNames, modeFor, refreshNationDemand } from './nation-simulation.js?v=45';
-import { nationSettings as config } from './nation-settings.js?v=45';
+import { actionNames, modeFor, refreshNationDemand } from './nation-simulation.js?v=47';
+import { nationSettings as config } from './nation-settings.js?v=47';
 
 export function setupNationMenu(state, input, field) {
   const dialog = document.querySelector('#nation-menu');
@@ -33,6 +33,11 @@ export function setupNationMenu(state, input, field) {
       });
       const finance = nation.finance;
       const income = finance && finance.food + finance.wood + finance.supplied;
+      const needsWarehouse = demand.plans.get(city.id)?.kind === 'warehouse';
+      const warehouseInProgress = city.project?.site.kind === 'warehouse';
+      const expansionStatus = warehouseInProgress ? '建築中' : needsWarehouse
+        ? `必要（木材 ${Math.min(nation.stock.wood, config.warehouse.cost)} / ${config.warehouse.cost}個 確保）`
+        : warehouses >= config.warehouse.max ? '上限到達' : total < demand.requiredCapacity ? '必要（工事待ち）' : '不要';
       const worker = city.project && city.residents.find(p => p.id === city.project.workerId);
       const progress = worker && Math.floor(100 * Math.max(0, state.nations.minute - worker.task.startWork)
         / (worker.task.end - worker.task.startWork));
@@ -44,9 +49,10 @@ export function setupNationMenu(state, input, field) {
         ['処理', modeFor(city, viewpoint) === 'near' ? '近距離' : '遠距離'],
         ['人口', `${population}人`], ['民家', `${houses} / ${config.house.max}軒`],
         ['倉庫', `${warehouses} / ${config.warehouse.max}軒`],
+        ['倉庫増設', expansionStatus],
         ...resourceRows,
         ['建築用木材', `${demand.buildingWood}個`],
-        ['保管状況', `${used} / ${total}（${Math.floor(100 * used / total)}%）`],
+        ['保管状況', `${used} / ${total}個（${Math.floor(100 * used / total)}%）／ 必要 ${demand.requiredCapacity}個`],
         ['住民の役割', `専属採集 ${roles[0]} ／ 専属木こり ${roles[1]} ／ 一般 ${roles[2]}人`],
         ['住民の行動', `採集・運搬 ${foodWorkers} ／ 伐採・運搬 ${woodWorkers} ／ 建築 ${builders} ／ 徘徊 ${wanderers} ／ その他 ${other}人`],
         ['一般住民の抽選', `自由徘徊 ${percent(demand.leisure)} ／ 食料 ${percent((1 - demand.leisure) * demand.labor.food)} ／ 伐採 ${percent((1 - demand.leisure) * demand.labor.wood)}`],

@@ -1,13 +1,13 @@
-import { discoverLocation, setupWorldMap } from './world-map.js?v=43';
+import { discoverLocation, setupWorldMap } from './world-map.js?v=47';
 import { createSkills } from './skills.js?v=32';
 import { setupSkillMenu } from './skill-menu.js?v=32';
 import { settings } from './settings.js?v=39';
-import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=41';
-import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=43';
+import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=47';
+import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=47';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=42';
-import { createRenderer } from './render.js?v=43';
-import { setupGearMenus } from './gear-ui.js?v=44';
+import { createRenderer } from './render.js?v=47';
+import { setupGearMenus } from './gear-ui.js?v=47';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=39';
 
@@ -15,17 +15,17 @@ import { setupQuestMenus } from './quests.js?v=39';
 
 import { collectLoot } from './loot.js?v=39';
 
-import { updateTrees } from './trees.js?v=37';
+import { updateTrees } from './trees.js?v=47';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=46';
+import { areas, makeSave, restoreSave } from './save-data.js?v=47';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
-import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=45';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=45';
-import { inSettlement } from './nation-layout.js?v=35';
-import { setupNationMenu } from './nation-menu.js?v=45';
+import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=47';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=47';
+import { inSettlement } from './nation-layout.js?v=47';
+import { setupNationMenu } from './nation-menu.js?v=47';
 
-import { createShopStock, settleShops, startingShopGold } from './shop.js?v=45';
+import { createShopStock, settleShops, startingShopGold } from './shop.js?v=47';
 
 let huntRequested = false;
 window.addEventListener('keydown', event => {

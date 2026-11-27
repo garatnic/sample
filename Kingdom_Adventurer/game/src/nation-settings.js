@@ -12,7 +12,6 @@ export const nationSettings = {
   dailyPerResident: { food: 1, wood: 1 },
   minimumDays: 2,
   targetDays: 4,
-  surplusCapacity: 24,
   specialists: { food: 1, wood: 1 },
   leisureCurve: [[0, 0], [0.25, 0.1], [0.5, 0.3], [0.75, 0.5], [1, 1]],
   shortageBonusBelow: 0.5,

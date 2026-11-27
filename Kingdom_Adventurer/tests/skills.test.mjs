@@ -1,12 +1,12 @@
-import { createMobWorld } from '../game/src/mob-world.js?v=45';
+import { createMobWorld } from '../game/src/mob-world.js?v=47';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=32';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=32';
 import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=39';
-import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=43';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=46';
-import { cave, field, legacyFieldSpawns, shopDoors, start } from '../game/src/world.js?v=41';
+import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=47';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=47';
+import { cave, field, legacyFieldSpawns, shopDoors, start } from '../game/src/world.js?v=47';
 import { items } from '../game/src/equipment.js?v=39';
 
 const id = 'one-handed';

@@ -1,5 +1,5 @@
-import { nationLayouts } from './nation-layout.js?v=35';
-import { buildings, shopDoors } from './world.js?v=41';
+import { nationLayouts } from './nation-layout.js?v=47';
+import { buildings, shopDoors } from './world.js?v=47';
 import { equippedId, items, ringSlots, slots } from './equipment.js?v=39';
 
 const equipmentTabs = [...slots];

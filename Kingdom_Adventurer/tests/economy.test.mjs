@@ -2,12 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
 import { items } from '../game/src/equipment.js?v=39';
-import { start, shopDoors } from '../game/src/world.js?v=41';
-import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=45';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=46';
-import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=45';
-import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=45';
-import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=45';
+import { start, shopDoors } from '../game/src/world.js?v=47';
+import { nationLayouts } from '../game/src/nation-layout.js?v=47';
+import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=47';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=47';
+import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=47';
+import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=47';
+import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=47';
 
 const midnight = firstMinuteOfDay(gameDay(0) + 1);
 const makeShops = () => ({
@@ -168,4 +169,62 @@ test('ECON-05: bulk trades conserve player, shop and treasury gold during partia
   assert.equal(state.shopStock['goods-shop'].get('apple'), 98);
   assert.deepEqual(state.shopStock['weapon-shop'], createShopStock()['weapon-shop']);
   assert.equal(nation.treasury, finance.supplied);
+});
+
+test('ECON-06: warehouse capacity thresholds depend on population and completed warehouses', () => {
+  for (const [population, needed, requiredWarehouses] of [
+    [10, 132, 2], [15, 182, 2], [20, 232, 2], [25, 282, 3],
+    [30, 332, 3], [35, 382, 4], [40, 432, 4],
+  ]) {
+    const [nation] = createNationSimulation().nations;
+    const [city] = nation.cities;
+    city.residents = Array.from({ length: population }, () => city.residents[0]);
+    const plots = nationLayouts[0].plots.slice(city.buildings.length - 1);
+    for (let warehouses = 1; warehouses <= 4; warehouses++) {
+      nation.stock = { food: 90 * warehouses, wood: 0 };
+      const targets = reserves(nation);
+      assert.equal(targets.requiredCapacity, warehouses < 4 ? needed : population * 10);
+      assert.equal(targets.plans.get(city.id).kind, warehouses < requiredWarehouses ? 'warehouse' : 'house');
+      assert.equal(targets.buildingWood, warehouses < requiredWarehouses ? 32 : 24);
+      if (warehouses < 4) city.buildings.push({ ...plots[warehouses - 1], kind: 'warehouse' });
+    }
+  }
+});
+
+test('ECON-07: full food storage recovers, construction wood is protected, and an active warehouse reloads', () => {
+  const simulation = createNationSimulation();
+  const [nation] = simulation.nations;
+  const [city] = nation.cities;
+  nation.stock = { food: 120, wood: 0 };
+  advanceNations(simulation, 1);
+  assert.equal(nation.demand.plans.get(city.id).kind, 'warehouse');
+  assert.equal(nation.demand.buildingWood, 32);
+  assert.equal(storageRoom(nation.demand, 'wood'), 0);
+  advanceNations(simulation, midnight);
+  assert.equal(nation.stock.food, 40);
+  assert.equal(nation.finance.food, 70);
+  assert.ok(nation.demand.labor.wood > 0);
+  for (let minute = midnight + 1; minute <= midnight + 200 && !city.project; minute++) {
+    advanceNations(simulation, minute);
+  }
+  assert.equal(city.project?.site.kind, 'warehouse');
+  assert.equal(nation.demand.plans.size, 0);
+  assert.equal(nation.demand.buildingWood, 0);
+  const worker = city.residents.find(person => person.id === city.project.workerId);
+  const finish = worker.task.end;
+  const saved = JSON.parse(JSON.stringify(captureNations(simulation)));
+  const restored = restoreNations(saved, saved.minute);
+  advanceNations(restored, finish);
+  advanceNations(simulation, finish);
+  assert.deepEqual(captureNations(restored), captureNations(simulation));
+  assert.equal(nation.demand.limit, 240);
+  assert.equal(city.buildings.filter(building => building.kind === 'warehouse').length, 2);
+  assert.notEqual(city.project?.site.kind, 'warehouse');
+
+  const [rich] = createNationSimulation().nations;
+  rich.stock = { food: 0, wood: 90 };
+  assert.equal(reserves(rich).ideal.wood, 72);
+  settleNationDay(rich, rich.lastDay + 1);
+  assert.equal(rich.stock.wood, 72);
+  assert.equal(rich.finance.wood, 8);
 });

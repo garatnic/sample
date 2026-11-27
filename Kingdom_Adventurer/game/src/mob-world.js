@@ -1,9 +1,9 @@
 import { exactGameMinutes } from './clock.js?v=34';
-import { physicalDamage } from './combat.js?v=43';
+import { physicalDamage } from './combat.js?v=47';
 import { mobSettings as config } from './mob-settings.js?v=41';
-import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=45';
+import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=47';
 import { animalTypes, mobTypes, settings } from './settings.js?v=39';
-import { buildings, cave, field, terrainAt } from './world.js?v=41';
+import { buildings, cave, field, terrainAt } from './world.js?v=47';
 
 export const mobGroup = kind => Object.hasOwn(animalTypes, kind) ? 'animal' : 'enemy';
 const groups = ['animal', 'enemy'];

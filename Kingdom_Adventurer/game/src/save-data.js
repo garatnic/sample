@@ -1,18 +1,18 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=45';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=47';
 import { mobSettings } from './mob-settings.js?v=41';
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
-import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=41';
+import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=47';
 import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=39';
 import { canEquipItem, items } from './equipment.js?v=39';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { maxMp } from './consumables.js?v=39';
 import { gameDay } from './clock.js?v=34';
-import { findSource, harvestSeconds } from './trees.js?v=37';
+import { findSource, harvestSeconds } from './trees.js?v=47';
 
-import { createNationSimulation } from './nation-simulation.js?v=45';
-import { captureNations, restoreNations } from './nation-save.js?v=46';
+import { createNationSimulation } from './nation-simulation.js?v=47';
+import { captureNations, restoreNations } from './nation-save.js?v=47';
 
-import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=45';
+import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=47';
 
 const format = 'kingdom-adventurer';
 const version = 11;

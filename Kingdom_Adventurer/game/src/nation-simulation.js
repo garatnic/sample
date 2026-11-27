@@ -1,8 +1,8 @@
-import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=37';
+import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=47';
 import { exactGameMinutes, firstMinuteOfDay, gameDay } from './clock.js?v=34';
-import { nationLayouts } from './nation-layout.js?v=35';
-import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=45';
-import { nationSettings as config } from './nation-settings.js?v=45';
+import { nationLayouts } from './nation-layout.js?v=47';
+import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=47';
+import { nationSettings as config } from './nation-settings.js?v=47';
 
 export const actionNames = {
   idle: '待機', wander: '自由徘徊', gatherWood: '木材収集', gatherFood: '食料収集',
