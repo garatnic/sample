@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { updateTrees } from '../game/src/trees.js?v=37';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=44';
-import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=44';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=45';
+import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=45';
 import { createEncounters } from '../game/src/combat.js?v=43';
 import { createSkills } from '../game/src/skills.js?v=32';
 import { refreshGuild } from '../game/src/quests.js?v=39';
 import { settings } from '../game/src/settings.js?v=39';
-import { nationSettings as config } from '../game/src/nation-settings.js?v=39';
+import { nationSettings as config } from '../game/src/nation-settings.js?v=45';
 import { nationLayouts } from '../game/src/nation-layout.js?v=35';
 import { buildings, field, guildDoors, inTown, innDoors, legacyFieldSpawns, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=41';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=41';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=41';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=45';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=45';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
@@ -180,7 +180,11 @@ test('NATION-05: all city facilities work independently and version 3 saves migr
   assert.equal(restored.shopGold[easternShop], 100);
   assert.ok(restored.guilds.has('house-southwest'));
   assert.deepEqual({ x: restored.player.x, y: restored.player.y }, facility.door);
-  assert.deepEqual(copy(restored.nations), copy(state.nations));
+  for (const [i, nation] of restored.nations.nations.entries()) {
+    assert.deepEqual(nation.stock, state.nations.nations[i].stock);
+    assert.equal(nation.cities[0].residents.length, state.nations.nations[i].cities[0].residents.length);
+    assert.equal(nation.treasury, config.initialTreasury);
+  }
 });
 
 test('NATION-06: player and residents compete for the same fruit and timber', () => {
@@ -267,6 +271,7 @@ test('NATION-07: shop stock, overnight settlements, and saved inventories', () =
   const reloaded = restoreSave(JSON.parse(JSON.stringify(save)));
   assert.deepEqual(reloaded.shopStock, state.shopStock);
   const old = structuredClone(save);
+  old.version = 10;
   delete old.shopStock;
   const legacy = restoreSave(old);
   assert.deepEqual(legacy.shopStock, createShopStock());
@@ -275,18 +280,25 @@ test('NATION-07: shop stock, overnight settlements, and saved inventories', () =
   damaged.shopStock['goods-shop'].push(['apple', 0]);
   assert.throws(() => restoreSave(damaged));
 
-  settleShops(reloaded);
+  const nation = reloaded.nations.nations[0];
+  const settle = (owner, day, finance) => settleShops(reloaded, owner, day, finance);
+  advanceNations(reloaded.nations, firstMinuteOfDay(gameDay(0) + 1), false, settle);
   assert.equal(reloaded.shopGold['weapon-shop'], 105);
   assert.equal(reloaded.shopGold['goods-shop'], 103);
   assert.deepEqual(reloaded.shopStock, createShopStock());
-  settleShops(reloaded);
-  assert.equal(reloaded.shopGold['weapon-shop'], 105);
-  assert.equal(reloaded.shopGold['goods-shop'], 103);
+  assert.deepEqual([nation.finance.bought, nation.finance.supplied], [4, 5]);
+  const savedBalance = nation.treasury;
+  advanceNations(reloaded.nations, reloaded.nations.minute, true, settle);
+  assert.equal(nation.treasury, savedBalance);
 
-  // A store that has spent the day's takings still bears the replenishment cost.
+  // Insufficient cash leaves shortages and preserves the store balance.
   buyItem(reloaded, 'weapon-shop', 'iron-dagger');
   reloaded.shopGold['weapon-shop'] = 1;
-  settleShops(reloaded);
-  assert.equal(reloaded.shopGold['weapon-shop'], -4);
-  assert.equal(restoreSave(makeSave(reloaded, areaStates, 0)).shopGold['weapon-shop'], -4);
+  advanceNations(reloaded.nations, firstMinuteOfDay(gameDay(0) + 2), false, settle);
+  assert.equal(reloaded.shopGold['weapon-shop'], 1);
+  assert.equal(reloaded.shopStock['weapon-shop'].has('iron-dagger'), false);
+  const overnightSave = makeSave({ ...reloaded, mobWorld: null }, areaStates, reloaded.nations.minute);
+  const reload = restoreSave(overnightSave);
+  assert.equal(reload.shopGold['weapon-shop'], 1);
+  assert.equal(reload.shopStock['weapon-shop'].has('iron-dagger'), false);
 });

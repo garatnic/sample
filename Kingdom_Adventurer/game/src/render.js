@@ -1,8 +1,8 @@
-import { mobsIn } from './mob-world.js?v=43';
+import { mobsIn } from './mob-world.js?v=45';
 import { animalTypes, settings } from './settings.js?v=39';
 import { buildings, cave, field, terrainAt } from './world.js?v=41';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=41';
+import { modeFor, residentPosition } from './nation-simulation.js?v=45';
 
 import { harvestSeconds, sourceQuantity } from './trees.js?v=37';
 

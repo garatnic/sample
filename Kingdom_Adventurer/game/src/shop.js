@@ -1,3 +1,4 @@
+import { nationLayouts } from './nation-layout.js?v=35';
 import { buildings, shopDoors } from './world.js?v=41';
 import { equippedId, items, ringSlots, slots } from './equipment.js?v=39';
 
@@ -34,20 +35,45 @@ export function createShopStock() {
   return Object.fromEntries(Object.keys(shops).map(id => [id, defaultStock(id)]));
 }
 
-export function settleShops(state) {
-  for (const shopId of Object.keys(shops)) {
-    const current = state.shopStock[shopId];
+const shopsByNation = new Map(nationLayouts.map(layout => [layout.id,
+  layout.facilities.map(b => b.id).filter(id => Object.hasOwn(shops, id)).sort()]));
+
+export function settleShops(state, nation, day, finance) {
+  const ids = shopsByNation.get(nation.id);
+  if (!ids?.length) return;
+  const offset = day % ids.length;
+  const ordered = [...ids.slice(offset), ...ids.slice(0, offset)];
+  for (const shopId of ordered) {
+    const stock = state.shopStock[shopId];
     const baseline = defaultStock(shopId);
-    let change = 0;
-    for (const [id, target] of baseline) {
-      const shortage = Math.max(0, target - (current.get(id) ?? 0));
-      change -= shortage * salePrice(items.get(id));
+    for (const id of [...stock.keys()].sort()) {
+      const count = stock.get(id);
+      const price = items.get(id).price;
+      const quantity = Math.min(Math.max(0, count - (baseline.get(id) ?? 0)), Math.floor(nation.treasury / price));
+      if (!quantity) continue;
+      const payment = price * quantity;
+      nation.treasury -= payment;
+      state.shopGold[shopId] += payment;
+      finance.bought += payment;
+      if (count === quantity) stock.delete(id);
+      else stock.set(id, count - quantity);
     }
-    for (const [id, count] of current) {
-      if (!baseline.has(id)) change += items.get(id).price * count;
+  }
+  for (const shopId of ordered) {
+    const stock = state.shopStock[shopId];
+    const baseline = defaultStock(shopId);
+    for (const id of [...baseline.keys()].sort()) {
+      const count = stock.get(id) ?? 0;
+      const price = salePrice(items.get(id));
+      const availableGold = Math.max(0, state.shopGold[shopId]);
+      const quantity = Math.min(Math.max(0, baseline.get(id) - count), Math.floor(availableGold / price));
+      if (!quantity) continue;
+      const payment = price * quantity;
+      state.shopGold[shopId] -= payment;
+      nation.treasury += payment;
+      finance.supplied += payment;
+      stock.set(id, count + quantity);
     }
-    state.shopGold[shopId] += change;
-    state.shopStock[shopId] = baseline;
   }
 }
 

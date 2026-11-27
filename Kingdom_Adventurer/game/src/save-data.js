@@ -1,4 +1,4 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=43';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=45';
 import { mobSettings } from './mob-settings.js?v=41';
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
 import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=41';
@@ -9,13 +9,13 @@ import { maxMp } from './consumables.js?v=39';
 import { gameDay } from './clock.js?v=34';
 import { findSource, harvestSeconds } from './trees.js?v=37';
 
-import { createNationSimulation } from './nation-simulation.js?v=41';
-import { captureNations, restoreNations } from './nation-save.js?v=41';
+import { createNationSimulation } from './nation-simulation.js?v=45';
+import { captureNations, restoreNations } from './nation-save.js?v=45';
 
-import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=44';
+import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=45';
 
 const format = 'kingdom-adventurer';
-const version = 10;
+const version = 11;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -195,7 +195,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, 9, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
@@ -210,7 +210,7 @@ export function restoreSave(data) {
     return [id, data.shopGold[id]];
   }));
   const shopStock = createShopStock();
-  if (data.version === version && Object.hasOwn(data, 'shopStock')) {
+  if (data.version >= 10 && Object.hasOwn(data, 'shopStock')) {
     check(record(data.shopStock) && Object.keys(data.shopStock).length === Object.keys(shopStock).length);
     for (const shopId of Object.keys(shopStock)) {
       const entries = data.shopStock[shopId];
@@ -235,7 +235,7 @@ export function restoreSave(data) {
   }
   const mobWorld = restoreMobs(data.mobs, areaStates.get(field), data.clock, data.version);
   indexSettlement(mobWorld, nations);
-  const explored = data.version === version ? data.exploredChunks ?? [] : [];
+  const explored = data.version >= 10 ? data.exploredChunks ?? [] : [];
   check(Array.isArray(explored) && explored.length <= mobWorld.chunks.length
     && explored.every(id => integer(id, 0, mobWorld.chunks.length - 1)));
   const exploredChunks = new Set(explored);

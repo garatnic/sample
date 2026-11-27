@@ -399,3 +399,7 @@ NPCの収支・資産履歴では、実際に受領した家賃収入と未回�
 ## 他分野が担当する関連仕様
 
 - [SOCIETY-003](13_population_society.md#society-003) 集落の自律発展
+
+## 現行の暫定倉庫と建築
+
+各国の初期都市では2資源の消費と容量需要を見て、倉庫と民家を自動建築する。建築用木材と生活分の容量配分は [CUR-NATION-003](current/CURRENT_SPECIFICATIONS.md#cur-nation-003-備蓄容量建築) を参照。

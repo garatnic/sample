@@ -1,0 +1,82 @@
+import { nationLayouts } from './nation-layout.js?v=35';
+import { nationSettings as config } from './nation-settings.js?v=45';
+
+export const resources = ['food', 'wood'];
+
+const byResource = calculate => Object.fromEntries(resources.map(kind => [kind, calculate(kind)]));
+
+export function capacity(nation) {
+  return nation.cities.reduce((total, city) =>
+    total + city.buildings.filter(b => b.kind === 'warehouse').length * config.warehouse.capacity, 0);
+}
+
+export function reserves(nation) {
+  const population = nation.cities.reduce((sum, city) => sum + city.residents.length, 0);
+  const daily = byResource(kind => population * config.dailyPerResident[kind]);
+  const minimum = byResource(kind => daily[kind] * config.minimumDays);
+  const ideal = byResource(kind => daily[kind] * config.targetDays);
+  const limit = capacity(nation);
+  const plans = new Map();
+  let projectedCapacity = limit;
+  let buildingWood = 0;
+  for (const city of nation.cities) {
+    if (city.project || city.residents.length === 0) continue;
+    const layout = nationLayouts.find(entry => entry.cityId === city.id);
+    const plot = layout.plots.find(entry => !city.buildings.some(b => b.id === entry.id));
+    if (!plot) continue;
+    const houses = city.buildings.filter(b => b.kind === 'house').length;
+    const warehouses = city.buildings.filter(b => b.kind === 'warehouse').length;
+    const houseCost = houses < config.house.max ? config.house.cost : 0;
+    const needed = ideal.food + ideal.wood + daily.food + daily.wood + houseCost + config.surplusCapacity;
+    const kind = warehouses < config.warehouse.max && projectedCapacity < needed ? 'warehouse' : houseCost ? 'house' : null;
+    if (!kind) continue;
+    if (kind === 'warehouse') projectedCapacity += config.warehouse.capacity;
+    plans.set(city.id, { ...plot, kind });
+    buildingWood += config[kind].cost;
+  }
+  ideal.wood += buildingWood;
+  const livingRoom = Math.max(0, limit - buildingWood);
+  const livingTotal = ideal.food + ideal.wood - buildingWood;
+  const food = livingTotal > livingRoom ? Math.floor(livingRoom * ideal.food / livingTotal) : ideal.food;
+  const effective = { food, wood: Math.min(ideal.wood, limit - food) };
+  const surplus = byResource(kind => Math.max(0, nation.stock[kind] - ideal[kind]));
+  return { daily, minimum, ideal, effective, limit, buildingWood, surplus, plans };
+}
+
+export function updateNationDemand(nation, reserved, targets = reserves(nation)) {
+  const { effective } = targets;
+  const expected = byResource(kind => nation.stock[kind] + reserved[kind]);
+  const fill = byResource(kind => effective[kind] ? Math.min(1, expected[kind] / effective[kind]) : 1);
+  const least = Math.min(fill.food, fill.wood);
+  const upper = config.leisureCurve.findIndex(([ratio]) => ratio >= least);
+  const [left, low] = config.leisureCurve[Math.max(0, upper - 1)];
+  const [right, high] = config.leisureCurve[upper];
+  const leisure = left === right ? high : low + (least - left) / (right - left) * (high - low);
+  const weights = byResource(kind => 1 - fill[kind] + Math.max(0, config.shortageBonusBelow - fill[kind]));
+  const total = weights.food + weights.wood;
+  const labor = byResource(kind => total ? weights[kind] / total : 0);
+  nation.demand = { ...targets, reserved: { ...reserved }, expected, leisure, labor };
+  return nation.demand;
+}
+
+export function storageRoom(demand, kind) {
+  const other = kind === 'food' ? 'wood' : 'food';
+  return Math.max(0, demand.limit - demand.expected[kind] - Math.max(demand.expected[other], demand.effective[other]));
+}
+
+export function settleNationDay(nation, day, settleShops) {
+  if (day <= nation.lastDay) return;
+  const { daily } = reserves(nation);
+  const finance = { day, food: 0, wood: 0, supplied: 0, bought: 0 };
+  for (const kind of resources) nation.stock[kind] = Math.max(0, nation.stock[kind] - daily[kind]);
+  const { ideal } = reserves(nation);
+  for (const kind of resources) {
+    const quantity = Math.max(0, nation.stock[kind] - ideal[kind]);
+    nation.stock[kind] -= quantity;
+    finance[kind] = quantity * config.surplusPrice[kind];
+    nation.treasury += finance[kind];
+  }
+  settleShops?.(nation, day, finance);
+  nation.finance = finance;
+  nation.lastDay = day;
+}

@@ -1,7 +1,7 @@
 import { exactGameMinutes } from './clock.js?v=34';
 import { physicalDamage } from './combat.js?v=43';
 import { mobSettings as config } from './mob-settings.js?v=41';
-import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=41';
+import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=45';
 import { animalTypes, mobTypes, settings } from './settings.js?v=39';
 import { buildings, cave, field, terrainAt } from './world.js?v=41';
 
@@ -362,7 +362,7 @@ function residentCombat(world) {
   }
 }
 
-export function advanceMobWorld(world, nations, toMinute, player = null, random = Math.random) {
+export function advanceMobWorld(world, nations, toMinute, player = null, random = Math.random, settleShops) {
   indexSettlement(world, nations);
   if (!world.tick) {
     indexResidents(world, nations);
@@ -371,7 +371,7 @@ export function advanceMobWorld(world, nations, toMinute, player = null, random 
   }
   while (world.minute + config.tickMinutes <= toMinute) {
     world.minute += config.tickMinutes;
-    advanceNations(nations, world.minute);
+    advanceNations(nations, world.minute, false, settleShops);
     indexSettlement(world, nations);
     indexResidents(world, nations);
     for (const mob of world.mobs.values()) {
@@ -379,11 +379,11 @@ export function advanceMobWorld(world, nations, toMinute, player = null, random 
     }
     residentCombat(world);
     if (nations.nations.some(nation => nation.nextMinute === world.minute)) {
-      advanceNations(nations, world.minute, true);
+      advanceNations(nations, world.minute, true, settleShops);
     }
     if (++world.tick % config.spawnEveryTicks === 0) {
       populate(world, player, random, false);
     }
   }
-  advanceNations(nations, toMinute);
+  advanceNations(nations, toMinute, false, settleShops);
 }

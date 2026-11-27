@@ -470,3 +470,7 @@
 - [v4.7.md Q3](../history/v4.7.md#q3) 領土拡張の優先順位 ／ 採用「資源・交通・防衛・人口需要を考慮して国家が拡張先を選ぶ」
 
 **関連仕様** [SOCIETY-008](13_population_society.md#society-008) · [SOCIETY-003](13_population_society.md#society-003) · [SOCIETY-012](13_population_society.md#society-012) · [QUEST-001](14_quests_history.md#quest-001)
+
+## 現行の暫定国庫
+
+各国10,000Gから開始し、余剰食料・木材の売却と所属商店との商品精算の収支を記録する。詳細は [CUR-NATION-005](current/CURRENT_SPECIFICATIONS.md#cur-nation-005-国庫余剰換金) を参照。

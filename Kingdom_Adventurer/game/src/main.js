@@ -17,15 +17,15 @@ import { collectLoot } from './loot.js?v=39';
 
 import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=44';
+import { areas, makeSave, restoreSave } from './save-data.js?v=45';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
-import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=41';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=43';
+import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=45';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=45';
 import { inSettlement } from './nation-layout.js?v=35';
-import { setupNationMenu } from './nation-menu.js?v=41';
+import { setupNationMenu } from './nation-menu.js?v=45';
 
-import { createShopStock, settleShops, startingShopGold } from './shop.js?v=44';
+import { createShopStock, settleShops, startingShopGold } from './shop.js?v=45';
 
 let huntRequested = false;
 window.addEventListener('keydown', event => {
@@ -100,6 +100,8 @@ function saveNotice(text) {
   state.notice = { text, remaining: 4 };
 }
 
+const settleNationShops = (nation, day, finance) => settleShops(state, nation, day, finance);
+
 let resting = false;
 inn.addEventListener('cancel', event => {
   if (resting) event.preventDefault();
@@ -112,19 +114,17 @@ inn.querySelector('form').addEventListener('submit', async event => {
   const buttons = [...inn.querySelectorAll('button')];
   for (const button of buttons) button.disabled = true;
   setText(innOffer, '翌朝まで休んでいます…');
-  const dayBeforeRest = gameDay(currentGameMinute());
   const morning = nextMorningMinute(currentGameMinute());
   // Break time skips into small steps so the dialog remains responsive on mobile.
   while (state.nations.minute < morning) {
     await new Promise(resolve => setTimeout(resolve, 0));
     const budgetEnd = performance.now() + 10;
     do {
-      advanceMobWorld(state.mobWorld, state.nations, Math.min(morning, state.nations.minute + 4));
+      advanceMobWorld(state.mobWorld, state.nations, Math.min(morning, state.nations.minute + 4), null, Math.random, settleNationShops);
     } while (state.nations.minute < morning && performance.now() < budgetEnd);
     clockBaseMinute = state.nations.minute;
     elapsedPlaySeconds = 0;
   }
-  if (gameDay(morning) !== dayBeforeRest) settleShops(state);
   state.player.hp = maxHealth(state.player.level);
   state.player.flash = 0;
   state.notice = { text: `翌朝6時になり、HPが全回復しました（−${settings.inn.price}G）`, remaining: 2 };
@@ -267,11 +267,9 @@ function frame(time) {
   const dt = Math.min((time - previous) / 1000, 0.04);
   previous = time;
   if (!document.querySelector('dialog[open]') && state.player.hp > 0) {
-    const previousDay = gameDay(currentGameMinute());
     elapsedPlaySeconds += dt;
-    if (gameDay(currentGameMinute()) !== previousDay) settleShops(state);
     advanceMobWorld(state.mobWorld, state.nations, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds),
-      state.area === field ? state.player : null);
+      state.area === field ? state.player : null, Math.random, settleNationShops);
     update(dt);
   }
   const minute = currentGameMinute();

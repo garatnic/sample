@@ -172,3 +172,7 @@ NPCは世界情報を把握し、噂は会話・演出に利用する。プレ�
 - [v4.9.md Q2](../history/v4.9.md#q2) 移住後の就職 ／ 採用「求人・技能・賃金を考慮して就職活動し、見つからなければ一時的に無職」
 
 **関連仕様** [SOCIETY-008](13_population_society.md#society-008) · [SOCIETY-013](13_population_society.md#society-013) · [SOCIETY-014](13_population_society.md#society-014) · [QUEST-001](14_quests_history.md#quest-001) · [HOUSING-008](11_building_housing.md#housing-008)
+
+## 現行の暫定生活AI
+
+1都市1人ずつの専属採集者・木こりと、備蓄に応じた一般住民の採集・伐採・自由徘徊を実装済み。建築・納品・再判定と保存は [CUR-NATION-002](current/CURRENT_SPECIFICATIONS.md#cur-nation-002-自律作業と物流) を参照。

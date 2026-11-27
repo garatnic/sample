@@ -1,5 +1,5 @@
-import { actionNames, capacity, modeFor } from './nation-simulation.js?v=41';
-import { nationSettings as config } from './nation-settings.js?v=39';
+import { actionNames, modeFor, refreshNationDemand } from './nation-simulation.js?v=45';
+import { nationSettings as config } from './nation-settings.js?v=45';
 
 export function setupNationMenu(state, input, field) {
   const dialog = document.querySelector('#nation-menu');
@@ -13,10 +13,26 @@ export function setupNationMenu(state, input, field) {
       const population = city.residents.length;
       const houses = city.buildings.filter(b => b.kind === 'house').length;
       const warehouses = city.buildings.filter(b => b.kind === 'warehouse').length;
-      const total = capacity(nation);
+      const demand = refreshNationDemand(nation, state.nations.minute);
+      const total = demand.limit;
       const used = nation.stock.wood + nation.stock.food;
-      const info = Object.entries(actionNames).map(([action, name]) =>
-        `${name} ${city.residents.filter(p => p.action === action).length}人`).join(' ／ ');
+      const roles = ['food', 'wood', 'general'].map(role => city.residents.filter(p => p.role === role).length);
+      const foodWorkers = city.residents.filter(p => p.action === 'gatherFood' || p.carrying?.kind === 'food').length;
+      const woodWorkers = city.residents.filter(p => p.action === 'gatherWood' || p.carrying?.kind === 'wood').length;
+      const builders = Number(Boolean(city.project));
+      const wanderers = city.residents.filter(p => p.action === 'wander').length;
+      const other = population - foodWorkers - woodWorkers - builders - wanderers;
+      const percent = value => `${(value * 100).toFixed(1)}%`;
+      const resourceRows = ['food', 'wood'].flatMap(kind => {
+        const name = kind === 'food' ? '食料' : '木材';
+        return [
+          [name, `${nation.stock[kind]}個（予約 ${demand.reserved[kind]}個）`],
+          [`${name}の備蓄`, `最低 ${demand.minimum[kind]} ／ 理想 ${demand.ideal[kind]} ／ 実効 ${demand.effective[kind]}`],
+          [`${name}の消費・余剰`, `日次消費 ${demand.daily[kind]} ／ 現在の余剰 ${demand.surplus[kind]}`],
+        ];
+      });
+      const finance = nation.finance;
+      const income = finance && finance.food + finance.wood + finance.supplied;
       const worker = city.project && city.residents.find(p => p.id === city.project.workerId);
       const progress = worker && Math.floor(100 * Math.max(0, state.nations.minute - worker.task.startWork)
         / (worker.task.end - worker.task.startWork));
@@ -28,10 +44,18 @@ export function setupNationMenu(state, input, field) {
         ['処理', modeFor(city, viewpoint) === 'near' ? '近距離' : '遠距離'],
         ['人口', `${population}人`], ['民家', `${houses} / ${config.house.max}軒`],
         ['倉庫', `${warehouses} / ${config.warehouse.max}軒`],
-        ['木材', nation.stock.wood], ['食料', nation.stock.food],
+        ...resourceRows,
+        ['建築用木材', `${demand.buildingWood}個`],
         ['保管状況', `${used} / ${total}（${Math.floor(100 * used / total)}%）`],
-        ['1日の食料消費', population * config.foodPerResident],
-        ['住民の行動', info],
+        ['住民の役割', `専属採集 ${roles[0]} ／ 専属木こり ${roles[1]} ／ 一般 ${roles[2]}人`],
+        ['住民の行動', `採集・運搬 ${foodWorkers} ／ 伐採・運搬 ${woodWorkers} ／ 建築 ${builders} ／ 徘徊 ${wanderers} ／ その他 ${other}人`],
+        ['一般住民の抽選', `自由徘徊 ${percent(demand.leisure)} ／ 食料 ${percent((1 - demand.leisure) * demand.labor.food)} ／ 伐採 ${percent((1 - demand.leisure) * demand.labor.wood)}`],
+        ['国庫', `${nation.treasury.toLocaleString()}G`],
+        ['前日の収支', finance ? `収入 ${income}G ／ 支出 ${finance.bought}G ／ 純収支 ${income - finance.bought}G` : '精算前'],
+        ...(finance ? [
+          ['資源売却', `食料 ${finance.food}G ／ 木材 ${finance.wood}G`],
+          ['商店精算', `供給 ${finance.supplied}G ／ 買取 ${finance.bought}G`],
+        ] : []),
         ['建築', worker ? `${actionNames[worker.action]} ${progress}%` : '建築なし'],
       ];
       for (const [label, value] of rows) {

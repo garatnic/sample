@@ -1,7 +1,7 @@
 import { animalTypes, mobTypes, settings } from './settings.js?v=39';
 import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=39';
 import { field } from './world.js?v=41';
-import { mobsIn, moveNearbyMobs, removeMob } from './mob-world.js?v=43';
+import { mobsIn, moveNearbyMobs, removeMob } from './mob-world.js?v=45';
 import { attackInterval, defenseRating, items } from './equipment.js?v=39';
 import { recordDefeat } from './quests.js?v=39';
 import { dropLoot } from './loot.js?v=39';
