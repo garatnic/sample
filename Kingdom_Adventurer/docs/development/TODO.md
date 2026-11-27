@@ -223,7 +223,9 @@
 
   - ver.48 [a43636a7fe58b8ef4d1301d911efaf88368ac63b](https://github.com/garatnic/sample/commit/a43636a7fe58b8ef4d1301d911efaf88368ac63b)。SKILL-07と既存テストで命中XP、技能上昇、セーブ復元を確認。
 
-- [ ] DEV-085 盗賊の出現と装備・貨幣ドロップを追加する。関連 CUR-WORLD-007、CUR-COMBAT-006/007、CUR-SYS-004。
+- [x] DEV-085 盗賊の出現と装備・貨幣ドロップを追加する。関連 CUR-WORLD-007、CUR-COMBAT-006/007、CUR-SYS-004。
+
+  - ver.49 [11052d23320e57df6f3fdb7134c878b5fab222f3](https://github.com/garatnic/sample/commit/11052d23320e57df6f3fdb7134c878b5fab222f3)。MOB-05で出現・抽選・撃破・拾得・保存を確認。
 
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
