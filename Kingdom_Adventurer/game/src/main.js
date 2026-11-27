@@ -5,7 +5,7 @@ import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=29';
 import { setupGearMenus } from './gear-ui.js?v=27';
-import { gameDateTime, gameDay, gameMinutes } from './clock.js?v=24';
+import { gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=30';
 import { maxMp } from './consumables.js?v=27';
 
 import { setupQuestMenus } from './quests.js?v=27';
@@ -60,7 +60,9 @@ inn.addEventListener('close', () => {
     state.gold -= settings.inn.price;
     state.player.hp = maxHealth(state.player.level);
     state.player.flash = 0;
-    state.notice = { text: `HPが全回復しました（−${settings.inn.price}G）`, remaining: 2 };
+    clockBaseMinute = nextMorningMinute(currentGameMinute());
+    elapsedPlaySeconds = 0;
+    state.notice = { text: `翌朝6時になり、HPが全回復しました（−${settings.inn.price}G）`, remaining: 2 };
   }
 });
 death.addEventListener('cancel', event => event.preventDefault());
@@ -107,7 +109,7 @@ function update(dt) {
     innConfirm.disabled = state.gold < price;
     setText(innOffer, innConfirm.disabled
       ? `宿泊料は${price}Gです。所持金が足りません（所持金 ${state.gold}G）。`
-      : `${price}Gを払ってHPを全回復しますか？（所持金 ${state.gold}G）`);
+      : `${price}Gを払って翌朝6時まで休み、HPを全回復しますか？（所持金 ${state.gold}G）`);
     inn.returnValue = 'no';
     inn.showModal();
     return;
@@ -137,13 +139,13 @@ function update(dt) {
   const enteringGuild = touchingGuild && touchingGuild !== state.guildContact;
   state.guildContact = touchingGuild;
   if (enteringGuild) {
-    openGuild(touchingGuild, gameDay(gameMinutes(elapsedPlaySeconds)));
+    openGuild(touchingGuild, gameDay(currentGameMinute()));
     return;
   }
 
   updateCombat(state, dt);
   if (outdoors && player.hp > 0) {
-    const fruit = updateTrees(state.resources, player, dt, gameDay(gameMinutes(elapsedPlaySeconds)));
+    const fruit = updateTrees(state.resources, player, dt, gameDay(currentGameMinute()));
     if (fruit && !state.notice?.leveledUp) {
       state.notice = { text: `${items.get(fruit).name}を1個採取しました`, remaining: 1.2 };
     }
@@ -162,6 +164,12 @@ function setText(element, value) {
 
 let previous = performance.now();
 let elapsedPlaySeconds = 0;
+let clockBaseMinute = 0;
+
+function currentGameMinute() {
+  return clockBaseMinute + gameMinutes(elapsedPlaySeconds);
+}
+
 let previousClockMinute = -1;
 function frame(time) {
   const dt = Math.min((time - previous) / 1000, 0.04);
@@ -170,7 +178,7 @@ function frame(time) {
     elapsedPlaySeconds += dt;
     update(dt);
   }
-  const minute = gameMinutes(elapsedPlaySeconds);
+  const minute = currentGameMinute();
   if (minute !== previousClockMinute) {
     previousClockMinute = minute;
     const clock = gameDateTime(minute);

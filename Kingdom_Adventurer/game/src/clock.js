@@ -10,6 +10,11 @@ export function gameDay(minute) {
   return Math.floor((startTime + minute * 60_000) / 86_400_000);
 }
 
+export function nextMorningMinute(minute) {
+  const nextMorning = (gameDay(minute) + 1) * 86_400_000 + 6 * 3_600_000;
+  return (nextMorning - startTime) / 60_000;
+}
+
 export function gameDateTime(minute) {
   const date = new Date(startTime + minute * 60_000);
   const weekday = weekdays[date.getUTCDay()];
