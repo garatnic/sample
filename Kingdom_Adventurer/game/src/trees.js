@@ -1,23 +1,21 @@
 import { settings } from './settings.js';
-import { terrainAt } from './world.js?v=24';
 
 const capacity = 20;
 export const harvestSeconds = 1;
 const contactRadius = settings.player.radius + 8;
 
+const treeLocations = [
+  { id: 'tree-3-2', x: 350, y: 237, itemId: 'apple' },
+  { id: 'tree-7-9', x: 733, y: 907, itemId: 'tree-nut' },
+  { id: 'tree-13-5', x: 1303, y: 536, itemId: 'apple' },
+  { id: 'tree-14-11', x: 1374, y: 1087, itemId: 'tree-nut' },
+  { id: 'tree-17-6', x: 1661, y: 615, itemId: 'apple' },
+];
+
 export function createTrees(day) {
-  const trees = [];
-  for (let row = 0; row < 16; row++) {
-    for (let column = 0; column < 23; column++) {
-      const variation = (column * 73 + row * 151 + column * row * 19) % 97;
-      const x = 52 + column * 94 + variation % 37;
-      const y = 48 + row * 94 + (variation * 7) % 37;
-      const terrain = terrainAt(x, y);
-      if (terrain !== 'forest' && (terrain !== 'grass' || variation % 4 !== 0)) continue;
-      trees.push({ id: `tree-${column}-${row}`, x, y, category: 'food',
-        itemId: variation % 2 ? 'apple' : 'tree-nut', remaining: capacity, capacity });
-    }
-  }
+  const trees = treeLocations.map(location => ({
+    ...location, category: 'food', remaining: capacity, capacity,
+  }));
   return { trees, day, harvest: null };
 }
 

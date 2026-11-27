@@ -3,7 +3,7 @@ import { guildDoors, innDoor, shopDoors, inTown, movePlayer, start, town } from 
 import { createEncounters, updateCombat } from './combat.js?v=27';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=27';
+import { createRenderer } from './render.js?v=28';
 import { setupGearMenus } from './gear-ui.js?v=27';
 import { gameDateTime, gameDay, gameMinutes } from './clock.js?v=24';
 import { maxMp } from './consumables.js?v=27';
@@ -12,7 +12,7 @@ import { setupQuestMenus } from './quests.js?v=27';
 
 import { collectLoot } from './loot.js?v=27';
 
-import { createTrees, updateTrees } from './trees.js?v=27';
+import { createTrees, updateTrees } from './trees.js?v=28';
 import { items } from './equipment.js?v=27';
 
 const inn = document.querySelector('#inn');

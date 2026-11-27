@@ -1,7 +1,7 @@
 import { settings } from './settings.js';
 import { buildings, guildDoors, innDoor, shopDoors, terrainAt } from './world.js?v=24';
 
-import { harvestSeconds } from './trees.js?v=27';
+import { harvestSeconds } from './trees.js?v=28';
 
 const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15]];
 
