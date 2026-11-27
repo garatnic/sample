@@ -1,11 +1,11 @@
 import { settings } from './settings.js?v=34';
 import { buildings, cave, field, terrainAt } from './world.js?v=35';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=36';
+import { modeFor, residentPosition } from './nation-simulation.js?v=37';
 
-import { harvestSeconds } from './trees.js?v=36';
+import { harvestSeconds, sourceQuantity } from './trees.js?v=37';
 
-const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15]];
+const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15], [1, -21], [11, -32], [-15, -21]];
 
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };
 
@@ -80,14 +80,13 @@ export function createRenderer(canvas) {
     ctx.fillText(outdoors ? '洞窟入口' : '出口', x, y - 48);
   }
 
-  function drawTree({ x, y }, ripe) {
+  function drawTree({ x, y }, quantity) {
     rect(x - 15, y + 1, 30, 6, '#263d3288');
     rect(x - 4, y - 17, 8, 21, '#765037');
     rect(x - 17, y - 29, 34, 15, '#274c36');
     rect(x - 12, y - 39, 24, 23, '#46794a');
     rect(x - 19, y - 30, 33, 12, '#568451');
-    const visibleFruit = ripe ? fruitOffsets.length : 0;
-    for (const [dx, dy] of fruitOffsets.slice(0, visibleFruit)) {
+    for (const [dx, dy] of fruitOffsets.slice(0, quantity)) {
       rect(x + dx, y + dy, 5, 5, '#ec6658');
       rect(x + dx + 1, y + dy, 2, 1, '#fff0c9');
     }
@@ -147,7 +146,7 @@ export function createRenderer(canvas) {
   function drawSource(source, minute) {
     const { x, y, kind } = source;
     if (kind === 'food') {
-      drawTree(source, source.readyAt <= minute);
+      drawTree(source, sourceQuantity(source, minute));
     } else if (source.readyAt > minute) {
       rect(x - 6, y - 6, 12, 8, '#766049');
     } else {

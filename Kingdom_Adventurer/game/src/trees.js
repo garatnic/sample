@@ -14,11 +14,17 @@ export function findSource(simulation, matches) {
   return null;
 }
 
-export function harvestSource(source, minute) {
-  if (source.readyAt > minute) return 0;
-  const { regrow, yield: amount } = config.harvest[source.kind];
-  source.readyAt = minute + regrow;
-  return Math.min(amount, config.carry);
+export function sourceQuantity(source, minute) {
+  return source.readyAt > minute ? 0 : source.remaining || config.harvest[source.kind].yield;
+}
+
+export function harvestSource(source, minute, limit = config.carry) {
+  const available = sourceQuantity(source, minute);
+  if (!available) return 0;
+  const quantity = Math.min(available, limit);
+  source.remaining = available - quantity;
+  if (!source.remaining) source.readyAt = minute + config.harvest[source.kind].regrow;
+  return quantity;
 }
 
 export function updateTrees(state, dt) {
@@ -34,10 +40,11 @@ export function updateTrees(state, dt) {
   state.harvest.elapsed += dt;
   if (state.harvest.elapsed + 1e-9 < harvestSeconds[source.kind]) return null;
 
-  const quantity = harvestSource(source, nations.minute);
-  nation.nextMinute = Math.min(nation.nextMinute, source.readyAt);
+  const quantity = harvestSource(source, nations.minute, 1);
+  if (!source.remaining) nation.nextMinute = Math.min(nation.nextMinute, source.readyAt);
   const itemId = source.kind === 'food' ? 'apple' : 'wood';
   player.inventory.set(itemId, (player.inventory.get(itemId) ?? 0) + quantity);
-  state.harvest = null;
+  state.harvest = source.remaining
+    ? { source, elapsed: Math.max(0, state.harvest.elapsed - harvestSeconds[source.kind]) } : null;
   return { itemId, quantity };
 }

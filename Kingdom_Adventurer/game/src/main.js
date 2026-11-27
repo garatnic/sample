@@ -5,7 +5,7 @@ import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius,
 import { createEncounters, inCombat, updateCombat } from './combat.js?v=36';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=36';
+import { createRenderer } from './render.js?v=37';
 import { setupGearMenus } from './gear-ui.js?v=36';
 import { exactGameMinutes, gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=36';
@@ -14,14 +14,14 @@ import { setupQuestMenus } from './quests.js?v=36';
 
 import { collectLoot } from './loot.js?v=27';
 
-import { updateTrees } from './trees.js?v=36';
+import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=36';
-import { areas, makeSave, restoreSave } from './save-data.js?v=36';
+import { areas, makeSave, restoreSave } from './save-data.js?v=37';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
-import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=36';
+import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=37';
 import { inSettlement } from './nation-layout.js?v=35';
-import { setupNationMenu } from './nation-menu.js?v=36';
+import { setupNationMenu } from './nation-menu.js?v=37';
 
 import { startingShopGold } from './shop.js?v=36';
 

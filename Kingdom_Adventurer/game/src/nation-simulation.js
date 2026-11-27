@@ -1,4 +1,4 @@
-import { harvestSource } from './trees.js?v=36';
+import { harvestSource } from './trees.js?v=37';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
 import { nationSettings as config } from './nation-settings.js?v=34';
@@ -32,7 +32,7 @@ export function createNationSimulation(minute = 0) {
       const city = {
         id: layout.cityId, name: layout.cityName, x: layout.x, y: layout.y,
         buildings: [{ ...layout.center }], residents: [],
-        sources: layout.sources.map(source => ({ ...source, readyAt: minute })), project: null,
+        sources: layout.sources.map(source => ({ ...source, readyAt: minute, remaining: config.harvest[source.kind].yield })), project: null,
       };
       const nation = { id: layout.id, name: layout.name, cities: [city],
         stock: { ...config.initialStock }, lastDay: gameDay(minute), nextMinute: minute };

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { updateTrees } from '../game/src/trees.js?v=36';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=36';
+import { updateTrees } from '../game/src/trees.js?v=37';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=37';
 import { buyItem, startingShopGold } from '../game/src/shop.js?v=36';
 import { createEncounters } from '../game/src/combat.js?v=36';
 import { createSkills } from '../game/src/skills.js?v=32';
@@ -11,8 +11,8 @@ import { nationSettings as config } from '../game/src/nation-settings.js?v=34';
 import { nationLayouts } from '../game/src/nation-layout.js?v=35';
 import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=35';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=36';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=36';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=37';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=37';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
@@ -190,7 +190,16 @@ test('NATION-06: player and residents compete for the same fruit and timber', ()
   const worker = city.residents.find(person => person.action === 'gatherFood');
   const fruit = city.sources.find(source => source.id === worker.targetId);
   const state = { nations, player: { ...fruit, inventory: new Map() }, harvest: null };
-  assert.deepEqual(updateTrees(state, 1), { itemId: 'apple', quantity: 8 });
+  assert.equal(updateTrees(state, 0.6), null);
+  assert.deepEqual(updateTrees(state, 0.4), { itemId: 'apple', quantity: 1 });
+  assert.equal(fruit.remaining, 7);
+  const partial = restoreNations(copy(nations), 1);
+  assert.equal(partial.nations[0].cities[0].sources.find(s => s.id === fruit.id).remaining, 7);
+  for (let i = 2; i <= 8; i++) {
+    assert.deepEqual(updateTrees(state, 1), { itemId: 'apple', quantity: 1 });
+    assert.equal(state.player.inventory.get('apple'), i);
+    assert.equal(fruit.remaining, 8 - i);
+  }
   assert.equal(fruit.readyAt, 26);
   assert.equal(updateTrees(state, 1), null);
   const restored = restoreNations(copy(nations), 1);
@@ -202,9 +211,12 @@ test('NATION-06: player and residents compete for the same fruit and timber', ()
   const timber = city.sources.find(s => s.kind === 'wood' && s.readyAt <= nations.minute);
   Object.assign(state.player, timber);
   assert.equal(updateTrees(state, 1), null);
-  assert.deepEqual(updateTrees(state, 1), { itemId: 'wood', quantity: 8 });
+  assert.deepEqual(updateTrees(state, 1), { itemId: 'wood', quantity: 1 });
+  assert.equal(state.player.inventory.get('wood'), 1);
+  assert.equal(timber.remaining, 7);
+  for (let i = 2; i <= 8; i++) assert.deepEqual(updateTrees(state, 2), { itemId: 'wood', quantity: 1 });
   assert.equal(timber.readyAt, nations.minute + 30);
-  assert.equal(state.player.inventory.get('wood'), 8);
+  assert.equal(updateTrees(state, 2), null);
 
   const separate = createNationSimulation();
   const other = separate.nations[0];
@@ -213,11 +225,13 @@ test('NATION-06: player and residents compete for the same fruit and timber', ()
   const otherCity = other.cities[0];
   const picker = otherCity.residents.find(p => p.action === 'gatherFood');
   const hungryTree = otherCity.sources.find(source => source.id === picker.targetId);
-  advanceNations(separate, picker.task.end);
-  assert.deepEqual(picker.carrying, { kind: 'food', quantity: 8 });
   const secondPlayer = { nations: separate, player: { ...hungryTree, inventory: new Map() }, harvest: null };
+  assert.deepEqual(updateTrees(secondPlayer, 1), { itemId: 'apple', quantity: 1 });
+  advanceNations(separate, picker.task.end);
+  assert.deepEqual(picker.carrying, { kind: 'food', quantity: 7 });
+  assert.deepEqual(copy(restoreNations(copy(separate), separate.minute)), copy(separate));
   assert.equal(updateTrees(secondPlayer, 1), null, 'the resident already picked the fruit');
   const regrowth = hungryTree.readyAt;
   advanceNations(separate, regrowth);
-  assert.deepEqual(updateTrees(secondPlayer, 1), { itemId: 'apple', quantity: 8 });
+  assert.deepEqual(updateTrees(secondPlayer, 1), { itemId: 'apple', quantity: 1 });
 });

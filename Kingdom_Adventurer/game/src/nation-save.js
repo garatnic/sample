@@ -1,6 +1,6 @@
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
-import { actionNames, capacity, createNationSimulation, taskSchedule } from './nation-simulation.js?v=36';
+import { actionNames, capacity, createNationSimulation, taskSchedule } from './nation-simulation.js?v=37';
 import { nationSettings as config } from './nation-settings.js?v=34';
 
 function requireValid(condition) {
@@ -21,6 +21,7 @@ export function captureNations(simulation) {
         id: nation.id, cityId: city.id, stock: nation.stock,
         buildings: city.buildings.map(({ id, kind }) => ({ id, kind })),
         sources: city.sources.map(({ readyAt }) => readyAt),
+        sourceRemaining: city.sources.map(({ remaining }) => remaining),
         project: city.project && { id: city.project.site.id, kind: city.project.site.kind, workerId: city.project.workerId },
         residents: city.residents.map(({ id, homeId, x, y, action, targetId, carrying, task }) =>
           ({ id, homeId, x, y, action, targetId, carrying, task })),
@@ -30,7 +31,7 @@ export function captureNations(simulation) {
   };
 }
 
-export function restoreNations(data, minute) {
+export function restoreNations(data, minute, legacy = false) {
   const simulation = createNationSimulation(minute);
   requireValid(data?.layoutVersion === simulation.layoutVersion && data.minute === minute
     && Array.isArray(data.nations) && data.nations.length === simulation.nations.length);
@@ -40,7 +41,8 @@ export function restoreNations(data, minute) {
     const layout = nationLayouts[index];
     requireValid(saved?.id === nation.id && saved.cityId === city.id
       && Array.isArray(saved.buildings) && Array.isArray(saved.residents) && Array.isArray(saved.sources)
-      && saved.sources.length === city.sources.length);
+      && saved.sources.length === city.sources.length
+      && (legacy || Array.isArray(saved.sourceRemaining) && saved.sourceRemaining.length === city.sources.length));
     const expected = city.buildings;
     const used = new Set();
     const readBuilding = (entry, project = false) => {
@@ -65,6 +67,9 @@ export function restoreNations(data, minute) {
     city.sources.forEach((source, i) => {
       requireValid(integer(saved.sources[i], 0, minute + config.harvest[source.kind].regrow));
       source.readyAt = saved.sources[i];
+      const max = config.harvest[source.kind].yield;
+      source.remaining = legacy ? (source.readyAt > minute ? 0 : max) : saved.sourceRemaining[i];
+      requireValid(integer(source.remaining, 0, max) && (source.readyAt <= minute || source.remaining === 0));
     });
     if (saved.project !== null) {
       const site = readBuilding(saved.project, true);
@@ -92,7 +97,7 @@ export function restoreNations(data, minute) {
         if (action === 'haul') {
           target = city.buildings.find(b => b.id === targetId && b.kind === 'warehouse');
           requireValid(target && Object.hasOwn(config.harvest, carrying?.kind)
-            && carrying.quantity === Math.min(config.carry, config.harvest[carrying.kind].yield));
+            && integer(carrying.quantity, 1, Math.min(config.carry, config.harvest[carrying.kind].yield)));
           reserved += carrying.quantity;
         } else {
           requireValid(carrying === null);
