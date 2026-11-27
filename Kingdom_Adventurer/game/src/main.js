@@ -5,9 +5,9 @@ import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius,
 import { createEncounters, inCombat, updateCombat } from './combat.js?v=36';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=37';
+import { createRenderer } from './render.js?v=38';
 import { setupGearMenus } from './gear-ui.js?v=36';
-import { exactGameMinutes, gameDateTime, gameDay, gameMinutes, nextMorningMinute } from './clock.js?v=34';
+import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=36';
 
 import { setupQuestMenus } from './quests.js?v=36';
@@ -16,12 +16,12 @@ import { collectLoot } from './loot.js?v=27';
 
 import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=36';
-import { areas, makeSave, restoreSave } from './save-data.js?v=37';
+import { areas, makeSave, restoreSave } from './save-data.js?v=38';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
-import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=37';
+import { advanceNations, createNationSimulation, settlementBuildings } from './nation-simulation.js?v=38';
 import { inSettlement } from './nation-layout.js?v=35';
-import { setupNationMenu } from './nation-menu.js?v=37';
+import { setupNationMenu } from './nation-menu.js?v=38';
 
 import { startingShopGold } from './shop.js?v=36';
 
@@ -217,7 +217,7 @@ let elapsedPlaySeconds = 0;
 let clockBaseMinute = 0;
 
 function currentGameMinute() {
-  return clockBaseMinute + gameMinutes(elapsedPlaySeconds);
+  return Math.floor(clockBaseMinute + exactGameMinutes(elapsedPlaySeconds));
 }
 
 let previousClockMinute = -1;
@@ -226,7 +226,7 @@ function frame(time) {
   previous = time;
   if (!document.querySelector('dialog[open]') && state.player.hp > 0) {
     elapsedPlaySeconds += dt;
-    advanceNations(state.nations, currentGameMinute());
+    advanceNations(state.nations, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds));
     update(dt);
   }
   const minute = currentGameMinute();
@@ -254,7 +254,7 @@ function frame(time) {
 const saves = setupSaveMenu({
   input,
   canSave: () => state.player.hp > 0 && !inCombat(state),
-  capture: () => makeSave(state, areaStates, currentGameMinute()),
+  capture: () => makeSave(state, areaStates, state.nations.minute),
   decode: restoreSave,
   restore: applySave,
   notify: saveNotice,

@@ -180,5 +180,7 @@
 
   - ver.37 [4bf43ef131bf37dda3fcbefca24643fc740c3faa](https://github.com/garatnic/sample/commit/4bf43ef131bf37dda3fcbefca24643fc740c3faa)。Nodeの保存済み自動テスト10件合格。
 
+- [ ] DEV-072 住民の採集を到着後1個ずつに変更し、共有残量と途中保存を確認する。関連 CUR-NATION-002、CUR-WORLD-005、CUR-SYS-004。
+
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。

@@ -1,7 +1,7 @@
 import { settings } from './settings.js?v=34';
 import { buildings, cave, field, terrainAt } from './world.js?v=35';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=37';
+import { modeFor, residentPosition } from './nation-simulation.js?v=38';
 
 import { harvestSeconds, sourceQuantity } from './trees.js?v=37';
 

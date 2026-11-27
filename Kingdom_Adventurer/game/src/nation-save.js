@@ -1,10 +1,14 @@
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
-import { actionNames, capacity, createNationSimulation, taskSchedule } from './nation-simulation.js?v=37';
+import { actionNames, capacity, createNationSimulation, gatherAction, nextPick, taskSchedule } from './nation-simulation.js?v=38';
 import { nationSettings as config } from './nation-settings.js?v=34';
 
 function requireValid(condition) {
   if (!condition) throw new Error('Invalid nation simulation data');
+}
+
+function time(value, min, max) {
+  return Number.isFinite(value) && value >= min && value <= max;
 }
 
 function integer(value, min, max) {
@@ -31,7 +35,9 @@ export function captureNations(simulation) {
   };
 }
 
-export function restoreNations(data, minute, legacy = false) {
+export function restoreNations(data, minute, saveVersion = 7) {
+  const legacy = saveVersion < 6;
+  const legacyTasks = saveVersion < 7;
   const simulation = createNationSimulation(minute);
   requireValid(data?.layoutVersion === simulation.layoutVersion && data.minute === minute
     && Array.isArray(data.nations) && data.nations.length === simulation.nations.length);
@@ -65,7 +71,7 @@ export function restoreNations(data, minute, legacy = false) {
     requireValid(integer(saved.stock?.wood, 0, limit) && integer(saved.stock?.food, 0, limit - saved.stock.wood));
     nation.stock = { wood: saved.stock.wood, food: saved.stock.food };
     city.sources.forEach((source, i) => {
-      requireValid(integer(saved.sources[i], 0, minute + config.harvest[source.kind].regrow));
+      requireValid(time(saved.sources[i], 0, minute + config.harvest[source.kind].regrow));
       source.readyAt = saved.sources[i];
       const max = config.harvest[source.kind].yield;
       source.remaining = legacy ? (source.readyAt > minute ? 0 : max) : saved.sourceRemaining[i];
@@ -87,11 +93,12 @@ export function restoreNations(data, minute, legacy = false) {
         && positions.some(point => point.x === person.x && point.y === person.y)
         && Object.hasOwn(actionNames, person.action));
       people.add(person.id);
-      const { id, homeId, x, y, action, targetId, carrying, task } = person;
+      const { id, homeId, x, y, action, targetId, carrying } = person;
+      let { task } = person;
       if (action === 'idle') {
         requireValid(task === null && targetId === null && carrying === null);
       } else {
-        requireValid(integer(task?.depart, 0, minute) && task.end > minute);
+        requireValid(time(task?.depart, 0, minute) && time(task.end, minute, minute + 200) && task.end > minute);
         let target;
         let workMinutes = 0;
         if (action === 'haul') {
@@ -100,15 +107,18 @@ export function restoreNations(data, minute, legacy = false) {
             && integer(carrying.quantity, 1, Math.min(config.carry, config.harvest[carrying.kind].yield)));
           reserved += carrying.quantity;
         } else {
-          requireValid(carrying === null);
-          if (action === 'gatherFood' || action === 'gatherWood') {
+          if (gatherAction(action)) {
             const source = city.sources.find(s => s.id === targetId);
             requireValid(source?.kind === (action === 'gatherFood' ? 'food' : 'wood') && !claimed.has(targetId));
+            const max = Math.min(config.carry, config.harvest[source.kind].yield);
+            requireValid(carrying === null || (!legacyTasks && carrying.kind === source.kind
+              && integer(carrying.quantity, 1, max - 1)));
             target = source;
             workMinutes = config.harvest[source.kind].minutes;
             claimed.add(targetId);
             reserved += Math.min(config.carry, config.harvest[source.kind].yield);
           } else {
+            requireValid(carrying === null);
             requireValid(city.project?.workerId === id && city.project.site.id === targetId
               && city.project.site.kind === (action === 'buildHouse' ? 'house' : 'warehouse'));
             target = city.project.site;
@@ -116,7 +126,13 @@ export function restoreNations(data, minute, legacy = false) {
           }
         }
         const expectedTask = taskSchedule(person, city, target, task.depart, workMinutes);
-        requireValid(task.startWork === expectedTask.startWork && task.end === expectedTask.end);
+        requireValid(task.startWork === expectedTask.startWork);
+        if (gatherAction(action) && !legacyTasks) {
+          requireValid(task.end <= nextPick(Math.max(task.startWork, minute), target.kind) + 1e-6);
+        } else {
+          requireValid(task.end === expectedTask.end);
+          if (gatherAction(action)) task = { ...task, end: nextPick(Math.max(task.startWork, minute), target.kind) };
+        }
       }
       return { id, homeId, x, y, action, targetId, carrying, task, nationId: nation.id, cityId: city.id };
     });
@@ -125,9 +141,9 @@ export function restoreNations(data, minute, legacy = false) {
     const eventMinute = Math.min(firstMinuteOfDay(gameDay(minute) + 1),
       ...city.residents.filter(p => p.task).map(p => p.task.end),
       ...city.sources.filter(s => s.readyAt > minute).map(s => s.readyAt));
-    requireValid(saved.nextMinute === eventMinute || (saved.nextMinute === minute
-      && !city.project && city.residents.every(p => p.action === 'idle')));
-    nation.nextMinute = saved.nextMinute;
+    const initial = saved.nextMinute === minute && !city.project && city.residents.every(p => p.action === 'idle');
+    requireValid(legacyTasks || saved.nextMinute === eventMinute || initial);
+    nation.nextMinute = initial ? minute : eventMinute;
   }
   return simulation;
 }

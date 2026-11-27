@@ -7,13 +7,13 @@ import { maxMp } from './consumables.js?v=36';
 import { gameDay } from './clock.js?v=34';
 import { findSource, harvestSeconds } from './trees.js?v=37';
 
-import { createNationSimulation } from './nation-simulation.js?v=37';
-import { captureNations, restoreNations } from './nation-save.js?v=37';
+import { createNationSimulation } from './nation-simulation.js?v=38';
+import { captureNations, restoreNations } from './nation-save.js?v=38';
 
 import { startingShopGold } from './shop.js?v=36';
 
 const format = 'kingdom-adventurer';
-const version = 6;
+const version = 7;
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -146,7 +146,7 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, 4, 5, version].includes(data.version) && integer(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && [1, 2, 3, 4, 5, 6, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
@@ -160,7 +160,7 @@ export function restoreSave(data) {
     check(integer(data.shopGold[id]));
     return [id, data.shopGold[id]];
   }));
-  const nations = data.version >= 3 ? restoreNations(data.nations, data.clock, data.version < 6) : createNationSimulation(data.clock);
+  const nations = data.version >= 3 ? restoreNations(data.nations, data.clock, data.version) : createNationSimulation(data.clock);
   let harvest = null;
   if (data.version >= 5 && data.harvest !== null) {
     const source = findSource(nations, entry => entry.id === data.harvest?.id)?.source;

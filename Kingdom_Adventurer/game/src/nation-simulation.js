@@ -1,5 +1,5 @@
-import { harvestSource } from './trees.js?v=37';
-import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
+import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=37';
+import { exactGameMinutes, firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=35';
 import { nationSettings as config } from './nation-settings.js?v=34';
 
@@ -64,10 +64,21 @@ export function taskSchedule(resident, city, target, minute, workMinutes) {
   return { depart: minute, startWork, end: Math.max(minute + 1, startWork + workMinutes) };
 }
 
+export function gatherAction(action) {
+  return action === 'gatherFood' || action === 'gatherWood';
+}
+
+export function nextPick(after, kind) {
+  return Math.round((after + exactGameMinutes(harvestSeconds[kind])) * 1e6) / 1e6;
+}
+
 function startTask(resident, city, action, target, minute, workMinutes = 0) {
   resident.action = action;
   resident.targetId = target.id;
   resident.task = taskSchedule(resident, city, target, minute, workMinutes);
+  if (gatherAction(action)) {
+    resident.task.end = nextPick(resident.task.startWork, target.kind);
+  }
 }
 
 function targetFor(city, resident) {
@@ -103,13 +114,22 @@ function resetJob(resident) {
 function completeTask(nation, city, resident, minute) {
   const target = targetFor(city, resident);
   const { x, y } = target.door ?? target;
-  Object.assign(resident, { x, y });
+  if (!gatherAction(resident.action)) Object.assign(resident, { x, y });
   switch (resident.action) {
     case 'gatherFood':
     case 'gatherWood': {
-      const quantity = harvestSource(target, minute);
-      if (!quantity) break;
-      resident.carrying = { kind: target.kind, quantity };
+      const quantity = harvestSource(target, minute, 1);
+      const collected = (resident.carrying?.quantity ?? 0) + quantity;
+      if (!collected) {
+        Object.assign(resident, { x, y });
+        break;
+      }
+      resident.carrying = { kind: target.kind, quantity: collected };
+      if (collected < config.carry && sourceQuantity(target, minute) > 0) {
+        resident.task.end = nextPick(minute, target.kind);
+        return;
+      }
+      Object.assign(resident, { x, y });
       const storage = city.buildings.filter(b => b.kind === 'warehouse')
         .sort((a, b) => Math.hypot(a.door.x - x, a.door.y - y) - Math.hypot(b.door.x - x, b.door.y - y))[0];
       startTask(resident, city, 'haul', storage, minute);
@@ -156,8 +176,10 @@ function assignWork(nation, city, minute, limits) {
   const reserved = { wood: 0, food: 0 };
   const claimed = new Set();
   for (const person of city.residents) {
-    if (person.carrying) reserved[person.carrying.kind] += person.carrying.quantity;
-    if (person.action !== 'gatherFood' && person.action !== 'gatherWood') continue;
+    if (!gatherAction(person.action)) {
+      if (person.carrying) reserved[person.carrying.kind] += person.carrying.quantity;
+      continue;
+    }
     const source = targetFor(city, person);
     claimed.add(source.id);
     reserved[source.kind] += Math.min(config.harvest[source.kind].yield, config.carry);
@@ -174,7 +196,7 @@ function assignWork(nation, city, minute, limits) {
       if (kind === 'wood' && (wood >= woodGoal || wood + amount > limits - foodTarget)) continue;
       const source = city.sources.find(s => s.kind === kind && s.readyAt <= minute && !claimed.has(s.id));
       if (!source) continue;
-      startTask(person, city, kind === 'wood' ? 'gatherWood' : 'gatherFood', source, minute, config.harvest[kind].minutes);
+      startTask(person, city, kind === 'wood' ? 'gatherWood' : 'gatherFood', source, minute);
       claimed.add(source.id);
       reserved[kind] += amount;
       break;
