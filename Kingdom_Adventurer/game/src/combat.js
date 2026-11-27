@@ -15,6 +15,17 @@ export function createEncounters(spawns = field.spawns) {
   return spawns.map(home => ({ home, enemy: null, remaining: 0, generation: 0 }));
 }
 
+function canChase(player, enemy, home, config) {
+  return Math.hypot(player.x - enemy.x, player.y - enemy.y) < config.aggro
+    && Math.hypot(player.x - home.x, player.y - home.y) < config.leash;
+}
+
+export function inCombat({ player, area, encounters, strike }) {
+  if (area === field && inTown(player)) return false;
+  return Boolean(strike) || encounters.some(({ home, enemy }) =>
+    enemy && canChase(player, enemy, home, settings.enemy));
+}
+
 export function updateCombat(state, dt) {
   const { player, encounters } = state;
   const config = settings.enemy;
@@ -28,7 +39,7 @@ export function updateCombat(state, dt) {
     const kind = home.kind;
     const type = enemyTypes[kind];
     if (!encounter.enemy) {
-      encounter.remaining -= dt;
+      encounter.remaining = Math.max(0, encounter.remaining - dt);
       if (encounter.remaining <= 0) {
         encounter.enemy = { id: `enemy-${home.id}-${++encounter.generation}`,
           kind, x: home.x, y: home.y, hp: type.maxHp, maxHp: type.maxHp, cooldown: 0, flash: 0 };
@@ -40,8 +51,7 @@ export function updateCombat(state, dt) {
     enemy.flash = Math.max(0, enemy.flash - dt);
     enemy.cooldown = Math.max(0, enemy.cooldown - dt);
     const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-    const chasing = !safe && distance < config.aggro
-      && Math.hypot(player.x - home.x, player.y - home.y) < config.leash;
+    const chasing = !safe && canChase(player, enemy, home, config);
     if (chasing && distance <= config.reach) {
       if (enemy.cooldown === 0) {
         player.hp = Math.max(0, player.hp - physicalDamage(type.damage, defenseRating(player), enemyDamageMultiplier));

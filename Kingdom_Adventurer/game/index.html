@@ -20,13 +20,14 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.30</h1>
+      <h1>Kingdom Adventurer ver.31</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
       <button id="open-inventory" type="button">装備</button>
       <button id="open-items" type="button">道具</button>
       <button id="open-quests" type="button">クエスト</button>
+      <button id="open-save" type="button" aria-haspopup="dialog">セーブ</button>
     </div>
   </header>
   <div id="game-clock" aria-label="ゲーム内時計">
@@ -35,6 +36,19 @@
   </div>
   <p id="notice" role="status"></p>
   <footer>移動 <kbd>W A S D</kbd> / <kbd>矢印キー</kbd><span>射程内で自動攻撃</span></footer>
+  <dialog id="save-menu" class="gear-menu" aria-labelledby="save-title">
+    <h2 id="save-title">セーブ</h2>
+    <p>このブラウザに1枠保存します。宿泊とエリア移動でも上書きされます。</p>
+    <div class="gear-tabs">
+      <button id="save-now" data-save-action type="button">セーブする</button>
+      <button id="load-save" data-save-action type="button">ロード</button>
+      <button id="export-save" data-save-action type="button">JSON書き出し</button>
+      <button id="delete-save" data-save-action type="button">セーブデータ削除</button>
+    </div>
+    <p><label for="save-file">JSON取り込み</label> <input id="save-file" type="file" accept=".json,application/json"></p>
+    <p id="save-feedback" role="status"></p>
+    <form method="dialog"><button data-save-action autofocus>閉じる</button></form>
+  </dialog>
   <dialog id="inn" aria-labelledby="inn-title">
     <form method="dialog">
       <h2 id="inn-title">街道の宿</h2>
@@ -118,6 +132,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=30"></script>
+  <script type="module" src="./src/main.js?v=31"></script>
 </body>
 </html>

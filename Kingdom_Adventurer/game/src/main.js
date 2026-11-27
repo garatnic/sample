@@ -1,6 +1,6 @@
 import { settings } from './settings.js';
 import { cave, field, guildDoors, innDoor, shopDoors, inTown, movePlayer, portalRadius, start, town } from './world.js?v=29';
-import { createEncounters, updateCombat } from './combat.js?v=29';
+import { createEncounters, inCombat, updateCombat } from './combat.js?v=31';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=29';
@@ -14,6 +14,8 @@ import { collectLoot } from './loot.js?v=27';
 
 import { createTrees, updateTrees } from './trees.js?v=28';
 import { items } from './equipment.js?v=27';
+import { areas, makeSave, restoreSave } from './save-data.js?v=31';
+import { setupSaveMenu } from './save-menu.js?v=31';
 
 const inn = document.querySelector('#inn');
 const death = document.querySelector('#death');
@@ -43,7 +45,7 @@ function createPlayer({ level = 1, experience = 0, inventory = new Map(), weapon
   return { id: 'player', ...start, level, experience, inventory, weaponId, armor, hp: maxHealth(level), mp: maxMp, pendingPoison: 0, cooldown: 0, flash: 0, moving: false };
 }
 
-const areaStates = new Map([field, cave].map(area => [
+const areaStates = new Map(areas.map(area => [
   area, { encounters: createEncounters(area.spawns), lootDrops: [] },
 ]));
 const state = { player: createPlayer(), area: field,
@@ -52,8 +54,23 @@ const state = { player: createPlayer(), area: field,
   strike: null, resources: createTrees(gameDay(0)),
   notice: null, innContact: false, gold: settings.currency.startingGold, shopContact: null, shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 100])) };
 Object.assign(state, { guilds: new Map(), guildContact: null });
-const openGuild = setupQuestMenus(state, input);
-const openShop = setupGearMenus(state, input);
+function applySave({ areaStates: savedAreas, clock, ...savedState }) {
+  Object.assign(state, savedState, { strike: null, notice: null });
+  for (const [area, value] of savedAreas) areaStates.set(area, value);
+  clockBaseMinute = clock;
+  elapsedPlaySeconds = 0;
+  const touching = door => Math.hypot(state.player.x - door.x, state.player.y - door.y) <= 19;
+  const contact = doors => state.area === field
+    ? Object.keys(doors).find(id => touching(doors[id])) ?? null : null;
+  state.innContact = state.area === field && touching(innDoor);
+  state.shopContact = contact(shopDoors);
+  state.guildContact = contact(guildDoors);
+  input.clear();
+}
+
+function saveNotice(text) {
+  state.notice = { text, remaining: 4 };
+}
 
 inn.addEventListener('close', () => {
   if (inn.returnValue === 'yes' && state.gold >= settings.inn.price) {
@@ -63,6 +80,7 @@ inn.addEventListener('close', () => {
     clockBaseMinute = nextMorningMinute(currentGameMinute());
     elapsedPlaySeconds = 0;
     state.notice = { text: `翌朝6時になり、HPが全回復しました（−${settings.inn.price}G）`, remaining: 2 };
+    void saves.autoSave();
   }
 });
 death.addEventListener('cancel', event => event.preventDefault());
@@ -96,6 +114,7 @@ function update(dt) {
     state.strike = null;
     state.notice = null;
     player.moving = false;
+    void saves.autoSave();
     return;
   }
 
@@ -198,4 +217,17 @@ function frame(time) {
   render(state, time);
   requestAnimationFrame(frame);
 }
+
+const saves = setupSaveMenu({
+  input,
+  canSave: () => state.player.hp > 0 && !inCombat(state),
+  capture: () => makeSave(state, areaStates, currentGameMinute()),
+  decode: restoreSave,
+  restore: applySave,
+  notify: saveNotice,
+});
+await saves.loadOnStart();
+const openGuild = setupQuestMenus(state, input);
+const openShop = setupGearMenus(state, input);
+previous = performance.now();
 requestAnimationFrame(frame);
