@@ -415,3 +415,4 @@
 | 原資料 | 対応する統合仕様 | 現行実装 |
 |---|---|---|
 | [2026-11-27 野外のチャンク管理とMOB](../history/2026-11-27-field-mobs.md) | [世界・マップ](02_world.md)、[ECO-001/002/005/007](09_ecosystem.md#eco-001) | CUR-WORLD-007、CUR-COMBAT-001〜006、CUR-SYS-004 |
+| [2026-11-28 フィールドMOBの発生密度と地域比率](../history/2026-11-28-field-mob-density.md) | [ECO-001](09_ecosystem.md#eco-001) | CUR-WORLD-007、CUR-COMBAT-001/006、CUR-SYS-004 |

@@ -1,5 +1,5 @@
 import { settings } from './settings.js?v=49';
-import { chunkAt } from './mob-world.js?v=50';
+import { chunkAt } from './mob-world.js?v=51';
 import { cave, field } from './world.js?v=50';
 
 const colors = { grass: '#658753', forest: '#41664a', road: '#b7a276', town: '#999365' };

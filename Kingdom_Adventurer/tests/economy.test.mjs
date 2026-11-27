@@ -5,10 +5,10 @@ import { items } from '../game/src/equipment.js?v=39';
 import { start, shopDoors } from '../game/src/world.js?v=50';
 import { nationLayouts } from '../game/src/nation-layout.js?v=50';
 import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=50';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=50';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=51';
 import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=50';
 import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=50';
-import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=50';
+import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=51';
 
 const midnight = firstMinuteOfDay(gameDay(0) + 1);
 const makeShops = () => ({

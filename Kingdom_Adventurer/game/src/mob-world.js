@@ -1,6 +1,6 @@
 import { exactGameMinutes } from './clock.js?v=34';
-import { physicalDamage } from './combat.js?v=50';
-import { mobSettings as config } from './mob-settings.js?v=49';
+import { physicalDamage } from './combat.js?v=51';
+import { mobSettings as config } from './mob-settings.js?v=51';
 import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=50';
 import { animalTypes, mobTypes, settings } from './settings.js?v=49';
 import { buildings, cave, field, terrainAt } from './world.js?v=50';
@@ -129,22 +129,25 @@ export function indexSettlement(world, nations) {
       building.x + building.w + margin, building.y + building.h + margin)) chunk.blockers.push(building);
   }
   for (const group of groups) {
-    let target = 0;
+    let normalTarget = 0;
     let protectedTarget = 0;
     let protectedCount = 0;
     const rule = config[group];
     for (const chunk of world.chunks) {
       const density = chunk.candidates[group].length ? (chunk.protected ? rule.protected : rule.local) : 0;
       chunk.targets[group] = density;
-      target += density;
       if (chunk.protected) {
         protectedTarget += density;
         protectedCount += chunk.mobs[group].size;
+      } else {
+        normalTarget += density;
       }
     }
     world.protectedCounts[group] = protectedCount;
+    const target = normalTarget + protectedTarget;
     world.limits[group] = {
-      target: Math.round(target), maximum: Math.ceil(target * rule.worldMaximumFactor), protectedTarget,
+      target: Math.round(target), maximum: Math.ceil(target * rule.worldMaximumFactor),
+      normalTarget: Math.round(normalTarget), protectedTarget,
     };
   }
 }
@@ -214,20 +217,27 @@ function populate(world, player, random, initial) {
     const limit = world.limits[group];
     const floor = Math.floor(limit.protectedTarget);
     const protectedLimit = floor + Number(random() < limit.protectedTarget - floor);
-    let budget = initial ? limit.target : rule.perCycle;
-    const candidates = world.chunks.filter(chunk => chunk.mobs[group].size < Math.ceil(chunk.targets[group]));
-    while (candidates.length && budget > 0 && world.counts[group] < Math.min(limit.target, limit.maximum)) {
-      const index = Math.floor(random() * candidates.length);
-      const chunk = candidates[index];
-      candidates[index] = candidates.at(-1);
-      candidates.pop();
-      if (chunk.protected && world.protectedCounts[group] >= protectedLimit) continue;
-      if (!initial && random() >= rule.chance) continue;
-      const slots = initial ? Math.ceil(chunk.targets[group]) - chunk.mobs[group].size : 1;
-      for (let i = 0; i < slots && budget > 0 && world.counts[group] < Math.min(limit.target, limit.maximum); i++) {
-        if (chunk.protected && world.protectedCounts[group] >= protectedLimit) break;
-        if (!spawn(world, chunk, group, player, random)) break;
-        budget--;
+    const worldLimit = Math.min(limit.target, limit.maximum);
+    let budget = initial ? worldLimit : rule.perCycle;
+    for (const protectedRegion of [true, false]) {
+      const regionalLimit = protectedRegion ? protectedLimit : limit.normalTarget;
+      const regionalCount = protectedRegion ? world.protectedCounts[group]
+        : world.counts[group] - world.protectedCounts[group];
+      let remaining = Math.min(budget, regionalLimit - regionalCount, worldLimit - world.counts[group]);
+      if (remaining <= 0) continue;
+      // A positive fractional target still gives an empty chunk a chance to spawn.
+      const candidates = world.chunks.filter(chunk => chunk.protected === protectedRegion
+        && chunk.mobs[group].size < Math.ceil(chunk.targets[group]));
+      while (candidates.length && remaining > 0) {
+        const index = Math.floor(random() * candidates.length);
+        const chunk = candidates[index];
+        candidates[index] = candidates.at(-1);
+        candidates.pop();
+        if (!initial && random() >= rule.chance) continue;
+        if (spawn(world, chunk, group, player, random)) {
+          remaining--;
+          budget--;
+        }
       }
     }
   }

@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createSkills } from '../game/src/skills.js?v=49';
 import { nextMorningMinute } from '../game/src/clock.js?v=34';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=50';
-import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=50';
-import { mobSettings } from '../game/src/mob-settings.js?v=49';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=51';
+import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=51';
+import { mobSettings } from '../game/src/mob-settings.js?v=51';
 import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=50';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=50';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=51';
 import { mobTypes } from '../game/src/settings.js?v=49';
 import { collectLoot, dropLoot } from '../game/src/loot.js?v=49';
 import { items } from '../game/src/equipment.js?v=39';
@@ -38,9 +38,10 @@ test('MOB-01: chunk borders, initial density, terrain and occupied spawn tiles',
   assert.equal(world.chunks.reduce((sum, chunk) => sum + chunk.tiles.length, 0), 65536);
   assert.notEqual(chunkAt(world, 511, 1).id, chunkAt(world, 512, 1).id);
   assert.equal(chunkAt(world, 8192, 0), undefined);
-  assert.equal(world.counts.animal, 1024);
-  assert.ok(world.counts.enemy >= 478 && world.counts.enemy <= 480);
-  assert.ok(world.protectedCounts.enemy <= 4);
+  assert.equal(world.counts.animal, 100);
+  assert.equal(world.counts.enemy - world.protectedCounts.enemy, 200);
+  assert.ok([14, 15].includes(world.protectedCounts.animal));
+  assert.ok([0, 1].includes(world.protectedCounts.enemy));
   assert.equal(new Set([...world.mobs.values()].map(mob => `${mob.x}:${mob.y}`)).size, world.mobs.size);
   for (const mob of world.mobs.values()) {
     const chunk = chunkAt(world, mob.x, mob.y);
@@ -160,4 +161,41 @@ test('MOB-05: road bandits drop gold and one inexpensive equipment item that sur
   collectLoot(loaded);
   assert.equal(loaded.gold, 35);
   assert.equal(loaded.player.inventory.get(drop.equipment), 1);
+});
+
+test('MOB-06: fractional regional density, bounded respawns and current save round trip', () => {
+  let protectedEnemies = 0;
+  for (const seed of [28, 115, 2026, 9001, 1729, 65535]) {
+    const nations = createNationSimulation();
+    const world = createMobWorld(0);
+    const random = rng(seed);
+    advanceMobWorld(world, nations, 0, start, random);
+    protectedEnemies += world.protectedCounts.enemy;
+    const normalAnimals = world.counts.animal - world.protectedCounts.animal;
+    assert.ok([85, 86].includes(normalAnimals));
+    assert.equal(world.counts.enemy - world.protectedCounts.enemy, 200);
+    assert.ok([14, 15].includes(world.protectedCounts.animal));
+    assert.ok(world.protectedCounts.enemy <= 1);
+
+    const state = gameState(nations, world);
+    const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns), lootDrops: [] }]));
+    const restored = restoreSave(JSON.parse(JSON.stringify(makeSave(state, areaStates, 0))));
+    assert.deepEqual(restored.mobWorld.mobs, world.mobs);
+    assert.deepEqual(restored.mobWorld.protectedCounts, world.protectedCounts);
+    assert.equal(restored.mobWorld.tick, world.tick);
+    assert.equal(restored.mobWorld.nextId, world.nextId);
+
+    for (const group of ['animal', 'enemy']) {
+      const victims = [...world.mobs.values()].filter(mob => mobGroup(mob.kind) === group
+        && !world.chunks[mob.chunkId].protected).slice(0, 30);
+      for (const mob of victims) removeMob(world, mob);
+    }
+    advanceMobWorld(world, nations, 5.9, null, random);
+    const nextId = world.nextId;
+    advanceMobWorld(world, nations, 6.1, null, random);
+    const replacements = [...world.mobs.values()].filter(mob => Number(mob.id.slice(6)) >= nextId);
+    assert.equal(replacements.filter(mob => mobGroup(mob.kind) === 'animal').length, 2);
+    assert.equal(replacements.filter(mob => mobGroup(mob.kind) === 'enemy').length, 5);
+  }
+  assert.ok(protectedEnemies > 0 && protectedEnemies < 6);
 });

@@ -6,8 +6,8 @@ export const mobSettings = {
   nearDistance: 320,
   spawnClearance: 21,
   collisionRadius: 9,
-  animal: { local: 4, protected: 4, worldMaximumFactor: 1, perCycle: 24, chance: 0.85 },
-  enemy: { local: 2, protected: 0.2, worldMaximumFactor: 1, perCycle: 12, chance: 0.7 },
+  animal: { local: 0.36, protected: 0.8, worldMaximumFactor: 1, perCycle: 2, chance: 0.85 },
+  enemy: { local: 0.84, protected: 0.04, worldMaximumFactor: 1, perCycle: 5, chance: 0.7 },
   resident: { hp: 50, attack: 10, defense: 0, interval: 1, reach: 15, recoveryPerSecond: 1 },
   wander: { speedFactor: 0.28, minSeconds: 3, extraSeconds: 8, centerDistance: 1100, turnAwayChance: 0.88 },
   terrain: {

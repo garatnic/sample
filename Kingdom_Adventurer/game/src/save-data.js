@@ -1,5 +1,5 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=50';
-import { mobSettings } from './mob-settings.js?v=49';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=51';
+import { mobSettings } from './mob-settings.js?v=51';
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
 import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=50';
 import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=49';
@@ -10,7 +10,7 @@ import { gameDay } from './clock.js?v=34';
 import { findSource, harvestSeconds } from './trees.js?v=50';
 
 import { createNationSimulation } from './nation-simulation.js?v=50';
-import { captureNations, restoreNations } from './nation-save.js?v=50';
+import { captureNations, restoreNations } from './nation-save.js?v=51';
 
 import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=50';
 

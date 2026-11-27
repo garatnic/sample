@@ -1,4 +1,4 @@
-import { mobSettings } from './mob-settings.js?v=49';
+import { mobSettings } from './mob-settings.js?v=51';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=50';
 import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=50';
