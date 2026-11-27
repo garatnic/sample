@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=5c5b24f99368">
+  <link rel="stylesheet" href="./style.css?v=b6f0d24a5b0a">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,7 +20,7 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.41</h1>
+      <h1>Kingdom Adventurer ver.42</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
@@ -29,6 +29,7 @@
       <button id="open-quests" type="button">クエスト</button>
       <button id="open-skills" type="button" aria-haspopup="dialog">スキル</button>
       <button id="open-nations" type="button" aria-haspopup="dialog">国家</button>
+      <button id="open-map" type="button" aria-haspopup="dialog">マップ</button>
       <button id="open-save" type="button" aria-haspopup="dialog">セーブ</button>
     </div>
   </header>
@@ -60,6 +61,14 @@
     <p><label for="save-file">JSON取り込み</label> <input id="save-file" type="file" accept=".json,application/json"></p>
     <p id="save-feedback" role="status"></p>
     <form method="dialog"><button data-save-action autofocus>閉じる</button></form>
+  </dialog>
+  <dialog id="world-map" aria-labelledby="world-map-title">
+    <h2 id="world-map-title">世界地図</h2>
+    <canvas aria-label="探索した地域と現在地"></canvas>
+    <form method="dialog">
+      <span id="map-location"></span>
+      <button type="submit" autofocus>閉じる</button>
+    </form>
   </dialog>
   <dialog id="inn" aria-labelledby="inn-title">
     <form method="dialog">
@@ -144,6 +153,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=41"></script>
+  <script type="module" src="./src/main.js?v=42"></script>
 </body>
 </html>

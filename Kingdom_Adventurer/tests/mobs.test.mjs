@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createSkills } from '../game/src/skills.js?v=32';
 import { nextMorningMinute } from '../game/src/clock.js?v=34';
-import { createEncounters } from '../game/src/combat.js?v=41';
-import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=41';
+import { createEncounters } from '../game/src/combat.js?v=42';
+import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=42';
 import { mobSettings } from '../game/src/mob-settings.js?v=41';
 import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=41';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=41';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=42';
 import { mobTypes } from '../game/src/settings.js?v=39';
 import { cave, field, inTown, legacyFieldSpawns, shopDoors, start, terrainAt } from '../game/src/world.js?v=41';
 

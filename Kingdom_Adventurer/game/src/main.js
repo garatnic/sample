@@ -1,11 +1,12 @@
+import { discoverLocation, setupWorldMap } from './world-map.js?v=42';
 import { createSkills } from './skills.js?v=32';
 import { setupSkillMenu } from './skill-menu.js?v=32';
 import { settings } from './settings.js?v=39';
 import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=41';
-import { createEncounters, inCombat, updateCombat } from './combat.js?v=41';
+import { animalAtTap, createEncounters, inCombat, updateCombat } from './combat.js?v=42';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
-import { createInput } from './input.js?v=6';
-import { createRenderer } from './render.js?v=41';
+import { createInput } from './input.js?v=42';
+import { createRenderer } from './render.js?v=42';
 import { setupGearMenus } from './gear-ui.js?v=41';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=39';
@@ -16,11 +17,11 @@ import { collectLoot } from './loot.js?v=39';
 
 import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=41';
+import { areas, makeSave, restoreSave } from './save-data.js?v=42';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=41';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=41';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=42';
 import { inSettlement } from './nation-layout.js?v=35';
 import { setupNationMenu } from './nation-menu.js?v=41';
 
@@ -52,7 +53,13 @@ const clockDate = document.querySelector('#clock-date');
 const clockTime = document.querySelector('#clock-time');
 const notice = document.querySelector('#notice');
 const canvas = document.querySelector('canvas');
-const input = createInput(canvas);
+const input = createInput(canvas, event => {
+  if (state.area !== field || document.querySelector('dialog[open]')) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left + Math.round(state.player.x - canvas.clientWidth / 2);
+  const y = event.clientY - rect.top + Math.round(state.player.y - canvas.clientHeight / 2);
+  huntRequested = animalAtTap(state.mobWorld, x, y) ?? huntRequested;
+});
 const render = createRenderer(canvas);
 
 function createPlayer({ level = 1, experience = 0, inventory = new Map(), weaponId = null, armor = new Map(), skills = createSkills() } = {}) {
@@ -66,6 +73,7 @@ const startingWeaponId = 'iron-dagger';
 const state = {
   player: createPlayer({ inventory: new Map([[startingWeaponId, 1]]), weaponId: startingWeaponId }),
   area: field,
+  exploredChunks: new Set(),
   nations: createNationSimulation(),
   mobWorld: createMobWorld(0),
   centerContact: null,
@@ -83,6 +91,8 @@ function applySave({ areaStates: savedAreas, clock, ...savedState }) {
   state.innContact = nearbyDoor(innDoors);
   state.shopContact = nearbyDoor(shopDoors);
   state.guildContact = nearbyDoor(guildDoors);
+  huntRequested = false;
+  discoverLocation(state);
   input.clear();
 }
 
@@ -157,6 +167,7 @@ function update(dt) {
   const direction = input.read();
   const { x, y } = player;
   movePlayer(player, direction.x, direction.y, dt, state.area, state.area === field ? settlementBuildings(state.nations) : []);
+  discoverLocation(state);
   player.moving = x !== player.x || y !== player.y;
   player.flash = Math.max(0, player.flash - dt);
   if (state.notice && (state.notice.remaining -= dt) <= 0) state.notice = null;
@@ -171,6 +182,7 @@ function update(dt) {
     state.strike = null;
     state.notice = null;
     player.moving = false;
+    discoverLocation(state);
     void saves.autoSave();
     return;
   }
@@ -293,5 +305,6 @@ const openNation = setupNationMenu(state, input, field);
 const openGuild = setupQuestMenus(state, input);
 const openShop = setupGearMenus(state, input);
 setupSkillMenu(state, input);
+setupWorldMap(state, input);
 previous = performance.now();
 requestAnimationFrame(frame);

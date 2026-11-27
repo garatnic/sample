@@ -1,7 +1,7 @@
 import { animalTypes, mobTypes, settings } from './settings.js?v=39';
 import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=39';
 import { field } from './world.js?v=41';
-import { mobsIn, moveNearbyMobs, removeMob } from './mob-world.js?v=41';
+import { mobsIn, moveNearbyMobs, removeMob } from './mob-world.js?v=42';
 import { attackInterval, defenseRating, items } from './equipment.js?v=39';
 import { recordDefeat } from './quests.js?v=39';
 import { dropLoot } from './loot.js?v=39';
@@ -41,6 +41,20 @@ export function inCombat(state) {
       : Math.hypot(state.player.x - enemy.x, state.player.y - enemy.y) < settings.enemy.aggro) return true;
   }
   return false;
+}
+
+export function animalAtTap(world, x, y) {
+  const hitRadius = 22;
+  let nearest = hitRadius;
+  let target = null;
+  for (const mob of mobsIn(world, x - hitRadius, y - hitRadius, x + hitRadius, y + hitRadius)) {
+    if (!Object.hasOwn(animalTypes, mob.kind)) continue;
+    const distance = Math.hypot(x - mob.x, y - mob.y);
+    if (distance > nearest) continue;
+    nearest = distance;
+    target = mob.id;
+  }
+  return target;
 }
 
 export function updateCombat(state, dt, hunt = false) {
@@ -98,13 +112,18 @@ export function updateCombat(state, dt, hunt = false) {
   for (const encounter of encounters) {
     if (!encounter.enemy) continue;
     const animal = Boolean(animalTypes[encounter.enemy.kind]);
-    if (hunt ? !animal : animal && !encounter.enemy.hunted) continue;
+    if (hunt === true && !animal) continue;
+    if (typeof hunt === 'string' && (!animal || encounter.enemy.id !== hunt)) continue;
+    if (!hunt && animal && !encounter.enemy.hunted) continue;
     const distance = Math.hypot(player.x - encounter.enemy.x, player.y - encounter.enemy.y);
     if (distance > range) continue;
     range = distance;
     nearest = encounter;
   }
-  if (!nearest) return;
+  if (!nearest) {
+    if (typeof hunt === 'string') state.notice = { text: '動物に近づいてタップしてください', remaining: 1.4 };
+    return;
+  }
   const enemy = nearest.enemy;
   player.cooldown = attackInterval(weapon);
   state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };

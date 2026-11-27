@@ -1,4 +1,4 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=41';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=42';
 import { mobSettings } from './mob-settings.js?v=41';
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
 import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=41';
@@ -27,6 +27,7 @@ export function makeSave(state, areaStates, clock) {
       level: player.level, experience: player.experience, weaponId: player.weaponId,
       inventory: [...player.inventory], armor: [...player.armor], skills: [...player.skills],
       pendingPoison: player.pendingPoison, cooldown: player.cooldown },
+    exploredChunks: [...(state.exploredChunks ?? [])],
     mobs: { minute: world.minute, tick: world.tick, nextId: world.nextId,
       individuals: [...world.mobs.values()].map(({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn }) =>
         ({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn })) },
@@ -216,5 +217,9 @@ export function restoreSave(data) {
   }
   const mobWorld = restoreMobs(data.mobs, areaStates.get(field), data.clock, data.version);
   indexSettlement(mobWorld, nations);
-  return { player, area, areaStates, nations, mobWorld, gold: data.gold, guilds, shopGold, harvest, clock: data.clock };
+  const explored = data.version === version ? data.exploredChunks ?? [] : [];
+  check(Array.isArray(explored) && explored.length <= mobWorld.chunks.length
+    && explored.every(id => integer(id, 0, mobWorld.chunks.length - 1)));
+  const exploredChunks = new Set(explored);
+  return { player, area, areaStates, nations, mobWorld, exploredChunks, gold: data.gold, guilds, shopGold, harvest, clock: data.clock };
 }

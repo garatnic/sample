@@ -3,7 +3,7 @@ const directions = {
   ArrowUp: [0, -1], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowRight: [1, 0],
 };
 
-export function createInput(canvas) {
+export function createInput(canvas, onTap) {
   const keys = new Set();
   const touch = { x: 0, y: 0 };
   let gesture = null;
@@ -35,18 +35,28 @@ export function createInput(canvas) {
     if (event.pointerId !== gesture?.pointerId) return;
     const x = event.clientX - gesture.x;
     const y = event.clientY - gesture.y;
-    const length = Math.max(34, Math.hypot(x, y));
+    const distance = Math.hypot(x, y);
+    if (distance >= 8) gesture.dragged = true;
+    if (!gesture.dragged) return;
+    const length = Math.max(34, distance);
     touch.x = x / length;
     touch.y = y / length;
   }
 
   canvas.addEventListener('pointerdown', event => {
     if (event.pointerType !== 'touch' || gesture || document.querySelector('dialog[open]')) return;
-    gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, started: performance.now(), dragged: false };
     canvas.setPointerCapture(event.pointerId);
   });
   canvas.addEventListener('pointermove', move);
-  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+  canvas.addEventListener('pointerup', event => {
+    if (event.pointerId !== gesture?.pointerId) return;
+    move(event);
+    const tapped = !gesture.dragged && performance.now() - gesture.started <= 300;
+    clearTouch();
+    if (tapped) onTap(event);
+  });
+  for (const type of ['pointercancel', 'lostpointercapture']) {
     canvas.addEventListener(type, event => {
       if (event.pointerId === gesture?.pointerId) clearTouch();
     });

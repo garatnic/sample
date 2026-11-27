@@ -5,7 +5,7 @@
   background: #192623;
 }
 body { margin: 0; overflow: hidden; }
-canvas { display: block; width: 100vw; height: 100dvh; touch-action: none; }
+body > canvas { display: block; width: 100vw; height: 100dvh; touch-action: none; }
 header, footer, #notice, #game-clock {
   position: fixed;
   margin: 0;
@@ -65,7 +65,7 @@ button {
   footer { display: none; }
 }
 
-#open-inventory, #open-items, #open-quests, #open-save, #open-skills, #open-nations { pointer-events: auto; }
+#open-inventory, #open-items, #open-quests, #open-save, #open-skills, #open-nations, #open-map { pointer-events: auto; }
 button:disabled { opacity: .55; cursor: default; }
 .gear-menu { width: 28rem; max-height: calc(100dvh - 4rem); overflow: auto; }
 .gear-menu ul { display: grid; gap: .55rem; padding: 0; }
@@ -269,3 +269,21 @@ header .hud-mp { margin: 0; color: #b6dbef; font-variant-numeric: tabular-nums; 
 #nation-menu {
   width: 44rem;
 }
+
+#world-map { padding: .75rem; }
+#world-map h2 { margin: 0 0 .55rem; font-size: 1.12rem; }
+#world-map canvas {
+  display: block;
+  width: min(78vw, 70dvh, 720px);
+  height: auto;
+  image-rendering: pixelated;
+  border: 1px solid #8d9a6b;
+}
+#world-map form {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: .55rem;
+}
+#map-location { color: #ffd36d; font-size: .88rem; }
