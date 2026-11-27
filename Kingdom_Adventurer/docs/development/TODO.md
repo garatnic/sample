@@ -134,7 +134,8 @@
 
   - ver.28 [37d114337509006f706980e7a06fff16ee6e7b37](https://github.com/garatnic/sample/commit/37d114337509006f706980e7a06fff16ee6e7b37)。5本の配置、採取、枯渇、日次補充を確認。
 
-- [ ] DEV-056 セーブ・ロード機能を実装する。[セーブ・ロード機能仕様書](../specifications/SAVE_LOAD_SPECIFICATION.md)に従い、PC・スマートフォンでIndexedDBの単一枠に保存・復元する。手動・自動保存、保存禁止条件、保存失敗時の既存データ保持、JSONのエクスポート・インポートを確認する。関連 SYSTEM-011、CUR-SYS-004。
+- [x] DEV-056 セーブ・ロード機能を実装する。[セーブ・ロード機能仕様書](../specifications/SAVE_LOAD_SPECIFICATION.md)に従い、PC・スマートフォンでIndexedDBの単一枠に保存・復元する。手動・自動保存、保存禁止条件、保存失敗時の既存データ保持、JSONのエクスポート・インポート、確認付き削除を確認する。関連 SYSTEM-011、CUR-SYS-004。
+  - ver.31 [aeba7fca18c61d791665565467037f17f5cd317e](https://github.com/garatnic/sample/commit/aeba7fca18c61d791665565467037f17f5cd317e)。PC版Chromiumの実IndexedDBで、手動保存・読み込み、装備・果樹・別マップ戦利品の復元、宿泊・洞窟往復のオートセーブ、戦闘制限、トランザクション中断時の旧データ保持、JSON書き出し・正常/不正取り込み、削除確認の取消・実行、起動時復元と削除後の初期起動を確認。スマートフォン実機は未確認。
 
 - [ ] DEV-057 緊急脱出機能を追加する。地形への埋没などの移動不能から、セーブデータを巻き戻さずに復帰できることを確認する。詳細仕様は未確定。[セーブ・ロード機能仕様書の第10節](../specifications/SAVE_LOAD_SPECIFICATION.md#10-緊急脱出機能との関係)を参照。
 
