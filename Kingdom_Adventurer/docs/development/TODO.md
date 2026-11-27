@@ -231,5 +231,9 @@
 
   - ver.50 [4050fadb347559b59aaef2c4a05e3eeab61c18a7](https://github.com/garatnic/sample/commit/4050fadb347559b59aaef2c4a05e3eeab61c18a7)。27件合格。日次消費、備蓄容量、建築中の旧保存の移行と100日の国家進行を確認。
 
+- [x] DEV-087 フィールドMOBを約20%に削減し、地域別発生比率・再POP上限・新規セーブ往復を検証する。関連 CUR-WORLD-007、CUR-COMBAT-001/006、CUR-SYS-004。
+
+  - ver.51 [758dd354599091d8c81947d3132d9eaa9845c476](https://github.com/garatnic/sample/commit/758dd354599091d8c81947d3132d9eaa9845c476)。MOB-01/04/06 と6シードの2ゲーム日試行。実機での長期検証は DEV-076。
+
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
