@@ -1,15 +1,16 @@
-import { createMobWorld } from '../game/src/mob-world.js?v=47';
+import { createMobWorld } from '../game/src/mob-world.js?v=48';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=32';
+import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=48';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=32';
-import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=39';
-import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=47';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=47';
+import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=48';
+import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=48';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=48';
 import { cave, field, legacyFieldSpawns, shopDoors, start } from '../game/src/world.js?v=47';
 import { items } from '../game/src/equipment.js?v=39';
 
 const id = 'one-handed';
+const twoHanded = 'two-handed';
 const required = skillDefinitions.get(id).requiredXp;
 const character = () => ({ ...start, level: 1, hp: 100, mp: 100, experience: 0, cooldown: 0,
   pendingPoison: 0, weaponId: null, inventory: new Map(), armor: new Map(), skills: createSkills() });
@@ -38,6 +39,7 @@ test('SKILL-02: base weapon XP, matching damage calculation and level carryover'
   recordWeaponHit(p, sword, 0);
   recordWeaponHit(p, items.get('iron-hammer'), 31);
   assert.equal(p.skills.get(id).experience, 0);
+  assert.equal(p.skills.get(twoHanded).experience, 84);
   recordWeaponHit(p, sword, 23);
   assert.equal(p.skills.get(id).experience, 30);
   p.skills.get(id).value = 100;
@@ -76,6 +78,7 @@ test('SKILL-04: JSON and ver.1 migration preserve progress and reject invalid sk
   Object.assign(player, { level: 4, experience: 80, hp: 115, weaponId: 'iron-sword' });
   player.inventory.set('iron-sword', 1);
   player.skills.set(id, { value: 22, experience: 18 });
+  player.skills.set(twoHanded, { value: 16, experience: 84 });
   const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns), lootDrops: [] }]));
   const state = { player, area: field, gold: 42, guilds: new Map(), harvest: null,
     shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 97])) };
@@ -140,4 +143,24 @@ test('SKILL-06: tapping wildlife marks it outside melee range and through cooldo
   updateCombat(state, 0.05);
   assert.ok(animal.hp < 34, 'closing distance triggers the attack without another tap');
   assert.equal(animal.flee, 3);
+});
+
+
+test('SKILL-07: the iron hammer grants two-handed XP and raises character XP on skill advancement', () => {
+  const player = character();
+  player.weaponId = 'iron-hammer';
+  const skill = player.skills.get(twoHanded);
+  skill.experience = skillDefinitions.get(twoHanded).requiredXp(skill.value) - 80;
+  const encounters = createEncounters(cave.spawns);
+  Object.assign(player, { x: 350, y: 450 });
+  const state = { area: cave, player, encounters, lootDrops: [], guilds: new Map() };
+  updateCombat(state, 0);
+  assert.equal(skill.value, 15);
+  const enemy = encounters[0].enemy;
+  Object.assign(player, { x: enemy.x + 16, y: enemy.y });
+  updateCombat(state, 0);
+  updateCombat(state, 0);
+  assert.deepEqual(skill, { value: 16, experience: 4 });
+  assert.equal(player.experience, 16);
+  assert.equal(player.skills.get(id).experience, 0);
 });

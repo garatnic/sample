@@ -1,13 +1,13 @@
-import { discoverLocation, setupWorldMap } from './world-map.js?v=47';
-import { createSkills } from './skills.js?v=32';
-import { setupSkillMenu } from './skill-menu.js?v=32';
+import { discoverLocation, setupWorldMap } from './world-map.js?v=48';
+import { createSkills } from './skills.js?v=48';
+import { setupSkillMenu } from './skill-menu.js?v=48';
 import { settings } from './settings.js?v=39';
 import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=47';
-import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=47';
+import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=48';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=42';
-import { createRenderer } from './render.js?v=47';
-import { setupGearMenus } from './gear-ui.js?v=47';
+import { createRenderer } from './render.js?v=48';
+import { setupGearMenus } from './gear-ui.js?v=48';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=39';
 
@@ -17,11 +17,11 @@ import { collectLoot } from './loot.js?v=39';
 
 import { updateTrees } from './trees.js?v=47';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=47';
+import { areas, makeSave, restoreSave } from './save-data.js?v=48';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=47';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=47';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=48';
 import { inSettlement } from './nation-layout.js?v=47';
 import { setupNationMenu } from './nation-menu.js?v=47';
 

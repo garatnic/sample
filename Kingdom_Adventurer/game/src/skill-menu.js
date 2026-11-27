@@ -1,4 +1,4 @@
-import { maxSkill, skillDefinitions, skillGroups } from './skills.js?v=32';
+import { maxSkill, skillDefinitions, skillGroups } from './skills.js?v=48';
 
 export function setupSkillMenu(state, input) {
   const dialog = document.querySelector('#skill-menu');

@@ -2,10 +2,12 @@ import { gainExperience } from './growth.js?v=32';
 
 export const initialSkill = 15;
 export const maxSkill = 100;
+const meleeWeaponRequiredXp = value => Math.ceil(2 * value ** 1.95);
+
 export const skillGroups = [
   { name: '戦闘系', skills: [
-    ['one-handed', '片手武器', value => Math.ceil(2 * value ** 1.95)],
-    ['two-handed', '両手武器'], ['archery', '弓術'], ['block', '防御'], ['heavy-armor', '重装'], ['smithing', '鍛冶'],
+    ['one-handed', '片手武器', meleeWeaponRequiredXp],
+    ['two-handed', '両手武器', meleeWeaponRequiredXp], ['archery', '弓術'], ['block', '防御'], ['heavy-armor', '重装'], ['smithing', '鍛冶'],
   ] },
   { name: '魔法系', skills: [
     ['destruction', '破壊'], ['restoration', '回復'], ['conjuration', '召喚'], ['illusion', '幻惑'],

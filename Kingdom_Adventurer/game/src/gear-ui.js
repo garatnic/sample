@@ -1,4 +1,4 @@
-import { playerAttack } from './weapon-skill.js?v=39';
+import { playerAttack } from './weapon-skill.js?v=48';
 import { maxHealth } from './growth.js?v=32';
 import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=39';
 import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=47';

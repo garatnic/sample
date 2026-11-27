@@ -1,6 +1,6 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=47';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=48';
 import { mobSettings } from './mob-settings.js?v=41';
-import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
+import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=48';
 import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=47';
 import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=39';
 import { canEquipItem, items } from './equipment.js?v=39';

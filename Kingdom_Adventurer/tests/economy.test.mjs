@@ -8,7 +8,7 @@ import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../g
 import { captureNations, restoreNations } from '../game/src/nation-save.js?v=47';
 import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=47';
 import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=47';
-import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=47';
+import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=48';
 
 const midnight = firstMinuteOfDay(gameDay(0) + 1);
 const makeShops = () => ({
