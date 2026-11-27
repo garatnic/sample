@@ -1,7 +1,7 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: 2026-11-27 / ver.28 / DEV-055 / 実装コミット `37d114337509006f706980e7a06fff16ee6e7b37`。
-正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全39仕様・実装ファイル18件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
+基準: 2026-11-27 / ver.29 / DEV-059 / 実装コミット `6ce2ec496d99a05c1b31d7021572c53a6448e8bf`。
+正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全40仕様・実装ファイル18件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
 
 ## 検証の記録
 
@@ -27,6 +27,7 @@
 | `CUR-WORLD-003` | 地形 | src/world.js: terrainAt(), inTown(); src/render.js: tile(), colors; src/world.js: movePlayer(), walkable()（地形を衝突に使わない） | CUR-WORLD-001, CUR-MOVE-002, CUR-UI-003 | — | 未登録 |
 | `CUR-WORLD-004` | 建物 | src/world.js: buildings, inn, innDoor, shopDoors, guildDoors, walkable(); src/render.js: building(); src/main.js: update() の施設接触判定; index.html: #inn, #equipment-shop, #guild | CUR-MOVE-002, CUR-INN-001, CUR-UI-003 | — | 未登録 |
 | `CUR-WORLD-005` | 果樹・採取・日次補充 | src/trees.js: treeLocations, createTrees(), takeFruit(), updateTrees(); src/main.js: update(), 死亡時の採取進捗解除; src/render.js: drawTree(), 採取バー; src/equipment.js: items; src/clock.js: gameDay(), gameMinutes(); src/settings.js: player.radius; src/consumables.js: useItem(); src/shop.js: sellItem() | CUR-SYS-005 | WORLD-006, ECO-008, EXPLORE-006 | 未登録 |
+| `CUR-WORLD-006` | 岩陰の洞窟 | src/world.js: cave, field, portalRadius, movePlayer(); src/main.js: areaStates, state.area, update(), frame(), 死亡時の復帰; src/combat.js: createEncounters(), updateCombat(); src/render.js: caveTile(), drawPortal(), render(); src/loot.js: collectLoot(), dropLoot(); src/settings.js: tile, enemyTypes | CUR-WORLD-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-007, CUR-LIFE-001 | EXPLORE-002 | 未登録 |
 | `CUR-INPUT-001` | キーボード | src/input.js: directions, createInput(), keys, keydown/keyup/blur, clear(), read(); index.html: footer; style.css: footer/kbd | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001 | — | 未登録 |
 | `CUR-INPUT-002` | スワイプ移動 | src/input.js: createInput(), move(), clearTouch(), clear(), pointerイベント, read(); index.html: canvas; style.css: canvas の touch-action; src/main.js: createInput() 呼出 | CUR-MOVE-001, CUR-UI-005, CUR-INPUT-001 | — | 未登録 |
 | `CUR-INPUT-003` | ゲームパッド | src/input.js: createInput().read() の navigator.getGamepads・axes・閾値; src/main.js: update() の入力取得 | CUR-MOVE-001, CUR-INPUT-001, CUR-INPUT-002 | — | 未登録 |
@@ -64,20 +65,20 @@
 | `index.html` | CUR-SYS-001, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-004, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005 |
 | `package.json` | CUR-SYS-001 |
 | `src/clock.js` | CUR-SYS-003, CUR-SYS-005, CUR-WORLD-005, CUR-QUEST-001 |
-| `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-LIFE-001, CUR-QUEST-001, CUR-ITEM-003, CUR-ITEM-001, CUR-UI-004 |
+| `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-LIFE-001, CUR-QUEST-001, CUR-ITEM-003, CUR-ITEM-001, CUR-UI-004, CUR-WORLD-006 |
 | `src/consumables.js` | CUR-SYS-002, CUR-WORLD-005, CUR-LIFE-001, CUR-ITEM-003, CUR-UI-001 |
 | `src/equipment.js` | CUR-WORLD-005, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-ITEM-001, CUR-ITEM-002 |
 | `src/gear-ui.js` | CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002 |
 | `src/growth.js` | CUR-SYS-002, CUR-COMBAT-005, CUR-COMBAT-006, CUR-GROWTH-001, CUR-INN-002, CUR-LIFE-001, CUR-ITEM-003, CUR-ITEM-002, CUR-UI-001 |
 | `src/input.js` | CUR-SYS-003, CUR-INPUT-001, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002 |
-| `src/loot.js` | CUR-SYS-003, CUR-COMBAT-006, CUR-COMBAT-007 |
-| `src/main.js` | CUR-SYS-001, CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-004, CUR-WORLD-005, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-UI-001, CUR-UI-004, CUR-UI-005 |
+| `src/loot.js` | CUR-SYS-003, CUR-COMBAT-006, CUR-COMBAT-007, CUR-WORLD-006 |
+| `src/main.js` | CUR-SYS-001, CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-004, CUR-WORLD-005, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-UI-001, CUR-UI-004, CUR-UI-005, CUR-WORLD-006 |
 | `src/quests.js` | CUR-COMBAT-006, CUR-QUEST-001, CUR-QUEST-002 |
-| `src/render.js` | CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-003, CUR-WORLD-004, CUR-WORLD-005, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-002, CUR-UI-003, CUR-UI-004 |
-| `src/settings.js` | CUR-SYS-002, CUR-WORLD-001, CUR-WORLD-005, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-UI-001, CUR-UI-002, CUR-UI-003, CUR-UI-004 |
+| `src/render.js` | CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-003, CUR-WORLD-004, CUR-WORLD-005, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-WORLD-006 |
+| `src/settings.js` | CUR-SYS-002, CUR-WORLD-001, CUR-WORLD-005, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-UI-001, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-WORLD-006 |
 | `src/shop.js` | CUR-WORLD-005, CUR-COMBAT-007, CUR-SHOP-001, CUR-SHOP-002, CUR-SHOP-003, CUR-ITEM-002 |
 | `src/trees.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-005, CUR-LIFE-001 |
-| `src/world.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-INN-001, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-001, CUR-UI-003 |
+| `src/world.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-INN-001, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-001, CUR-UI-003, CUR-WORLD-006 |
 | `style.css` | CUR-SYS-001, CUR-SYS-005, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005 |
 
 ## 更新方法
