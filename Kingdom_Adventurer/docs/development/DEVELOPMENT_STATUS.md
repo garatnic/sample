@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.27 / DEV-054 [5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba](https://github.com/garatnic/sample/commit/5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba)。果樹の配置、接触採取、残数表示、日次補充を追加。村人との接続時は src/trees.js の食料資源データと takeFruit() を利用する。端末実機は未確認。
+
 - ver.26 / DEV-053 [5c02f0affa716f7c39fa0eb2603808241f9781fb](https://github.com/garatnic/sample/commit/5c02f0affa716f7c39fa0eb2603808241f9781fb)。装備専用表示と道具ボタン、討伐3・素材収集2のギルド依頼を追加。要求数と報酬は暫定。スマホ実機未確認。
 
 - ver.25 / DEV-052 [71e37b9985fe3330988700d704720da10652eb41](https://github.com/garatnic/sample/commit/71e37b9985fe3330988700d704720da10652eb41)。非人型の素材入手と道具屋の買取を実装。素材の錬成は未実装。スマホ実機は未確認。

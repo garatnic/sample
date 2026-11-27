@@ -126,7 +126,9 @@
 - [x] DEV-053 装備と道具の表示を分離し、ギルドに低難度の収集依頼を追加する。関連 CUR-ITEM-002/003、CUR-QUEST-001/002、QUEST-002/005。
   - 2026-11-27 ver.26 [5c02f0affa716f7c39fa0eb2603808241f9781fb](https://github.com/garatnic/sample/commit/5c02f0affa716f7c39fa0eb2603808241f9781fb)。候補範囲、更新、納品、表示分離を確認。
 
-- [ ] DEV-054 果樹を生成し、接触採取・枯渇表示・日付更新での補充を実装する。関連 CUR-WORLD-005、CUR-SYS-005、ECO-008、EXPLORE-006。
+- [x] DEV-054 果樹を生成し、接触採取・枯渇表示・日付更新での補充を実装する。関連 CUR-WORLD-005、CUR-SYS-005、ECO-008、EXPLORE-006。
+
+  - 2026-11-27 ver.27 [5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba](https://github.com/garatnic/sample/commit/5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba)。配置、採取、枯渇、日次補充をNodeで確認。端末実機は未確認。
 
 ## 登録漏れの確認
 現時点では分野単位の登録のみ。211個別仕様のTODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
