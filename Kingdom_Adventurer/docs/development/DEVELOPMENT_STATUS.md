@@ -1,5 +1,7 @@
 # 現在の開発状況
 
+- ver.26 / DEV-053 [5c02f0affa716f7c39fa0eb2603808241f9781fb](https://github.com/garatnic/sample/commit/5c02f0affa716f7c39fa0eb2603808241f9781fb)。装備専用表示と道具ボタン、討伐3・素材収集2のギルド依頼を追加。要求数と報酬は暫定。スマホ実機未確認。
+
 - ver.25 / DEV-052 [71e37b9985fe3330988700d704720da10652eb41](https://github.com/garatnic/sample/commit/71e37b9985fe3330988700d704720da10652eb41)。非人型の素材入手と道具屋の買取を実装。素材の錬成は未実装。スマホ実機は未確認。
 
 - ver.24 / DEV-051 [129acb34908a26c11476d45d55d72e9c48389f3c](https://github.com/garatnic/sample/commit/129acb34908a26c11476d45d55d72e9c48389f3c)。ギルド別5枠を閲覧日で更新。現地にあるギルドは1か所、2か所分のデータを用いて分離と10件受注を検証。スマホ実機は未確認。
