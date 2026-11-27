@@ -17,7 +17,7 @@ import { collectLoot } from './loot.js?v=39';
 
 import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=45';
+import { areas, makeSave, restoreSave } from './save-data.js?v=46';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=45';

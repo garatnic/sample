@@ -4,7 +4,7 @@ import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.
 import { items } from '../game/src/equipment.js?v=39';
 import { start, shopDoors } from '../game/src/world.js?v=41';
 import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=45';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=45';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=46';
 import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=45';
 import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=45';
 import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=45';
@@ -141,6 +141,14 @@ test('ECON-04: midnight hooks, multi-day advancement, lodging time and save migr
   const migrated = restoreNations(old, 0, 10);
   assert.equal(migrated.nations[0].treasury, 10_000);
   assert.deepEqual(migrated.nations[0].cities[0].residents.slice(0, 2).map(person => person.role), ['food', 'wood']);
+
+  // An old save could put all residents to sleep until the next midnight.
+  for (const entry of old.nations) entry.nextMinute = midnight;
+  const sleeping = restoreNations(old, 0, 10);
+  assert.deepEqual(sleeping.nations[0].stock, fresh.nations[0].stock);
+  const immediatelyResaved = restoreNations(captureNations(sleeping), 0);
+  advanceNations(immediatelyResaved, 1);
+  assert.ok(immediatelyResaved.nations[0].cities[0].residents.every(person => person.action !== 'idle'));
 });
 
 test('ECON-05: bulk trades conserve player, shop and treasury gold during partial settlement', () => {

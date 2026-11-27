@@ -6,7 +6,7 @@ import { createEncounters } from '../game/src/combat.js?v=43';
 import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=45';
 import { mobSettings } from '../game/src/mob-settings.js?v=41';
 import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=45';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=45';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=46';
 import { mobTypes } from '../game/src/settings.js?v=39';
 import { cave, field, inTown, legacyFieldSpawns, shopDoors, start, terrainAt } from '../game/src/world.js?v=41';
 

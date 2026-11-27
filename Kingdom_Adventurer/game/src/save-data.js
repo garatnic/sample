@@ -10,7 +10,7 @@ import { gameDay } from './clock.js?v=34';
 import { findSource, harvestSeconds } from './trees.js?v=37';
 
 import { createNationSimulation } from './nation-simulation.js?v=45';
-import { captureNations, restoreNations } from './nation-save.js?v=45';
+import { captureNations, restoreNations } from './nation-save.js?v=46';
 
 import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=45';
 

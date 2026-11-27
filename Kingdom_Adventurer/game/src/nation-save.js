@@ -176,9 +176,11 @@ export function restoreNations(data, minute, saveVersion = 11) {
     const eventMinute = Math.min(firstMinuteOfDay(gameDay(minute) + 1),
       ...city.residents.filter(p => p.task).map(p => p.task.end),
       ...city.sources.filter(s => s.readyAt > minute).map(s => s.readyAt));
+    const hasIdle = city.residents.some(person => person.action === 'idle');
     const initial = saved.nextMinute === minute && !city.project && city.residents.every(p => p.action === 'idle');
-    requireValid(legacyTasks || saved.nextMinute === eventMinute || initial);
-    nation.nextMinute = initial ? minute : eventMinute;
+    const pendingDecision = saved.nextMinute === minute && (initial || saveVersion >= 11 && hasIdle);
+    requireValid(legacyTasks || saved.nextMinute === eventMinute || pendingDecision);
+    nation.nextMinute = pendingDecision || saveVersion < 11 && hasIdle ? minute : eventMinute;
   }
   return simulation;
 }
