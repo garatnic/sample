@@ -184,7 +184,11 @@
 
   - ver.38 [e7f651e0687053560f412bb66bcead85ae55cfaa](https://github.com/garatnic/sample/commit/e7f651e0687053560f412bb66bcead85ae55cfaa)。Nodeの保存済み自動テスト10件合格。
 
-- [ ] DEV-073 非敵性のシカ・ウサギ・キツネと逃走、狩猟、素材、セーブ互換。関連 CUR-COMBAT-001〜007、CUR-SYS-004、ECO-005/007。
+- [x] DEV-073 非敵性のシカ・ウサギ・キツネと逃走、狩猟、素材、セーブ互換。関連 CUR-COMBAT-001〜007、CUR-SYS-004、ECO-005/007。
+
+  - ver.39 [c4e6d799463c5259644caed98358cf9a45a18f3a](https://github.com/garatnic/sample/commit/c4e6d799463c5259644caed98358cf9a45a18f3a)。Nodeの自動テスト11件合格。
+
+- [ ] DEV-074 野外のチャンク別出現数と地形、都市周辺の敵・動物密度を検討する。関連 ECO-001/005/007。
 
 ## 登録漏れの確認
 分野別項目と個別作業を登録済み。目標仕様全体の個別TODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
