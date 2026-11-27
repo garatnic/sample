@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kingdom Adventurer</title>
-  <link rel="stylesheet" href="./style.css?v=c776c55e4dfc">
+  <link rel="stylesheet" href="./style.css?v=da7aeca23d3a">
 </head>
 <body>
   <canvas aria-label="フィールド"></canvas>
@@ -20,11 +20,12 @@
       </button>
     </div>
     <div id="hud-details" hidden>
-      <h1>Kingdom Adventurer ver.25</h1>
+      <h1>Kingdom Adventurer ver.26</h1>
       <p id="location"></p>
       <p id="progress"></p>
       <p>所持金 <output id="gold"></output></p>
       <button id="open-inventory" type="button">装備</button>
+      <button id="open-items" type="button">道具</button>
       <button id="open-quests" type="button">クエスト</button>
     </div>
   </header>
@@ -108,7 +109,7 @@
   <dialog id="quest-journal" class="gear-menu" aria-labelledby="quest-title">
     <h2 id="quest-title">クエスト</h2>
     <p class="quest-count"></p>
-    <p class="quest-empty" hidden>ギルドで討伐依頼を受けられます。</p>
+    <p class="quest-empty" hidden>ギルドで依頼を受けられます。</p>
     <ul></ul>
     <form method="dialog"><button autofocus>閉じる</button></form>
   </dialog>
@@ -117,6 +118,6 @@
     <p>街でHPを全回復して再開できます。</p>
     <form method="dialog"><button>街で再開</button></form>
   </dialog>
-  <script type="module" src="./src/main.js?v=25"></script>
+  <script type="module" src="./src/main.js?v=26"></script>
 </body>
 </html>

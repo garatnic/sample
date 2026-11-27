@@ -1,14 +1,14 @@
 import { settings } from './settings.js';
 import { guildDoors, innDoor, shopDoors, inTown, movePlayer, start, town } from './world.js?v=24';
-import { createEncounters, updateCombat } from './combat.js?v=25';
+import { createEncounters, updateCombat } from './combat.js?v=26';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=5';
 import { createInput } from './input.js?v=6';
 import { createRenderer } from './render.js?v=25';
-import { setupGearMenus } from './gear-ui.js?v=25';
+import { setupGearMenus } from './gear-ui.js?v=26';
 import { gameDateTime, gameDay, gameMinutes } from './clock.js?v=24';
 import { maxMp } from './consumables.js?v=25';
 
-import { setupQuestMenus } from './quests.js?v=25';
+import { setupQuestMenus } from './quests.js?v=26';
 
 import { collectLoot } from './loot.js?v=25';
 

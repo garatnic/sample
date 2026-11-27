@@ -28,6 +28,8 @@ export function setupGearMenus(state, input) {
   let markShopFilter;
   let shopFilter = 'all';
   let inventoryFilter = 'all';
+  let equipmentOnly = true;
+  let markInventoryFilter;
 
   function row(list, text, actions) {
     const item = document.createElement('li');
@@ -71,11 +73,6 @@ export function setupGearMenus(state, input) {
     return [hp && `HP+${hp}`, mp && `MP+${mp}`].filter(Boolean).join(' / ');
   };
   const details = item => [item.name, itemStats(item) || effectText(item.effect)].filter(Boolean).join('　');
-
-  const markInventoryFilter = filters('#inventory-tabs', [...slots, ...goodsTabs], key => {
-    inventoryFilter = key;
-    renderInventory();
-  });
 
   function setShopMode(mode) {
     shopMode = mode;
@@ -158,6 +155,7 @@ export function setupGearMenus(state, input) {
     inventoryList.replaceChildren();
     for (const [id, quantity] of player.inventory) {
       const item = items.get(id);
+      if (Boolean(item.slot) !== equipmentOnly) continue;
       if (inventoryFilter !== 'all' && inventoryFilter !== itemGroup(item)) continue;
       if (!item.slot) {
         const index = inventoryList.children.length;
@@ -206,14 +204,24 @@ export function setupGearMenus(state, input) {
     });
   }
 
-  document.querySelector('#open-inventory').addEventListener('click', () => {
+  function openInventory(showEquipment) {
     if (document.querySelector('dialog[open]') || state.player.hp <= 0) return;
     input.clear();
     inventoryFilter = 'all';
-    itemFeedback.textContent = state.player.pendingPoison ? '次の攻撃に毒が乗ります。' : '';
+    equipmentOnly = showEquipment;
+    inventory.classList.toggle('inventory-goods', !showEquipment);
+    document.querySelector('#inventory-title').textContent = showEquipment ? '装備' : '道具';
+    markInventoryFilter = filters('#inventory-tabs', showEquipment ? slots : goodsTabs, key => {
+      inventoryFilter = key;
+      renderInventory();
+    });
+    itemFeedback.textContent = !showEquipment && state.player.pendingPoison ? '次の攻撃に毒が乗ります。' : '';
     renderInventory();
     inventory.showModal();
-  });
+  }
+
+  document.querySelector('#open-inventory').addEventListener('click', () => openInventory(true));
+  document.querySelector('#open-items').addEventListener('click', () => openInventory(false));
 
   return id => {
     input.clear();

@@ -65,7 +65,7 @@ button {
   footer { display: none; }
 }
 
-#open-inventory, #open-quests { pointer-events: auto; }
+#open-inventory, #open-items, #open-quests { pointer-events: auto; }
 button:disabled { opacity: .55; cursor: default; }
 .gear-menu { width: 28rem; max-height: calc(100dvh - 4rem); overflow: auto; }
 .gear-menu ul { display: grid; gap: .55rem; padding: 0; }
@@ -245,3 +245,7 @@ header .hud-mp { margin: 0; color: #b6dbef; font-variant-numeric: tabular-nums; 
   border-color: #83cba6;
 }
 .equipment-slot.is-equipped small { color: #d0f5df; }
+
+.equipment-menu.inventory-goods { width: min(30rem, calc(100vw - 1rem)); }
+.inventory-goods .equipment-layout { display: block; }
+.inventory-goods .equipment-stats, .inventory-goods .equipment-body { display: none; }
