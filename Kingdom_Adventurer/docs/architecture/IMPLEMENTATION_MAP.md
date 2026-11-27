@@ -1,6 +1,6 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: 2026-11-27 / ver.29 / DEV-059 / 実装コミット `6ce2ec496d99a05c1b31d7021572c53a6448e8bf`。
+基準: 2026-11-27 / ver.30 / DEV-061 / 実装コミット `88b1d3e230933dc30a276fe5e369234182d35044`。
 正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全40仕様・実装ファイル18件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
 
 ## 検証の記録
@@ -20,7 +20,7 @@
 | `CUR-SYS-001` | 起動 | index.html: module script・版付きstylesheet参照・DOM; package.json: type/private; src/main.js: モジュール初期化; style.css: 基本表示 | CUR-SYS-002, CUR-UI-001 | — | 未登録 |
 | `CUR-SYS-002` | 初期状態 | src/main.js: createPlayer(), state; src/growth.js: maxHealth(); src/world.js: start; src/settings.js: player.maxHp / currency.startingGold; src/combat.js: createEncounters(); src/trees.js: createTrees(); src/consumables.js: maxMp | CUR-WORLD-002, CUR-COMBAT-001, CUR-LIFE-001 | — | 未登録 |
 | `CUR-SYS-003` | フレーム処理 | src/main.js: frame(), update(), previous, requestAnimationFrame; src/input.js: read(); src/world.js: movePlayer(); src/combat.js: updateCombat(); src/render.js: render(); src/loot.js: collectLoot(); src/trees.js: updateTrees(); src/clock.js: gameMinutes(), gameDay() | CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-UI-001 | — | 未登録 |
-| `CUR-SYS-005` | ゲーム内時計 | src/clock.js: gameMinutes(), gameDateTime(), gameDay(); src/main.js: frame(), elapsedPlaySeconds; index.html: #game-clock; style.css: #game-clock; src/main.js: update() のギルド・果樹への日付渡し | CUR-SYS-003 | SYSTEM-002 | 未登録 |
+| `CUR-SYS-005` | ゲーム内時計 | src/clock.js: gameMinutes(), gameDateTime(), gameDay(), nextMorningMinute(); src/main.js: frame(), currentGameMinute(), clockBaseMinute, elapsedPlaySeconds; index.html: #game-clock; style.css: #game-clock; src/main.js: update() のギルド・果樹への日付渡し | CUR-SYS-003 | SYSTEM-002 | 未登録 |
 | `CUR-SYS-004` | 保存なし | src/main.js: state, createPlayer()（メモリ初期化）; index.html: 起動時モジュール読み込み | CUR-SYS-002, CUR-LIFE-001 | SYSTEM-011 | 未登録 |
 | `CUR-WORLD-001` | 固定マップ | src/settings.js: tile/mapWidth/mapHeight; src/world.js: 固定配置・terrainAt(); src/render.js: render() のタイル範囲 | CUR-WORLD-003, CUR-MOVE-002, CUR-UI-002 | — | 未登録 |
 | `CUR-WORLD-002` | 街 | src/world.js: town, start, inTown(); src/main.js: createPlayer(), frame() の所在地; src/combat.js: updateCombat() の安全判定 | CUR-COMBAT-002, CUR-UI-001, CUR-LIFE-001 | — | 未登録 |
@@ -42,7 +42,7 @@
 | `CUR-COMBAT-007` | 戦利品ドロップ・拾得 | src/loot.js: dropLoot(), collectLoot(); src/combat.js: 撃破時の呼び出し; src/main.js: state, update(); src/settings.js: enemyTypes.materials, currency.pickupRadius; src/equipment.js: 素材データ; src/render.js: render() の戦利品描画; src/shop.js: sellItem() | CUR-COMBAT-001, CUR-COMBAT-006, CUR-SYS-003, CUR-SHOP-003, CUR-UI-004 | ITEM-006 | 未登録 |
 | `CUR-GROWTH-001` | 討伐経験値・レベル | src/growth.js: growth, experienceToNextLevel(), gainExperience(), maxHealth(), attackDamage(); src/combat.js: 撃破時の付与と通知; src/main.js: createPlayer(), frame() | CUR-COMBAT-005, CUR-COMBAT-006, CUR-INN-002, CUR-LIFE-001, CUR-UI-001 | — | 未登録 |
 | `CUR-INN-001` | 宿接触 | src/world.js: innDoor, buildings; src/main.js: update() の touchingInn/innContact/料金・残高案内/returnValue/showModal; src/input.js: clear(); index.html: #inn; src/render.js: building() の入口マーカー | CUR-WORLD-004, CUR-MOVE-001, CUR-INN-002 | — | 未登録 |
-| `CUR-INN-002` | 宿泊 | src/main.js: inn closeイベント（残高確認・支払い）, frame() の停止条件; src/settings.js: inn.price; src/growth.js: maxHealth(); index.html: #inn/#inn-offer/#inn-confirm/NO; style.css: dialog/button/backdrop; src/render.js: render() の継続描画 | CUR-INN-001, CUR-SYS-003, CUR-UI-001, CUR-UI-005 | — | 未登録 |
+| `CUR-INN-002` | 宿泊 | src/main.js: inn closeイベント（残高確認・支払い・時計更新）, currentGameMinute(), frame() の停止条件; src/clock.js: nextMorningMinute(); src/settings.js: inn.price; src/growth.js: maxHealth(); index.html: #inn/#inn-offer/#inn-confirm/NO; style.css: dialog/button/backdrop; src/render.js: render() の継続描画 | CUR-INN-001, CUR-SYS-003, CUR-SYS-005, CUR-UI-001, CUR-UI-005 | SYSTEM-003 | 未登録 |
 | `CUR-LIFE-001` | 死亡・再開 | src/combat.js: updateCombat() のHP0; src/main.js: update(), createPlayer(), death cancel/closeイベント（所持金・戦利品・成長維持）, frame(); src/input.js: clear(); src/world.js: start; src/settings.js: player.maxHp; index.html: #death; style.css: dialog/button; src/growth.js: maxHealth(); src/consumables.js: maxMp; src/trees.js: harvest | CUR-SYS-002, CUR-COMBAT-004, CUR-INN-001, CUR-UI-005 | — | 未登録 |
 | `CUR-QUEST-001` | ギルドの討伐・素材収集依頼 | src/quests.js: templates, collectionPool, refreshGuild(), acceptQuest(), recordDefeat(), reportQuest(), setupQuestMenus(); src/main.js: state, update(); src/world.js: guildDoors, buildings; src/combat.js: updateCombat(); src/render.js: building(); index.html: #guild; src/settings.js: enemyTypes.materials; src/equipment.js: items; src/clock.js: gameDay(), gameMinutes(); src/input.js: clear() | CUR-WORLD-004, CUR-COMBAT-006, CUR-QUEST-002 | QUEST-002, QUEST-005 | 未登録 |
 | `CUR-QUEST-002` | クエスト一覧 | src/quests.js: setupQuestMenus(); index.html: #open-quests/#quest-journal; style.css: #open-quests, .gear-menu; src/input.js: clear(); src/equipment.js: items; src/settings.js: enemyTypes | CUR-QUEST-001, CUR-SYS-003 | — | 未登録 |
@@ -64,7 +64,7 @@
 |---|---|
 | `index.html` | CUR-SYS-001, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-004, CUR-INPUT-001, CUR-INPUT-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005 |
 | `package.json` | CUR-SYS-001 |
-| `src/clock.js` | CUR-SYS-003, CUR-SYS-005, CUR-WORLD-005, CUR-QUEST-001 |
+| `src/clock.js` | CUR-SYS-003, CUR-SYS-005, CUR-WORLD-005, CUR-QUEST-001, CUR-INN-002 |
 | `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-WORLD-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-LIFE-001, CUR-QUEST-001, CUR-ITEM-003, CUR-ITEM-001, CUR-UI-004, CUR-WORLD-006 |
 | `src/consumables.js` | CUR-SYS-002, CUR-WORLD-005, CUR-LIFE-001, CUR-ITEM-003, CUR-UI-001 |
 | `src/equipment.js` | CUR-WORLD-005, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-ITEM-001, CUR-ITEM-002 |
