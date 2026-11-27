@@ -1,4 +1,4 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=42';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=43';
 import { mobSettings } from './mob-settings.js?v=41';
 import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=32';
 import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=41';

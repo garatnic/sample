@@ -1,12 +1,12 @@
-import { discoverLocation, setupWorldMap } from './world-map.js?v=42';
+import { discoverLocation, setupWorldMap } from './world-map.js?v=43';
 import { createSkills } from './skills.js?v=32';
 import { setupSkillMenu } from './skill-menu.js?v=32';
 import { settings } from './settings.js?v=39';
 import { cave, field, guildDoors, innDoors, shopDoors, movePlayer, portalRadius, start } from './world.js?v=41';
-import { animalAtTap, createEncounters, inCombat, updateCombat } from './combat.js?v=42';
+import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=43';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=32';
 import { createInput } from './input.js?v=42';
-import { createRenderer } from './render.js?v=42';
+import { createRenderer } from './render.js?v=43';
 import { setupGearMenus } from './gear-ui.js?v=41';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=39';
@@ -17,11 +17,11 @@ import { collectLoot } from './loot.js?v=39';
 
 import { updateTrees } from './trees.js?v=37';
 import { items } from './equipment.js?v=39';
-import { areas, makeSave, restoreSave } from './save-data.js?v=42';
+import { areas, makeSave, restoreSave } from './save-data.js?v=43';
 import { setupSaveMenu } from './save-menu.js?v=31';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=41';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=42';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=43';
 import { inSettlement } from './nation-layout.js?v=35';
 import { setupNationMenu } from './nation-menu.js?v=41';
 
@@ -58,7 +58,7 @@ const input = createInput(canvas, event => {
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left + Math.round(state.player.x - canvas.clientWidth / 2);
   const y = event.clientY - rect.top + Math.round(state.player.y - canvas.clientHeight / 2);
-  huntRequested = animalAtTap(state.mobWorld, x, y) ?? huntRequested;
+  markHuntedAnimal(state.mobWorld, x, y);
 });
 const render = createRenderer(canvas);
 

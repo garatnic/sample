@@ -1,4 +1,4 @@
-import { mobsIn } from './mob-world.js?v=42';
+import { mobsIn } from './mob-world.js?v=43';
 import { animalTypes, settings } from './settings.js?v=39';
 import { buildings, cave, field, terrainAt } from './world.js?v=41';
 

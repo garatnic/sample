@@ -1,11 +1,11 @@
-import { createMobWorld } from '../game/src/mob-world.js?v=42';
+import { createMobWorld } from '../game/src/mob-world.js?v=43';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=32';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=32';
 import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=39';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=42';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=42';
+import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=43';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=43';
 import { cave, field, legacyFieldSpawns, shopDoors, start } from '../game/src/world.js?v=41';
 import { items } from '../game/src/equipment.js?v=39';
 
@@ -119,4 +119,25 @@ test('SKILL-05: passive wildlife flee when hunted and drop materials', () => {
     assert.equal(state.lootDrops[0].gold, 0);
     assert.ok(state.lootDrops[0].materials.length);
   }
+});
+
+test('SKILL-06: tapping wildlife marks it outside melee range and through cooldown', () => {
+  const player = { ...character(), x: 3000, y: 3000, cooldown: 0.5 };
+  const animal = { id: 'field-1', kind: 'deer', x: 3100, y: 3000, hp: 34, maxHp: 34,
+    flash: 0, cooldown: 0, flee: 0, hunted: false, angle: 0, turnIn: 5 };
+  const mobWorld = createMobWorld(0, { individuals: [animal] });
+  const state = { player, area: field, mobWorld, guilds: new Map(), lootDrops: [] };
+
+  markHuntedAnimal(mobWorld, animal.x, animal.y);
+  assert.equal(animal.hunted, true);
+  updateCombat(state, 0.6);
+  assert.equal(animal.hp, 34, 'target remains unharmed outside weapon range');
+  assert.equal(animal.flee, 0, 'wildlife only flees after taking damage');
+
+  Object.assign(player, { x: animal.x - 8, cooldown: 0.05 });
+  updateCombat(state, 0.01);
+  assert.equal(animal.hp, 34);
+  updateCombat(state, 0.05);
+  assert.ok(animal.hp < 34, 'closing distance triggers the attack without another tap');
+  assert.equal(animal.flee, 3);
 });

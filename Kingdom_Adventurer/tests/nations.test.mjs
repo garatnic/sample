@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { updateTrees } from '../game/src/trees.js?v=37';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=42';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=43';
 import { buyItem, startingShopGold } from '../game/src/shop.js?v=41';
-import { createEncounters } from '../game/src/combat.js?v=42';
+import { createEncounters } from '../game/src/combat.js?v=43';
 import { createSkills } from '../game/src/skills.js?v=32';
 import { refreshGuild } from '../game/src/quests.js?v=39';
 import { settings } from '../game/src/settings.js?v=39';
