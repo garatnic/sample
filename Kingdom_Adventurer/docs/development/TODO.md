@@ -130,7 +130,9 @@
 
   - 2026-11-27 ver.27 [5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba](https://github.com/garatnic/sample/commit/5e392413ad7bbe04d991fc8f8b5e7a9ac7a620ba)。配置、採取、枯渇、日次補充をNodeで確認。端末実機は未確認。
 
-- [ ] DEV-055 採取できる果樹をマップ全体で5本に減らす。関連 CUR-WORLD-005。採取・枯渇・日次補充も確認する。
+- [x] DEV-055 採取できる果樹をマップ全体で5本に減らす。関連 CUR-WORLD-005。採取・枯渇・日次補充も確認する。
+
+  - ver.28 [37d114337509006f706980e7a06fff16ee6e7b37](https://github.com/garatnic/sample/commit/37d114337509006f706980e7a06fff16ee6e7b37)。5本の配置、採取、枯渇、日次補充を確認。
 
 ## 登録漏れの確認
 現時点では分野単位の登録のみ。211個別仕様のTODO対応は未確認。着手時およびPhase移行時に照合し、必要な項目を追加する。
