@@ -1,4 +1,4 @@
-import { actionNames, modeFor, refreshNationDemand } from './nation-simulation.js?v=50';
+import { actionNames, modeFor, refreshNationDemand } from './nation-simulation.js?v=52';
 import { nationSettings as config } from './nation-settings.js?v=50';
 
 export function setupNationMenu(state, input, field) {

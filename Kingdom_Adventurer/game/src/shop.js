@@ -1,5 +1,5 @@
 import { nationLayouts } from './nation-layout.js?v=50';
-import { buildings, shopDoors } from './world.js?v=50';
+import { buildings, shopDoors } from './world.js?v=52';
 import { equippedId, items, ringSlots, slots } from './equipment.js?v=39';
 
 const equipmentTabs = [...slots];
@@ -65,8 +65,7 @@ export function settleShops(state, nation, day, finance) {
     for (const id of [...baseline.keys()].sort()) {
       const count = stock.get(id) ?? 0;
       const price = salePrice(items.get(id));
-      const availableGold = Math.max(0, state.shopGold[shopId]);
-      const quantity = Math.min(Math.max(0, baseline.get(id) - count), Math.floor(availableGold / price));
+      const quantity = Math.min(Math.max(0, baseline.get(id) - count), Math.floor(state.shopGold[shopId] / price));
       if (!quantity) continue;
       const payment = price * quantity;
       state.shopGold[shopId] -= payment;

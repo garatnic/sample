@@ -1,12 +1,12 @@
-import { createMobWorld } from '../game/src/mob-world.js?v=51';
+import { createMobWorld } from '../game/src/mob-world.js?v=52';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=49';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=49';
 import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=49';
-import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=51';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=51';
-import { cave, field, legacyFieldSpawns, shopDoors, start } from '../game/src/world.js?v=50';
+import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=52';
+import { areas, makeSave, restoreSave, UnsupportedSaveVersion } from '../game/src/save-data.js?v=52';
+import { cave, field, shopDoors, start } from '../game/src/world.js?v=52';
 import { items } from '../game/src/equipment.js?v=39';
 
 const id = 'one-handed';
@@ -73,7 +73,7 @@ test('SKILL-03: normal combat grants XP once on a valid hit and keeps kill rewar
   assert.equal(quest.progress.rat, 1);
 });
 
-test('SKILL-04: JSON and ver.1 migration preserve progress and reject invalid skills', () => {
+test('SKILL-04: current JSON preserves progress and rejects invalid or unsupported data', () => {
   const player = character();
   Object.assign(player, { level: 4, experience: 80, hp: 115, weaponId: 'iron-sword' });
   player.inventory.set('iron-sword', 1);
@@ -83,16 +83,23 @@ test('SKILL-04: JSON and ver.1 migration preserve progress and reject invalid sk
   const state = { player, area: field, gold: 42, guilds: new Map(), harvest: null,
     shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 97])) };
   const data = JSON.parse(JSON.stringify(makeSave(state, areaStates, 0)));
-  assert.deepEqual(restoreSave(data).player.skills, player.skills);
-  const old = structuredClone(data);
-  old.version = 1;
-  old.areas[0].encounters = legacyFieldSpawns.slice(0, 8).map(({ id }) => ({ id, enemy: null, remaining: 0, generation: 0 }));
-  old.player.experience = 30;
-  delete old.player.skills;
-  const restored = restoreSave(old);
-  assert.deepEqual([restored.player.level, restored.player.experience, restored.player.hp, restored.player.weaponId, restored.gold],
-    [4, 87, 115, 'iron-sword', 42]);
-  assert.deepEqual(restored.player.skills, createSkills());
+  const restored = restoreSave(data);
+  assert.equal(data.version, 13);
+  assert.deepEqual(restored.player.skills, player.skills);
+  assert.deepEqual(restored.player.inventory, player.inventory);
+  assert.deepEqual([restored.player.level, restored.player.experience, restored.player.hp,
+    restored.player.mp, restored.player.weaponId, restored.gold], [4, 80, 115, player.mp, 'iron-sword', 42]);
+  for (const version of [...Array.from({ length: 12 }, (_, index) => index + 1), 14]) {
+    assert.throws(() => restoreSave({ ...data, version }), UnsupportedSaveVersion);
+  }
+  for (const key of ['version', 'exploredChunks', 'shopStock', 'nations', 'harvest']) {
+    const damaged = structuredClone(data);
+    delete damaged[key];
+    assert.throws(() => restoreSave(damaged), /Invalid (save|nation simulation) data/);
+  }
+  const negativeBalance = structuredClone(data);
+  negativeBalance.shopGold['goods-shop'] = -1;
+  assert.throws(() => restoreSave(negativeBalance), /Invalid save data/);
   data.player.skills[0][1].value = 101;
   assert.throws(() => restoreSave(data));
 });

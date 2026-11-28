@@ -1,21 +1,22 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=51';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=52';
 import { mobSettings } from './mob-settings.js?v=51';
-import { createSkills, initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
-import { cave, facilityAt, field, guildDoors, legacyFieldSpawns, movePlayer, shopDoors } from './world.js?v=50';
-import { animalTypes, enemyTypes, mobTypes, settings } from './settings.js?v=49';
+import { initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
+import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=52';
+import { enemyTypes, mobTypes, settings } from './settings.js?v=49';
 import { canEquipItem, items } from './equipment.js?v=39';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
 import { maxMp } from './consumables.js?v=49';
 import { gameDay } from './clock.js?v=34';
 import { findSource, harvestSeconds } from './trees.js?v=50';
 
-import { createNationSimulation } from './nation-simulation.js?v=50';
-import { captureNations, restoreNations } from './nation-save.js?v=51';
+import { createNationSimulation } from './nation-simulation.js?v=52';
+import { captureNations, restoreNations } from './nation-save.js?v=52';
 
-import { acceptsItem, createShopStock, startingShopGold } from './shop.js?v=50';
+import { acceptsItem, createShopStock } from './shop.js?v=52';
 
 const format = 'kingdom-adventurer';
-const version = 12;
+const version = 13;
+export class UnsupportedSaveVersion extends Error {}
 export const areas = [field, cave];
 
 export function makeSave(state, areaStates, clock) {
@@ -74,15 +75,13 @@ function restoreSkills(data) {
   return structuredClone(skills);
 }
 
-function restorePlayer(data, area, savedVersion) {
-  const legacy = savedVersion === 1;
-  const requiredXp = legacy ? 30 + 10 * (data?.level - 1) : experienceToNextLevel(data?.level);
+function restorePlayer(data, area) {
+  const requiredXp = experienceToNextLevel(data?.level);
   check(position(data, area) && integer(data.level, 1) && integer(data.experience, 0, requiredXp - 1)
     && number(data.hp, Number.MIN_VALUE, maxHealth(data.level)) && number(data.mp, 0, maxMp)
     && number(data.pendingPoison) && number(data.cooldown));
   const { hp, mp, level, experience, weaponId, pendingPoison, cooldown } = data;
-  const displaced = savedVersion < 4 && area === field && facilityAt(data);
-  const { x, y } = displaced ? displaced.door : data;
+  const { x, y } = data;
   const bounded = { x, y };
   movePlayer(bounded, 0, 0, 0, area);
   check(bounded.x === x && bounded.y === y);
@@ -96,36 +95,25 @@ function restorePlayer(data, area, savedVersion) {
   for (const [id, count] of inventory) check(items.has(id) && integer(count, 1));
   const armor = entries(data.armor);
   const player = { id: 'player', x, y, hp, mp, level, experience, weaponId, pendingPoison, cooldown,
-    inventory, armor, skills: legacy ? createSkills() : restoreSkills(data.skills), flash: 0, moving: false };
+    inventory, armor, skills: restoreSkills(data.skills), flash: 0, moving: false };
   check(weaponId === null || canEquipItem(player, weaponId, 'weapon'));
   for (const [slot, id] of armor) check(slot !== 'weapon' && canEquipItem(player, id, slot));
-  if (legacy) {
-    // Preserve the fraction of progress towards the next level.
-    const next = experienceToNextLevel(level);
-    player.experience = Math.min(next - 1, Math.floor(experience / requiredXp * next));
-  }
   return player;
 }
 
-function restoreArea(data, area, savedVersion) {
-  const legacy = savedVersion < 8;
-  const slots = area === field && savedVersion < 10 ? legacyFieldSpawns : area.spawns;
-  const expected = legacy ? slots.filter(home => !animalTypes[home.kind]) : slots;
-  check(data?.id === area.id && Array.isArray(data.encounters) && data.encounters.length === expected.length
+function restoreArea(data, area) {
+  check(data?.id === area.id && Array.isArray(data.encounters) && data.encounters.length === area.spawns.length
     && Array.isArray(data.lootDrops));
-  const encounters = slots.map((home, index) => {
-    if (legacy && animalTypes[home.kind]) return { home, remaining: 0, generation: 0, enemy: null };
+  const encounters = area.spawns.map((home, index) => {
     const { id, remaining, generation, enemy } = data.encounters[index];
     check(id === home.id && integer(generation) && number(remaining, 0, settings.enemy.spawnDelay));
     const maxHp = mobTypes[home.kind].maxHp;
     check(enemy === null || (generation > 0 && position(enemy, area)
       && number(enemy.hp, Number.MIN_VALUE, maxHp) && number(enemy.cooldown)
-      && (legacy || number(enemy.flee, 0, 3))
-      && (savedVersion < 9 || typeof enemy.hunted === 'boolean')));
+      && number(enemy.flee, 0, 3) && typeof enemy.hunted === 'boolean'));
     return { home, remaining, generation, enemy: enemy && {
       id: `enemy-${home.id}-${generation}`, kind: home.kind, x: enemy.x, y: enemy.y,
-      hp: enemy.hp, maxHp, cooldown: enemy.cooldown, flash: 0, flee: legacy ? 0 : enemy.flee,
-      hunted: savedVersion >= 9 ? enemy.hunted : Boolean(animalTypes[home.kind] && enemy.hp < maxHp),
+      hp: enemy.hp, maxHp, cooldown: enemy.cooldown, flash: 0, flee: enemy.flee, hunted: enemy.hunted,
     } };
   });
   const lootDrops = data.lootDrops.map(drop => {
@@ -139,17 +127,7 @@ function restoreArea(data, area, savedVersion) {
   return { encounters, lootDrops };
 }
 
-function restoreMobs(data, fieldState, clock, savedVersion) {
-  if (savedVersion < 10) {
-    const individuals = fieldState.encounters.flatMap(({ enemy }) => enemy ? [enemy] : []);
-    for (const [index, mob] of individuals.entries()) {
-      Object.assign(mob, { id: `field-${index + 1}`, angle: 0, turnIn: 0 });
-      mob.x = Math.max(10, Math.min(field.width - 10, mob.x));
-      mob.y = Math.max(10, Math.min(field.height - 10, mob.y));
-    }
-    fieldState.encounters = [];
-    return createMobWorld(clock, { individuals, nextId: individuals.length + 1 });
-  }
+function restoreMobs(data, clock) {
   const chunkSpan = mobSettings.chunkTiles * settings.tile;
   const chunkCount = Math.ceil(field.width / chunkSpan) * Math.ceil(field.height / chunkSpan);
   const maximum = chunkCount * (Math.ceil(mobSettings.animal.local * mobSettings.animal.worldMaximumFactor)
@@ -198,47 +176,45 @@ function restoreGuilds(data, day) {
 }
 
 export function restoreSave(data) {
-  check(data?.format === format && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, version].includes(data.version) && number(data.clock, 0, 1_000_000_000_000)
+  check(data?.format === format && integer(data.version, 1));
+  if (data.version !== version) throw new UnsupportedSaveVersion();
+  check(number(data.clock, 0, 1_000_000_000_000)
     && integer(data.gold) && record(data.shopGold));
   const area = areas.find(entry => entry.id === data.area);
   check(area && Array.isArray(data.areas) && data.areas.length === areas.length);
-  const player = restorePlayer(data.player, area, data.version);
-  const areaStates = new Map(areas.map((entry, index) => [entry, restoreArea(data.areas[index], entry, data.version)]));
+  const player = restorePlayer(data.player, area);
+  const areaStates = new Map(areas.map((entry, index) => [entry, restoreArea(data.areas[index], entry)]));
   const day = gameDay(data.clock);
   const guilds = restoreGuilds(data.guilds, day);
   const shopGold = Object.fromEntries(Object.keys(shopDoors).map(id => {
-    if (data.version < 4 && !Object.hasOwn(data.shopGold, id)
-      && id !== 'goods-shop' && id !== 'weapon-shop') return [id, startingShopGold];
-    check(Number.isSafeInteger(data.shopGold[id]));
+    check(integer(data.shopGold[id]));
     return [id, data.shopGold[id]];
   }));
   const shopStock = createShopStock();
-  if (data.version >= 10 && Object.hasOwn(data, 'shopStock')) {
-    check(record(data.shopStock) && Object.keys(data.shopStock).length === Object.keys(shopStock).length);
-    for (const shopId of Object.keys(shopStock)) {
-      const entries = data.shopStock[shopId];
-      check(Array.isArray(entries) && entries.length <= items.size);
-      const stock = new Map();
-      for (const entry of entries) {
-        check(Array.isArray(entry) && entry.length === 2);
-        const [id, count] = entry;
-        check(acceptsItem(shopId, items.get(id)) && integer(count, 1) && !stock.has(id));
-        stock.set(id, count);
-      }
-      shopStock[shopId] = stock;
+  check(record(data.shopStock) && Object.keys(data.shopStock).length === Object.keys(shopStock).length);
+  for (const shopId of Object.keys(shopStock)) {
+    const entries = data.shopStock[shopId];
+    check(Array.isArray(entries) && entries.length <= items.size);
+    const stock = new Map();
+    for (const entry of entries) {
+      check(Array.isArray(entry) && entry.length === 2);
+      const [id, count] = entry;
+      check(acceptsItem(shopId, items.get(id)) && integer(count, 1) && !stock.has(id));
+      stock.set(id, count);
     }
+    shopStock[shopId] = stock;
   }
-  const nations = data.version >= 3 ? restoreNations(data.nations, data.clock, data.version) : createNationSimulation(data.clock);
+  const nations = restoreNations(data.nations, data.clock);
   let harvest = null;
-  if (data.version >= 5 && data.harvest !== null) {
+  if (data.harvest !== null) {
     const source = findSource(nations, entry => entry.id === data.harvest?.id)?.source;
     check(area === field && source && source.readyAt <= data.clock
       && number(data.harvest.elapsed, 0, harvestSeconds[source.kind]));
     harvest = { source, elapsed: data.harvest.elapsed };
   }
-  const mobWorld = restoreMobs(data.mobs, areaStates.get(field), data.clock, data.version);
+  const mobWorld = restoreMobs(data.mobs, data.clock);
   indexSettlement(mobWorld, nations);
-  const explored = data.version >= 10 ? data.exploredChunks ?? [] : [];
+  const explored = data.exploredChunks;
   check(Array.isArray(explored) && explored.length <= mobWorld.chunks.length
     && explored.every(id => integer(id, 0, mobWorld.chunks.length - 1)));
   const exploredChunks = new Set(explored);

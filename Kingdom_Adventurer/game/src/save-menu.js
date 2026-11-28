@@ -1,3 +1,4 @@
+import { UnsupportedSaveVersion } from './save-data.js?v=52';
 import { readSave, writeSave, deleteSave } from './save-store.js?v=31';
 
 export function setupSaveMenu({ input, canSave, capture, decode, restore, notify }) {
@@ -20,16 +21,26 @@ export function setupSaveMenu({ input, canSave, capture, decode, restore, notify
     feedback.textContent = text;
   }
 
-  async function run(action, failure) {
+  async function run(action, failure, onFailure = message) {
     if (busy) return;
     setBusy(true);
     try {
       await action();
-    } catch {
-      message(failure);
-      if (!menu.open) notify(failure);
+    } catch (error) {
+      if (error instanceof UnsupportedSaveVersion) onFailure('セーブ形式がこの版に対応していません。');
+      else if (error instanceof SyntaxError) onFailure('セーブデータが破損しているか不正です。');
+      else onFailure(failure);
     } finally {
       setBusy(false);
+    }
+  }
+
+  function decodeData(data) {
+    try {
+      return decode(data);
+    } catch (error) {
+      if (error instanceof UnsupportedSaveVersion) throw error;
+      throw new SyntaxError('Invalid save data', { cause: error });
     }
   }
 
@@ -57,11 +68,12 @@ export function setupSaveMenu({ input, canSave, capture, decode, restore, notify
   document.querySelector('#load-save').addEventListener('click', () => run(async () => {
     const data = await readSave();
     if (data === undefined) return message('セーブデータがありません。');
+    const restored = decodeData(data);
     if (!window.confirm('最後のセーブを読み込みますか？ 保存していない進行は失われます。')) return;
-    restore(decode(data));
+    restore(restored);
     menu.close();
     notify('セーブデータを読み込みました。');
-  }, 'セーブデータを読み込めませんでした。'));
+  }, '保存枠にアクセスできませんでした。'));
 
   document.querySelector('#export-save').addEventListener('click', () => run(async () => {
     const data = await readSave();
@@ -83,13 +95,13 @@ export function setupSaveMenu({ input, canSave, capture, decode, restore, notify
     if (!selected) return;
     void run(async () => {
       const data = JSON.parse(await selected.text());
-      const restored = decode(data);
+      const restored = decodeData(data);
       if (!window.confirm('このファイルを読み込みますか？ 現在の進行と既存のセーブ枠が置き換わります。')) return;
       await writeSave(data);
       restore(restored);
       menu.close();
       notify('セーブデータを取り込みました。');
-    }, '取り込めませんでした。対応するセーブJSONか、ブラウザの保存設定を確認してください。');
+    }, 'ファイルを読めないか、保存枠に書き込めませんでした。');
   });
 
   document.querySelector('#delete-save').addEventListener('click', () => run(async () => {
@@ -107,7 +119,11 @@ export function setupSaveMenu({ input, canSave, capture, decode, restore, notify
     autoSave: () => saveGame({ automatic: true }),
     loadOnStart: () => run(async () => {
       const data = await readSave();
-      if (data !== undefined) restore(decode(data));
-    }, 'セーブデータを読み込めませんでした。「セーブ」から確認できます。'),
+      if (data !== undefined) restore(decodeData(data));
+    }, '保存枠にアクセスできませんでした。', reason => {
+      const text = `${reason} 新規ゲームを開始しました。`;
+      message(text);
+      notify(text);
+    }),
   };
 }

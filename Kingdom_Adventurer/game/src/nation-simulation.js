@@ -124,7 +124,7 @@ function completeTask(nation, city, resident, minute) {
       break;
     case 'gatherFood':
     case 'gatherWood': {
-      const quantity = resident.gatherGeneration == null || resident.gatherGeneration === target.readyAt
+      const quantity = resident.gatherGeneration === target.readyAt
         ? harvestSource(target, minute, 1) : 0;
       const collected = (resident.carrying?.quantity ?? 0) + quantity;
       if (!collected) {
@@ -132,7 +132,7 @@ function completeTask(nation, city, resident, minute) {
         break;
       }
       resident.carrying = { kind: target.kind, quantity: collected };
-      if (quantity && collected < (resident.gatherLimit ?? config.carry) && sourceQuantity(target, minute) > 0) {
+      if (quantity && collected < resident.gatherLimit && sourceQuantity(target, minute) > 0) {
         resident.task.end = nextPick(minute, target.kind);
         return;
       }
@@ -235,9 +235,8 @@ export function refreshNationDemand(nation, minute, targets) {
       }
       const source = targetFor(city, person);
       const carried = person.carrying?.quantity ?? 0;
-      const available = person.gatherGeneration == null ? config.carry
-        : person.gatherGeneration === source.readyAt
-          ? Math.min(person.gatherLimit, carried + sourceQuantity(source, minute)) : carried;
+      const available = person.gatherGeneration === source.readyAt
+        ? Math.min(person.gatherLimit, carried + sourceQuantity(source, minute)) : carried;
       reserved[source.kind] += available;
     }
   }
