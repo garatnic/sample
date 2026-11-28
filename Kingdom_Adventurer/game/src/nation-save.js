@@ -176,19 +176,19 @@ export function restoreNations(data, minute) {
     });
     requireValid(tradeRoom(nation) >= 0);
     requireValid(!city.project || city.residents.some(p => p.id === city.project.workerId && p.targetId === city.project.site.id));
-    const nextEvent = () => Math.min(firstMinuteOfDay(gameDay(minute) + 1),
+    const nextEvent = Math.min(firstMinuteOfDay(gameDay(minute) + 1),
       ...city.residents.filter(p => p.task).map(p => p.task.end),
       ...city.sources.filter(s => s.readyAt > minute).map(s => s.readyAt));
     const initial = saved.nextMinute === minute && !city.project && city.residents.every(p => p.action === 'idle');
     const pendingDecision = saved.nextMinute === minute
       && (initial || city.residents.some(p => p.action === 'idle'));
-    requireValid(saved.nextMinute === nextEvent() || pendingDecision);
+    requireValid(saved.nextMinute === nextEvent || pendingDecision);
 
     assignRoles(city);
     const demand = refreshNationDemand(nation, minute);
     requireValid(nation.stock.wood + nation.stock.food + demand.reserved.wood + demand.reserved.food <= limit);
     const hasIdle = city.residents.some(person => person.action === 'idle');
-    nation.nextMinute = hasIdle && pendingDecision ? minute : nextEvent();
+    nation.nextMinute = hasIdle && pendingDecision ? minute : nextEvent;
   }
   return simulation;
 }
