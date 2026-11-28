@@ -2,15 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createSkills } from '../game/src/skills.js?v=49';
 import { nextMorningMinute } from '../game/src/clock.js?v=34';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=53';
-import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=53';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=55';
+import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=55';
 import { mobSettings } from '../game/src/mob-settings.js?v=51';
 import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=53';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=53';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=55';
 import { mobTypes } from '../game/src/settings.js?v=49';
 import { collectLoot, dropLoot } from '../game/src/loot.js?v=53';
 import { items } from '../game/src/equipment.js?v=53';
-import { cave, field, inTown, shopDoors, start, terrainAt } from '../game/src/world.js?v=53';
+import { cave, field, inTown, shopDoors, start, terrainAt } from '../game/src/world.js?v=55';
 
 function rng(seed = 28) {
   return () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);

@@ -1,7 +1,7 @@
 import { playerAttack } from './weapon-skill.js?v=49';
 import { maxHealth } from './growth.js?v=49';
 import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=53';
-import { acceptsItem, buyItem, inventoryTabs, itemGroup, sellableQuantity, sellItem, shops, shopBalance, shopCanAcceptStock, shopInventory, shopPrice, tradeNation } from './shop.js?v=53';
+import { acceptsItem, buyItem, inventoryTabs, itemGroup, sellableQuantity, sellItem, shops, shopBalance, shopCanAcceptStock, shopInventory, shopPrice, tradeNation } from './shop.js?v=55';
 import { canUseItem, maxMp, useItem } from './consumables.js?v=53';
 
 export function setupGearMenus(state, input) {

@@ -1,7 +1,7 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=53';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=55';
 import { mobSettings } from './mob-settings.js?v=51';
 import { initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
-import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=53';
+import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=55';
 import { enemyTypes, mobTypes, settings } from './settings.js?v=49';
 import { canEquipItem, items } from './equipment.js?v=53';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
@@ -12,7 +12,7 @@ import { findSource, harvestSeconds } from './trees.js?v=53';
 import { createNationSimulation } from './nation-simulation.js?v=53';
 import { captureNations, restoreNations } from './nation-save.js?v=53';
 
-import { acceptsItem, createShopStock } from './shop.js?v=53';
+import { acceptsItem, createShopStock } from './shop.js?v=55';
 
 const format = 'kingdom-adventurer';
 const version = 14;

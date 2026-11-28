@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { updateTrees } from '../game/src/trees.js?v=53';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=53';
-import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=53';
-import { createEncounters } from '../game/src/combat.js?v=53';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=55';
+import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=55';
+import { createEncounters } from '../game/src/combat.js?v=55';
 import { createSkills } from '../game/src/skills.js?v=49';
 import { refreshGuild } from '../game/src/quests.js?v=53';
 import { settings } from '../game/src/settings.js?v=49';
 import { nationSettings as config } from '../game/src/nation-settings.js?v=53';
 import { nationLayouts } from '../game/src/nation-layout.js?v=53';
-import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=53';
+import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=55';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
 import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=53';
 import { captureNations, restoreNations } from '../game/src/nation-save.js?v=53';
@@ -68,6 +68,28 @@ test('NATION-01: expansion, accessible national centers, initial placements and 
   follow(south.x, south.y);
   follow(south.center.door.x, south.center.door.y);
   assert.equal(modeFor(south, player), 'near');
+  // The junction has three connected branches on the actual rendered tile grid.
+  const tile = settings.tile;
+  const tileCenter = coordinate => Math.floor(coordinate / tile) * tile + tile / 2;
+  const junctionY = 3440;
+  const westRoadX = tileCenter(west.x);
+  const eastRoadX = tileCenter(east.x);
+  for (let y = tileCenter(west.y); y <= tileCenter(south.y); y += tile) {
+    assert.equal(terrainAt(westRoadX, y), 'road', `western road at ${y}`);
+  }
+  for (let x = westRoadX; x <= eastRoadX; x += tile) {
+    assert.equal(terrainAt(x, junctionY), 'road', `eastbound road at ${x}`);
+  }
+  for (let y = junctionY; y <= tileCenter(east.y); y += tile) {
+    assert.equal(terrainAt(eastRoadX, y), 'road', `eastern approach at ${y}`);
+  }
+  follow(westRoadX, south.y);
+  follow(westRoadX, junctionY);
+  follow(eastRoadX, junctionY);
+  follow(eastRoadX, east.y);
+  follow(eastRoadX, junctionY);
+  follow(westRoadX, junctionY);
+  follow(westRoadX, west.y);
 });
 
 test('NATION-02: long-run quotas, capacity, parcels and exact event batching', () => {

@@ -18,7 +18,28 @@ export function inTown({ x, y }) {
   return nationLayouts.some(city => inSettlement(city, { x, y }));
 }
 
+const [elmCity, violetCity, cedarCity] = nationLayouts;
+const junctionY = 3440;
+
+function roadSection(x1, y1, x2, y2) {
+  // Tile boundaries keep the route continuous in both terrain sampling and the map.
+  const tile = settings.tile;
+  const firstEdge = coordinate => Math.floor(coordinate / tile) * tile;
+  return {
+    left: firstEdge(Math.min(x1, x2)), right: firstEdge(Math.max(x1, x2)) + tile,
+    top: firstEdge(Math.min(y1, y2)), bottom: firstEdge(Math.max(y1, y2)) + tile,
+  };
+}
+
+const nationalRoads = [
+  roadSection(elmCity.x, elmCity.y, cedarCity.x, cedarCity.y),
+  roadSection(cedarCity.x, junctionY, violetCity.x, junctionY),
+  roadSection(violetCity.x, junctionY, violetCity.x, violetCity.y),
+];
+
 export function terrainAt(x, y) {
+  if (nationalRoads.some(road => x >= road.left && x < road.right
+    && y >= road.top && y < road.bottom)) return 'road';
   const civicTerrain = nationTerrainAt(x, y);
   if (civicTerrain) return civicTerrain;
   const easternCity = nationLayouts[1];

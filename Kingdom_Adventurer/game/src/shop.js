@@ -1,5 +1,5 @@
 import { nationLayouts } from './nation-layout.js?v=53';
-import { buildings, shopDoors } from './world.js?v=53';
+import { buildings, shopDoors } from './world.js?v=55';
 import { equippedId, items, ringSlots, slots } from './equipment.js?v=53';
 
 import { tradePrice } from './trade-settings.js?v=53';

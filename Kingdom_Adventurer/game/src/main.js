@@ -1,13 +1,13 @@
-import { discoverLocation, setupWorldMap } from './world-map.js?v=53';
+import { discoverLocation, setupWorldMap } from './world-map.js?v=55';
 import { createSkills } from './skills.js?v=49';
 import { setupSkillMenu } from './skill-menu.js?v=49';
 import { settings } from './settings.js?v=49';
-import { cave, field, guildDoors, innDoors, shopDoors, tradeDoors, movePlayer, portalRadius, start } from './world.js?v=53';
-import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=53';
+import { cave, field, guildDoors, innDoors, shopDoors, tradeDoors, movePlayer, portalRadius, start } from './world.js?v=55';
+import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=55';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
 import { createInput } from './input.js?v=42';
-import { createRenderer } from './render.js?v=53.1';
-import { setupGearMenus } from './gear-ui.js?v=54';
+import { createRenderer } from './render.js?v=55';
+import { setupGearMenus } from './gear-ui.js?v=55';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=53';
 
@@ -17,15 +17,15 @@ import { collectLoot } from './loot.js?v=53';
 
 import { updateTrees } from './trees.js?v=53';
 import { items } from './equipment.js?v=53';
-import { areas, makeSave, restoreSave } from './save-data.js?v=53';
-import { setupSaveMenu } from './save-menu.js?v=53';
+import { areas, makeSave, restoreSave } from './save-data.js?v=55';
+import { setupSaveMenu } from './save-menu.js?v=55';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=53';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=53';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=55';
 import { inSettlement } from './nation-layout.js?v=53';
 import { setupNationMenu } from './nation-menu.js?v=53';
 
-import { createShopStock, settleShops, startingShopGold } from './shop.js?v=53';
+import { createShopStock, settleShops, startingShopGold } from './shop.js?v=55';
 
 let huntRequested = false;
 window.addEventListener('keydown', event => {
