@@ -29,4 +29,4 @@ Phase 2の世界シミュレーションは、2国家の採集・運搬・日次
 現在のPhase：2（反復開発中）。詳細な開発順序は固定しない。
 
 ### Phase 2 追加工程：国際交易・自由民
-DEV-090 三国交易・生産・国庫 → DEV-091 行商人。独立して DEV-092 冒険者 → DEV-093 成長。両系統を統合する DEV-094 護衛、DEV-095 住民転向。詳細は[横断仕様](../specifications/TRADE_FREE_PEOPLE_SPECIFICATION.md)。
+DEV-090 三国交易・生産・国庫（完了。検証状況はTODOを参照） → DEV-091 行商人。独立して DEV-092 冒険者 → DEV-093 成長。両系統を統合する DEV-094 護衛、DEV-095 住民転向。詳細は[横断仕様](../specifications/TRADE_FREE_PEOPLE_SPECIFICATION.md)。

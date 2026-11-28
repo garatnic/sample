@@ -183,4 +183,4 @@
 
 ## 現行の暫定商流
 
-2資源は生活備蓄を超えた分だけ0時に仮想市場で換金する。商店の現金と国庫の間では実際に代金を移し、商品の国家側の流通は仮想扱い。詳細は [CUR-SHOP-004](current/CURRENT_SPECIFICATIONS.md#cur-shop-004-国庫と商店の日次精算) と [CUR-NATION-005](current/CURRENT_SPECIFICATIONS.md#cur-nation-005-国庫余剰換金) を参照。
+生活・建築備蓄を超えた木材とリンゴを住民が加工し、特産品が交易所に入る。0時に輸入品の仮想市場売却と基礎収入を国庫に反映する。商店の現金と国庫の間では実際に代金を移し、商品の国家側の流通は仮想扱い。詳細は [CUR-SHOP-004](current/CURRENT_SPECIFICATIONS.md#cur-shop-004-国庫と商店の日次精算) と [CUR-NATION-005](current/CURRENT_SPECIFICATIONS.md#cur-nation-005-国庫日次精算) を参照。

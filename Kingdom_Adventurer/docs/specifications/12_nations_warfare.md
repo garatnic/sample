@@ -473,4 +473,4 @@
 
 ## 現行の暫定国庫
 
-各国10,000Gから開始し、余剰食料・木材の売却と所属商店との商品精算の収支を記録する。詳細は [CUR-NATION-005](current/CURRENT_SPECIFICATIONS.md#cur-nation-005-国庫余剰換金) を参照。
+各国10,000Gから開始し、基礎収入・交易・輸入品売却・所属商店との商品精算の収支を記録する。詳細は [CUR-NATION-005](current/CURRENT_SPECIFICATIONS.md#cur-nation-005-国庫日次精算) を参照。

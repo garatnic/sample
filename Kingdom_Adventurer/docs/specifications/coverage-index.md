@@ -419,3 +419,5 @@
 
 ## 追加横断仕様の出典
 - [2026-11-28 交易・自由民](../history/2026-11-28-trade-free-people.md) → [TRADE-001〜006](TRADE_FREE_PEOPLE_SPECIFICATION.md)。既存版の集計対象外。
+
+- 工程1（DEV-090）の実装先は CUR-NATION-001/005/006、CUR-SHOP-005、CUR-SYS-004。TRADE-004〜006は後続工程。
