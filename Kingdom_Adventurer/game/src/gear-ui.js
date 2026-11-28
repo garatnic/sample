@@ -1,14 +1,14 @@
 import { playerAttack } from './weapon-skill.js?v=49';
 import { maxHealth } from './growth.js?v=49';
-import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=39';
-import { acceptsItem, buyItem, goodsTabs, itemGroup, salePrice, sellableQuantity, sellItem, shops } from './shop.js?v=52';
-import { canUseItem, maxMp, useItem } from './consumables.js?v=49';
+import { attackInterval, canEquipItem, defenseRating, equippedId, equipItem, items, ringSlots, slots, unequipSlot } from './equipment.js?v=53';
+import { acceptsItem, buyItem, inventoryTabs, itemGroup, sellableQuantity, sellItem, shops, shopBalance, shopCanAcceptStock, shopInventory, shopPrice, tradeNation } from './shop.js?v=53';
+import { canUseItem, maxMp, useItem } from './consumables.js?v=53';
 
 export function setupGearMenus(state, input) {
   const shop = document.querySelector('#equipment-shop');
   const inventory = document.querySelector('#inventory');
   const shopTitle = document.querySelector('#shop-title');
-  const shopBalance = document.querySelector('#shop-balance');
+  const balanceLabel = document.querySelector('#shop-balance');
   const shopEmpty = document.querySelector('#shop-empty');
   const buyButton = document.querySelector('#shop-buy');
   const sellButton = document.querySelector('#shop-sell');
@@ -90,14 +90,15 @@ export function setupGearMenus(state, input) {
     markShopFilter(shopFilter);
     shopList.replaceChildren();
     shopGold.textContent = `所持金 ${state.gold}G`;
-    shopBalance.textContent = `店の所持金 ${state.shopGold[shopId]}G`;
+    const balance = shopBalance(state, shopId);
+    balanceLabel.textContent = `${tradeNation(state, shopId) ? '国庫' : '店の所持金'} ${balance}G`;
     const buying = shopMode === 'buy';
     let focusTarget = buying ? buyButton : sellButton;
     for (const [id, item] of items) {
       if (!acceptsItem(shopId, item) || (shopFilter !== 'all' && shopFilter !== itemGroup(item))) continue;
-      const quantity = (buying ? state.shopStock[shopId] : state.player.inventory).get(id) ?? 0;
+      const quantity = (buying ? shopInventory(state, shopId) : state.player.inventory).get(id) ?? 0;
       if (!quantity) continue;
-      const price = buying ? item.price : salePrice(item);
+      const price = shopPrice(shopId, id, buying);
       const equipped = !buying && sellableQuantity(state.player, id) <= 0;
       const entry = document.createElement('li');
       const disclosure = document.createElement('details');
@@ -115,12 +116,13 @@ export function setupGearMenus(state, input) {
       button.type = 'button';
       button.textContent = `${price}G`;
       button.setAttribute('aria-label', `${item.name}を${price}Gで${buying ? '買う' : '売る'}`);
-      const insufficient = (buying ? state.gold : state.shopGold[shopId]) < price;
-      button.disabled = equipped || insufficient;
+      const insufficient = (buying ? state.gold : balance) < price;
+      const full = !buying && !shopCanAcceptStock(state, shopId);
+      button.disabled = equipped || insufficient || full;
       disclosure.append(summary, facts);
       if (button.disabled) {
         const reason = document.createElement('small');
-        reason.textContent = equipped ? '装備中のため売却できません' : '所持金が足りません';
+        reason.textContent = equipped ? '装備中のため売却できません' : insufficient ? '所持金が足りません' : '交易所在庫が満杯です';
         disclosure.append(reason);
       }
       button.addEventListener('click', () => {
@@ -212,7 +214,7 @@ export function setupGearMenus(state, input) {
     equipmentOnly = showEquipment;
     inventory.classList.toggle('inventory-goods', !showEquipment);
     document.querySelector('#inventory-title').textContent = showEquipment ? '装備' : '道具';
-    markInventoryFilter = filters('#inventory-tabs', showEquipment ? slots : goodsTabs, key => {
+    markInventoryFilter = filters('#inventory-tabs', showEquipment ? slots : inventoryTabs, key => {
       inventoryFilter = key;
       renderInventory();
     });

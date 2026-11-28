@@ -2,15 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createSkills } from '../game/src/skills.js?v=49';
 import { nextMorningMinute } from '../game/src/clock.js?v=34';
-import { createEncounters, updateCombat } from '../game/src/combat.js?v=52';
-import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=52';
+import { createEncounters, updateCombat } from '../game/src/combat.js?v=53';
+import { chunkAt, advanceMobWorld, createMobWorld, mobGroup, removeMob } from '../game/src/mob-world.js?v=53';
 import { mobSettings } from '../game/src/mob-settings.js?v=51';
-import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=52';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=52';
+import { advanceNations, createNationSimulation, residentPosition } from '../game/src/nation-simulation.js?v=53';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=53';
 import { mobTypes } from '../game/src/settings.js?v=49';
-import { collectLoot, dropLoot } from '../game/src/loot.js?v=49';
-import { items } from '../game/src/equipment.js?v=39';
-import { cave, field, inTown, shopDoors, start, terrainAt } from '../game/src/world.js?v=52';
+import { collectLoot, dropLoot } from '../game/src/loot.js?v=53';
+import { items } from '../game/src/equipment.js?v=53';
+import { cave, field, inTown, shopDoors, start, terrainAt } from '../game/src/world.js?v=53';
 
 function rng(seed = 28) {
   return () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
@@ -34,13 +34,13 @@ test('MOB-01: chunk borders, initial density, terrain and occupied spawn tiles',
   const world = createMobWorld(0);
   advanceMobWorld(world, nations, 0, start, rng());
   assert.equal(world.chunks.length, 256);
-  assert.equal(world.chunks.filter(chunk => chunk.protected).length, 18);
+  assert.equal(world.chunks.filter(chunk => chunk.protected).length, 27);
   assert.equal(world.chunks.reduce((sum, chunk) => sum + chunk.tiles.length, 0), 65536);
   assert.notEqual(chunkAt(world, 511, 1).id, chunkAt(world, 512, 1).id);
   assert.equal(chunkAt(world, 8192, 0), undefined);
-  assert.equal(world.counts.animal, 100);
-  assert.equal(world.counts.enemy - world.protectedCounts.enemy, 200);
-  assert.ok([14, 15].includes(world.protectedCounts.animal));
+  assert.equal(world.counts.animal, 104);
+  assert.equal(world.counts.enemy - world.protectedCounts.enemy, 192);
+  assert.ok([21, 22].includes(world.protectedCounts.animal));
   assert.ok([0, 1].includes(world.protectedCounts.enemy));
   assert.equal(new Set([...world.mobs.values()].map(mob => `${mob.x}:${mob.y}`)).size, world.mobs.size);
   for (const mob of world.mobs.values()) {
@@ -164,9 +164,9 @@ test('MOB-06: fractional regional density, bounded respawns and current save rou
     advanceMobWorld(world, nations, 0, start, random);
     protectedEnemies += world.protectedCounts.enemy;
     const normalAnimals = world.counts.animal - world.protectedCounts.animal;
-    assert.ok([85, 86].includes(normalAnimals));
-    assert.equal(world.counts.enemy - world.protectedCounts.enemy, 200);
-    assert.ok([14, 15].includes(world.protectedCounts.animal));
+    assert.ok([82, 83].includes(normalAnimals));
+    assert.equal(world.counts.enemy - world.protectedCounts.enemy, 192);
+    assert.ok([21, 22].includes(world.protectedCounts.animal));
     assert.ok(world.protectedCounts.enemy <= 1);
 
     const state = gameState(nations, world);
@@ -189,5 +189,5 @@ test('MOB-06: fractional regional density, bounded respawns and current save rou
     assert.equal(replacements.filter(mob => mobGroup(mob.kind) === 'animal').length, 2);
     assert.equal(replacements.filter(mob => mobGroup(mob.kind) === 'enemy').length, 5);
   }
-  assert.ok(protectedEnemies > 0 && protectedEnemies < 6);
+  assert.ok(protectedEnemies > 0 && protectedEnemies <= 6);
 });

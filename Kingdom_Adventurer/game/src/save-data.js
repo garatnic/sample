@@ -1,21 +1,21 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=52';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=53';
 import { mobSettings } from './mob-settings.js?v=51';
 import { initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
-import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=52';
+import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=53';
 import { enemyTypes, mobTypes, settings } from './settings.js?v=49';
-import { canEquipItem, items } from './equipment.js?v=39';
+import { canEquipItem, items } from './equipment.js?v=53';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
-import { maxMp } from './consumables.js?v=49';
+import { maxMp } from './consumables.js?v=53';
 import { gameDay } from './clock.js?v=34';
-import { findSource, harvestSeconds } from './trees.js?v=50';
+import { findSource, harvestSeconds } from './trees.js?v=53';
 
-import { createNationSimulation } from './nation-simulation.js?v=52';
-import { captureNations, restoreNations } from './nation-save.js?v=52';
+import { createNationSimulation } from './nation-simulation.js?v=53';
+import { captureNations, restoreNations } from './nation-save.js?v=53';
 
-import { acceptsItem, createShopStock } from './shop.js?v=52';
+import { acceptsItem, createShopStock } from './shop.js?v=53';
 
 const format = 'kingdom-adventurer';
-const version = 13;
+const version = 14;
 export class UnsupportedSaveVersion extends Error {}
 export const areas = [field, cave];
 

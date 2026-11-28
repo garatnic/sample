@@ -1,5 +1,8 @@
-import { nationLayouts } from './nation-layout.js?v=50';
-import { nationSettings as config } from './nation-settings.js?v=50';
+import { nationLayouts } from './nation-layout.js?v=53';
+import { nationSettings as config } from './nation-settings.js?v=53';
+
+import { tradeSettings } from './trade-settings.js?v=53';
+import { settleTrade } from './trade-stock.js?v=53';
 
 export const resources = ['food', 'wood'];
 
@@ -53,7 +56,7 @@ function targetsFor(nation) {
   const livingTotal = ideal.food + ideal.wood - buildingWood;
   const food = livingTotal > livingRoom ? Math.floor(livingRoom * ideal.food / livingTotal) : ideal.food;
   const effective = { food, wood: Math.min(ideal.wood, limit - food) };
-  const targets = { daily, minimum, ideal, effective, limit, requiredCapacity, buildingWood, plans };
+  const targets = { population, daily, minimum, ideal, effective, limit, requiredCapacity, buildingWood, plans };
   reserveTargets.set(nation, { cities, targets });
   return targets;
 }
@@ -87,15 +90,12 @@ export function storageRoom(demand, kind) {
 
 export function settleNationDay(nation, day, settleShops) {
   if (day <= nation.lastDay) return;
-  const { daily, ideal } = targetsFor(nation);
-  const finance = { day, food: 0, wood: 0, supplied: 0, bought: 0 };
+  const { daily, population } = targetsFor(nation);
+  const finance = { day, base: population * tradeSettings.dailyGoldPerResident,
+    imports: 0, tradeSales: 0, tradePurchases: 0, supplied: 0, bought: 0 };
   for (const kind of resources) nation.stock[kind] = Math.max(0, nation.stock[kind] - daily[kind]);
-  for (const kind of resources) {
-    const quantity = Math.max(0, nation.stock[kind] - ideal[kind]);
-    nation.stock[kind] -= quantity;
-    finance[kind] = quantity * config.surplusPrice[kind];
-    nation.treasury += finance[kind];
-  }
+  nation.treasury += finance.base;
+  settleTrade(nation, finance);
   settleShops?.(nation, day, finance);
   nation.finance = finance;
   nation.lastDay = day;

@@ -1,13 +1,13 @@
-import { createMobWorld } from '../game/src/mob-world.js?v=52';
+import { createMobWorld } from '../game/src/mob-world.js?v=53';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src/skills.js?v=49';
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=49';
 import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=49';
-import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=52';
-import { areas, makeSave, restoreSave, UnsupportedSaveVersion } from '../game/src/save-data.js?v=52';
-import { cave, field, shopDoors, start } from '../game/src/world.js?v=52';
-import { items } from '../game/src/equipment.js?v=39';
+import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=53';
+import { areas, makeSave, restoreSave, UnsupportedSaveVersion } from '../game/src/save-data.js?v=53';
+import { cave, field, shopDoors, start } from '../game/src/world.js?v=53';
+import { items } from '../game/src/equipment.js?v=53';
 
 const id = 'one-handed';
 const twoHanded = 'two-handed';
@@ -84,12 +84,12 @@ test('SKILL-04: current JSON preserves progress and rejects invalid or unsupport
     shopGold: Object.fromEntries(Object.keys(shopDoors).map(id => [id, 97])) };
   const data = JSON.parse(JSON.stringify(makeSave(state, areaStates, 0)));
   const restored = restoreSave(data);
-  assert.equal(data.version, 13);
+  assert.equal(data.version, 14);
   assert.deepEqual(restored.player.skills, player.skills);
   assert.deepEqual(restored.player.inventory, player.inventory);
   assert.deepEqual([restored.player.level, restored.player.experience, restored.player.hp,
     restored.player.mp, restored.player.weaponId, restored.gold], [4, 80, 115, player.mp, 'iron-sword', 42]);
-  for (const version of [...Array.from({ length: 12 }, (_, index) => index + 1), 14]) {
+  for (const version of [...Array.from({ length: 13 }, (_, index) => index + 1), 15]) {
     assert.throws(() => restoreSave({ ...data, version }), UnsupportedSaveVersion);
   }
   for (const key of ['version', 'exploredChunks', 'shopStock', 'nations', 'harvest']) {

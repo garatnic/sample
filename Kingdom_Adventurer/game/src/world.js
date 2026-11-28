@@ -1,6 +1,6 @@
 import { settings } from './settings.js?v=49';
 
-import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=50';
+import { inSettlement, nationLayouts, nationTerrainAt } from './nation-layout.js?v=53';
 
 export const start = { ...nationLayouts[0].arrival };
 export const buildings = nationLayouts.flatMap(city => city.facilities);
@@ -11,6 +11,7 @@ function doorsFor(matches) {
 
 export const innDoors = doorsFor(b => b.kind === 'inn');
 export const guildDoors = doorsFor(b => b.kind === 'guild');
+export const tradeDoors = doorsFor(b => b.kind === 'trade-post');
 export const shopDoors = doorsFor(b => b.kind.endsWith('-shop'));
 
 export function inTown({ x, y }) {

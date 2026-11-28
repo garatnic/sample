@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { updateTrees } from '../game/src/trees.js?v=50';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=52';
-import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=52';
-import { createEncounters } from '../game/src/combat.js?v=52';
+import { updateTrees } from '../game/src/trees.js?v=53';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=53';
+import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=53';
+import { createEncounters } from '../game/src/combat.js?v=53';
 import { createSkills } from '../game/src/skills.js?v=49';
-import { refreshGuild } from '../game/src/quests.js?v=49';
+import { refreshGuild } from '../game/src/quests.js?v=53';
 import { settings } from '../game/src/settings.js?v=49';
-import { nationSettings as config } from '../game/src/nation-settings.js?v=50';
-import { nationLayouts } from '../game/src/nation-layout.js?v=50';
-import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=52';
+import { nationSettings as config } from '../game/src/nation-settings.js?v=53';
+import { nationLayouts } from '../game/src/nation-layout.js?v=53';
+import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=53';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=52';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=52';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=53';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=53';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
@@ -20,8 +20,8 @@ const copy = state => JSON.parse(JSON.stringify(captureNations(state)));
 test('NATION-01: expansion, accessible national centers, initial placements and housing', () => {
   assert.deepEqual([field.width / settings.tile, field.height / settings.tile], [256, 256]);
   const simulation = createNationSimulation();
-  assert.equal(simulation.nations.length, 2);
-  const [west, east] = nationLayouts;
+  assert.equal(simulation.nations.length, 3);
+  const [west, east, south] = nationLayouts;
   assert.ok(Math.hypot(west.x - east.x, west.y - east.y) > config.nearRadius * 2);
   assert.ok(west.x + config.sourceRadius < east.x - config.sourceRadius);
   for (const nation of simulation.nations) {
@@ -55,6 +55,19 @@ test('NATION-01: expansion, accessible national centers, initial placements and 
   const before = { ...player };
   movePlayer(player, 0, -1, 0.2, field, settlementBuildings(simulation));
   assert.deepEqual(player, before, 'government building blocks entrance into the footprint');
+  follow(east.x, east.y);
+  follow(east.x, 2400);
+  follow(south.x, 2400);
+  follow(south.x, south.arrival.y + 36);
+  for (const facility of south.facilities) {
+    follow(facility.door.x, south.arrival.y + 36);
+    follow(facility.door.x, facility.door.y);
+    follow(facility.door.x, south.arrival.y + 36);
+  }
+  follow(south.x, south.arrival.y + 36);
+  follow(south.x, south.y);
+  follow(south.center.door.x, south.center.door.y);
+  assert.equal(modeFor(south, player), 'near');
 });
 
 test('NATION-02: long-run quotas, capacity, parcels and exact event batching', () => {
@@ -137,11 +150,11 @@ test('NATION-04: reserved cargo, capacity recovery and distant city arrival surv
 });
 
 test('NATION-05: all city facilities work independently and persisted city state restores', () => {
-  assert.equal(buildings.length, 8);
+  assert.equal(buildings.length, 15);
   assert.equal(inTown({ x: 1112, y: 800 }), false);
   assert.deepEqual(start, nationLayouts[0].arrival);
   for (const city of nationLayouts) {
-    assert.deepEqual(city.facilities.map(b => b.kind), ['inn', 'goods-shop', 'weapon-shop', 'guild']);
+    assert.deepEqual(city.facilities.map(b => b.kind), ['inn', 'goods-shop', 'weapon-shop', 'guild', 'trade-post']);
     for (const facility of city.facilities) {
       assert.ok(inTown(facility.door));
       const player = { ...facility.door };
@@ -149,7 +162,7 @@ test('NATION-05: all city facilities work independently and persisted city state
       assert.deepEqual(player, facility.door);
     }
   }
-  assert.equal(Object.keys(innDoors).length, 2);
+  assert.equal(Object.keys(innDoors).length, 3);
   const state = {
     area: field, nations: createNationSimulation(), gold: 50, guilds: new Map(),
     player: { ...start, level: 1, experience: 0, hp: 100, mp: 100, weaponId: null, cooldown: 0,
@@ -163,7 +176,7 @@ test('NATION-05: all city facilities work independently and persisted city state
   assert.equal(state.shopGold[easternShop], 110);
   assert.equal(state.shopGold['weapon-shop'], 100);
   for (const id of Object.keys(guildDoors)) refreshGuild(state, id, gameDay(0));
-  assert.equal(state.guilds.size, 2);
+  assert.equal(state.guilds.size, 3);
   const areaStates = new Map(areas.map(area => [area, { encounters: createEncounters(area.spawns), lootDrops: [] }]));
   const current = makeSave(state, areaStates, 0);
   current.exploredChunks = [7, 29];

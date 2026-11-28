@@ -1,3 +1,5 @@
+import { tradeGoods, tradeSettings } from './trade-settings.js?v=53';
+
 export const slots = new Map([
   ['weapon', '武器'], ['head', '頭'], ['body', '胴'], ['arm-r', '右腕'],
   ['arm-l', '左腕'], ['waist', '腰'], ['legs', '脚'], ['feet', '足'],
@@ -22,6 +24,7 @@ export function attackInterval(weapon) {
 const armorPieceBonus = 25;
 
 export const items = new Map([
+  ...[...tradeGoods].map(([id, good]) => [id, { category: 'trade', name: good.name, price: tradeSettings.basePrice }]),
   ['iron-dagger', { slot: 'weapon', category: 'dagger', skill: 'one-handed', name: '鉄の短剣', price: 10, range: 22, bonus: 2 }],
   ['iron-sword', { slot: 'weapon', category: 'sword', skill: 'one-handed', name: '鉄の剣', price: 20, range: 30, bonus: 5 }],
   ['iron-mace', { slot: 'weapon', category: 'mace', skill: 'one-handed', name: '鉄のメイス', price: 30, range: 30, bonus: 8 }],

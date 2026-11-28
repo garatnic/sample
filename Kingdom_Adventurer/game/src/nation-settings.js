@@ -1,5 +1,5 @@
 export const nationSettings = {
-  count: 2,
+  count: 3,
   spacing: { x: 5152, y: 2432 },
   buildingRadius: 288,
   initialStock: { wood: 36, food: 25 },
@@ -19,7 +19,6 @@ export const nationSettings = {
   leisureMinutes: [10, 60],
   retryMinutes: [5, 15],
   initialTreasury: 10000,
-  surplusPrice: { food: 1, wood: 1 },
   walkingSpeed: 48,
   nearRadius: 1450,
 };

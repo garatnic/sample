@@ -1,11 +1,11 @@
 import { settings } from './settings.js?v=49';
-import { nationSettings as config } from './nation-settings.js?v=50';
+import { nationSettings as config } from './nation-settings.js?v=53';
 
-const names = [['楡の国', '楡の宿場町'], ['紫峰の国', '紫峰の開拓町']];
+const names = [['楡の国', '楡の宿場町'], ['紫峰の国', '紫峰の開拓町'], ['杉谷の国', '杉谷の市場町']];
 const origin = { x: 1112, y: 1856 };
 const columns = [-96, 96, -192, 192, -288, 288];
 const facilityRow = 384;
-const facilityTypes = [[-192, 'inn'], [-96, 'goods-shop'], [96, 'weapon-shop'], [192, 'guild']];
+const facilityTypes = [[-192, 'inn'], [-96, 'goods-shop'], [96, 'weapon-shop'], [192, 'guild'], [288, 'trade-post']];
 const rows = [0, -96, 96, -192, 192, 288];
 
 function plot(id, x, row, kind) {

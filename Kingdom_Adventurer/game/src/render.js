@@ -1,10 +1,10 @@
-import { mobsIn } from './mob-world.js?v=52';
+import { mobsIn } from './mob-world.js?v=53';
 import { animalTypes, settings } from './settings.js?v=49';
-import { buildings, cave, field, terrainAt } from './world.js?v=52';
+import { buildings, cave, field, terrainAt } from './world.js?v=53';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=52';
+import { modeFor, residentPosition } from './nation-simulation.js?v=53';
 
-import { harvestSeconds, sourceQuantity } from './trees.js?v=50';
+import { harvestSeconds, sourceQuantity } from './trees.js?v=53';
 
 const fruitOffsets = [[-11, -24], [6, -27], [-4, -34], [10, -17], [-9, -15], [1, -21], [11, -32], [-15, -21]];
 
@@ -125,7 +125,7 @@ export function createRenderer(canvas) {
     ctx.fillStyle = '#493821';
     ctx.textAlign = 'center';
     ctx.font = guild || civic ? 'bold 10px system-ui' : 'bold 15px system-ui';
-    const labels = { inn: '宿', guild: 'ギルド', 'goods-shop': '道具', 'weapon-shop': '装備',
+    const labels = { inn: '宿', guild: 'ギルド', 'goods-shop': '道具', 'weapon-shop': '装備', 'trade-post': '交易',
       center: '国の中心', warehouse: '倉庫' };
     ctx.fillText(labels[kind], x + w / 2, y + 27);
     rect(door.x - 10, door.y - 6, 20, 12, '#cfbb8b');

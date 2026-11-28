@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { items } from '../game/src/equipment.js?v=39';
-import { start, shopDoors } from '../game/src/world.js?v=52';
-import { nationLayouts } from '../game/src/nation-layout.js?v=50';
-import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=52';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=52';
-import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=52';
-import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=50';
-import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=52';
+import { items } from '../game/src/equipment.js?v=53';
+import { start, shopDoors } from '../game/src/world.js?v=53';
+import { nationLayouts } from '../game/src/nation-layout.js?v=53';
+import { createShopStock, salePrice, settleShops, sellItem, buyItem } from '../game/src/shop.js?v=53';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=53';
+import { advanceNations, createNationSimulation, refreshNationDemand, removeResident, residentPosition } from '../game/src/nation-simulation.js?v=53';
+import { reserves, settleNationDay, storageRoom, updateNationDemand } from '../game/src/nation-economy.js?v=53';
+import { advanceMobWorld, createMobWorld } from '../game/src/mob-world.js?v=53';
 
 const midnight = firstMinuteOfDay(gameDay(0) + 1);
 const makeShops = () => ({
@@ -65,7 +65,7 @@ test('ECON-02: constrained targets, daily consumption, storage claims and constr
   assert.equal(storageRoom(demand, 'wood'), 38);
   settleNationDay(nation, nation.lastDay + 1);
   assert.deepEqual(nation.stock, { food: 2, wood: 18 });
-  assert.equal(nation.finance.wood, 0);
+  assert.equal(nation.finance.base, 20);
 });
 
 test('ECON-03: treasury isolation, rotation, funding limits and a balanced shop ledger', () => {
@@ -119,13 +119,13 @@ test('ECON-04: midnight hooks, multi-day advancement, lodging time and current s
   };
   const world = createMobWorld(midnight - 1);
   advanceMobWorld(world, simulation, nextMorningMinute(midnight - 1), start, () => 0.5, settle);
-  assert.equal(seen.length, 2);
-  assert.equal(nation.treasury, 55);
-  assert.deepEqual(nation.stock, { food: 0, wood: 0 });
-  assert.deepEqual(nation.finance, { day: gameDay(midnight), food: 25, wood: 30, bought: 0, supplied: 0 });
+  assert.equal(seen.length, 3);
+  assert.equal(nation.treasury, 0);
+  assert.deepEqual(nation.stock, { food: 25, wood: 30 });
+  assert.deepEqual(nation.finance, { day: gameDay(midnight), base: 0, imports: 0, tradeSales: 0, tradePurchases: 0, bought: 0, supplied: 0 });
   advanceNations(simulation, midnight + 2 * 1440, false, settle);
-  assert.equal(seen.length, 6);
-  assert.equal(new Set(seen.map(pair => pair.join('/'))).size, 6);
+  assert.equal(seen.length, 9);
+  assert.equal(new Set(seen.map(pair => pair.join('/'))).size, 9);
   nation.treasury = 0;
   const snapshot = JSON.parse(JSON.stringify(captureNations(simulation)));
   const restored = restoreNations(snapshot, snapshot.minute);
@@ -187,10 +187,10 @@ test('ECON-07: full food storage recovers, construction wood is protected, and a
   assert.equal(nation.demand.buildingWood, 32);
   assert.equal(storageRoom(nation.demand, 'wood'), 0);
   advanceNations(simulation, midnight);
-  assert.equal(nation.stock.food, 40);
-  assert.equal(nation.finance.food, 70);
+  assert.equal(nation.stock.food, 110);
+  assert.equal(nation.finance.base, 10);
   assert.ok(nation.demand.labor.wood > 0);
-  for (let minute = midnight + 1; minute <= midnight + 200 && !city.project; minute++) {
+  for (let minute = midnight + 1; minute <= midnight + 4 * 1440 && !city.project; minute++) {
     advanceNations(simulation, minute);
   }
   assert.equal(city.project?.site.kind, 'warehouse');
@@ -211,6 +211,6 @@ test('ECON-07: full food storage recovers, construction wood is protected, and a
   rich.stock = { food: 0, wood: 90 };
   assert.equal(reserves(rich).ideal.wood, 72);
   settleNationDay(rich, rich.lastDay + 1);
-  assert.equal(rich.stock.wood, 72);
-  assert.equal(rich.finance.wood, 8);
+  assert.equal(rich.stock.wood, 80);
+  assert.equal(rich.finance.base, 10);
 });

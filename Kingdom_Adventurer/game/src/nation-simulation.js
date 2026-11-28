@@ -1,12 +1,15 @@
-import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=50';
+import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=53';
 import { exactGameMinutes, firstMinuteOfDay, gameDay } from './clock.js?v=34';
-import { nationLayouts } from './nation-layout.js?v=50';
-import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=50';
-import { nationSettings as config } from './nation-settings.js?v=50';
+import { nationLayouts } from './nation-layout.js?v=53';
+import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=53';
+import { nationSettings as config } from './nation-settings.js?v=53';
+
+import { tradeGoods, tradeSettings } from './trade-settings.js?v=53';
+import { reservedProduction, tradeRoom } from './trade-stock.js?v=53';
 
 export const actionNames = {
   idle: '待機', wander: '自由徘徊', gatherWood: '木材収集', gatherFood: '食料収集',
-  haul: '運搬', buildHouse: '民家建築', buildWarehouse: '倉庫建築',
+  craftTrade: '特産品加工', haul: '運搬', buildHouse: '民家建築', buildWarehouse: '倉庫建築',
 };
 
 export { capacity };
@@ -24,16 +27,19 @@ function finishBuilding(nation, city, site) {
 
 export function createNationSimulation(minute = 0) {
   return {
-    layoutVersion: 1,
+    layoutVersion: 2,
     minute,
     nations: nationLayouts.map(layout => {
       const city = {
         id: layout.cityId, name: layout.cityName, x: layout.x, y: layout.y,
         buildings: [{ ...layout.center }], residents: [],
+        tradePost: layout.facilities.find(building => building.kind === 'trade-post'),
         sources: layout.sources.map(source => ({ ...source, readyAt: minute, remaining: config.harvest[source.kind].yield })), project: null,
       };
       const nation = { id: layout.id, name: layout.name, cities: [city],
         stock: { ...config.initialStock }, treasury: config.initialTreasury, finance: null, lastDay: gameDay(minute), nextMinute: minute };
+      const specialty = [...tradeGoods].find(([, good]) => good.origin === layout.id)?.[0];
+      nation.trade = { specialty, stock: new Map(), produced: 0, sales: 0, purchases: 0 };
       const kinds = Array(config.warehouse.initial).fill('warehouse').concat(Array(config.house.initial).fill('house'));
       kinds.forEach((kind, index) => finishBuilding(nation, city, { ...layout.plots[index], kind }));
       assignRoles(city);
@@ -82,6 +88,7 @@ function startTask(resident, city, action, target, minute, workMinutes = 0) {
 
 function targetFor(city, resident) {
   if (resident.action === 'wander') return wanderPoints(city).get(resident.targetId);
+  if (resident.action === 'craftTrade') return city.tradePost;
   return city.buildings.find(b => b.id === resident.targetId)
     ?? city.sources.find(s => s.id === resident.targetId)
     ?? (city.project?.site.id === resident.targetId ? city.project.site : null);
@@ -143,6 +150,18 @@ function completeTask(nation, city, resident, minute) {
       resident.gatherGeneration = null;
       startTask(resident, city, 'haul', storage, minute);
       return;
+    }
+    case 'craftTrade': {
+      const { surplus } = reserves(nation);
+      // Living and construction needs may have increased while the worker travelled.
+      if (surplus.food > 0 && surplus.wood > 0) {
+        nation.stock.food--;
+        nation.stock.wood--;
+        const { specialty, stock } = nation.trade;
+        stock.set(specialty, (stock.get(specialty) ?? 0) + 1);
+        nation.trade.produced++;
+      }
+      break;
     }
     case 'haul': {
       const { kind, quantity } = resident.carrying;
@@ -243,12 +262,20 @@ export function refreshNationDemand(nation, minute, targets) {
   return updateNationDemand(nation, reserved, targets);
 }
 
+export function craftChance(nation, demand) {
+  const reserved = reservedProduction(nation);
+  return nation.trade.specialty && tradeRoom(nation) > 0
+    && (nation.trade.stock.get(nation.trade.specialty) ?? 0) + reserved < tradeSettings.domesticProductionLimit
+    && demand.surplus.food > reserved && demand.surplus.wood > reserved
+    ? demand.leisure * tradeSettings.leisureShare : 0;
+}
+
 function assignWork(nation, city, minute, demand) {
   const idle = city.residents.filter(person => !person.task);
   const plan = demand.plans.get(city.id);
   const hasGeneral = city.residents.some(person => person.role === 'general');
   const worker = plan && idle.find(person => person.role === 'general' || !hasGeneral);
-  if (worker && nation.stock.wood >= config[plan.kind].cost) {
+  if (worker && nation.stock.wood - reservedProduction(nation) >= config[plan.kind].cost) {
     city.project = { site: plan, workerId: worker.id };
     nation.stock.wood -= config[plan.kind].cost;
     startTask(worker, city, plan.kind === 'house' ? 'buildHouse' : 'buildWarehouse',
@@ -260,8 +287,13 @@ function assignWork(nation, city, minute, demand) {
   for (const person of idle) {
     if (person.task) continue;
     const general = person.role === 'general';
-    if (general && draw(person, minute, 'leisure') < demand.leisure) {
-      startWander(city, person, minute, false);
+    const leisure = draw(person, minute, 'leisure');
+    if (general && leisure < demand.leisure) {
+      if (leisure < craftChance(nation, demand)) {
+        startTask(person, city, 'craftTrade', city.tradePost, minute, tradeSettings.workMinutes);
+      } else {
+        startWander(city, person, minute, false);
+      }
       continue;
     }
     const kind = general ? (draw(person, minute, 'resource') < demand.labor.food ? 'food' : 'wood') : person.role;

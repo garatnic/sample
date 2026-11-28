@@ -1,8 +1,11 @@
 import { mobSettings } from './mob-settings.js?v=51';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
-import { nationLayouts } from './nation-layout.js?v=50';
-import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=52';
-import { nationSettings as config } from './nation-settings.js?v=50';
+import { nationLayouts } from './nation-layout.js?v=53';
+import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=53';
+import { nationSettings as config } from './nation-settings.js?v=53';
+
+import { tradeGoods, tradeSettings } from './trade-settings.js?v=53';
+import { tradeRoom } from './trade-stock.js?v=53';
 
 function requireValid(condition) {
   if (!condition) throw new Error('Invalid nation simulation data');
@@ -24,6 +27,8 @@ export function captureNations(simulation) {
       const [city] = nation.cities;
       return {
         id: nation.id, cityId: city.id, stock: nation.stock,
+        trade: { stock: [...nation.trade.stock], produced: nation.trade.produced,
+          sales: nation.trade.sales, purchases: nation.trade.purchases },
         treasury: nation.treasury, finance: nation.finance, lastDay: nation.lastDay,
         buildings: city.buildings.map(({ id, kind }) => ({ id, kind })),
         sources: city.sources.map(({ readyAt }) => readyAt),
@@ -72,7 +77,16 @@ export function restoreNations(data, minute) {
     nation.stock = { wood: saved.stock.wood, food: saved.stock.food };
     requireValid(integer(saved.treasury, 0, Number.MAX_SAFE_INTEGER) && saved.lastDay === gameDay(minute));
     requireValid(saved.finance === null || saved.finance?.day === saved.lastDay
-      && ['food', 'wood', 'supplied', 'bought'].every(key => integer(saved.finance[key], 0, Number.MAX_SAFE_INTEGER)));
+      && ['base', 'imports', 'tradeSales', 'tradePurchases', 'supplied', 'bought'].every(key => integer(saved.finance[key], 0, Number.MAX_SAFE_INTEGER)));
+    requireValid(Array.isArray(saved.trade?.stock) && saved.trade.stock.length <= tradeGoods.size
+      && ['produced', 'sales', 'purchases'].every(key => integer(saved.trade[key], 0, Number.MAX_SAFE_INTEGER)));
+    for (const entry of saved.trade.stock) {
+      requireValid(Array.isArray(entry) && entry.length === 2 && tradeGoods.has(entry[0])
+        && !nation.trade.stock.has(entry[0]) && integer(entry[1], 1, tradeSettings.capacity));
+      nation.trade.stock.set(entry[0], entry[1]);
+    }
+    Object.assign(nation.trade, { produced: saved.trade.produced, sales: saved.trade.sales, purchases: saved.trade.purchases });
+    requireValid((nation.trade.stock.get(nation.trade.specialty) ?? 0) <= nation.trade.produced);
     nation.treasury = saved.treasury;
     nation.lastDay = saved.lastDay;
     nation.finance = saved.finance;
@@ -88,7 +102,7 @@ export function restoreNations(data, minute) {
       requireValid(counts[site.kind] < config[site.kind].max);
       city.project = { site, workerId: saved.project.workerId };
     }
-    const positions = [...city.buildings.map(b => b.door), ...city.sources, ...wanderPoints(city).values()];
+    const positions = [city.tradePost.door, ...city.buildings.map(b => b.door), ...city.sources, ...wanderPoints(city).values()];
     const people = new Set();
     const claimed = new Set();
     city.residents = saved.residents.map(person => {
@@ -114,6 +128,10 @@ export function restoreNations(data, minute) {
           requireValid(target && carrying === null && time(wanderUntil, minute, minute + config.leisureMinutes[1])
             && wanderUntil > minute);
           if (x === target.x && y === target.y) workMinutes = wanderUntil - task.depart;
+        } else if (action === 'craftTrade') {
+          target = city.tradePost;
+          requireValid(target.id === targetId && carrying === null && nation.trade.specialty);
+          workMinutes = tradeSettings.workMinutes;
         } else if (action === 'haul') {
           target = city.buildings.find(b => b.id === targetId && b.kind === 'warehouse');
           requireValid(target && Object.hasOwn(config.harvest, carrying?.kind)
@@ -155,8 +173,9 @@ export function restoreNations(data, minute) {
         requireValid(time(person.cooldown, 0, mobSettings.resident.interval));
         combatState.cooldown = person.cooldown;
       }
-      return { id, homeId, x, y, action, targetId, carrying, task, role, wanderUntil, gatherLimit, gatherGeneration, ...combatState, nationId: nation.id, cityId: city.id };
+      return { id, homeId, x, y, action, targetId, carrying: carrying && { ...carrying }, task: task && { ...task }, role, wanderUntil, gatherLimit, gatherGeneration, ...combatState, nationId: nation.id, cityId: city.id };
     });
+    requireValid(tradeRoom(nation) >= 0);
     requireValid(!city.project || city.residents.some(p => p.id === city.project.workerId && p.targetId === city.project.site.id));
     const nextEvent = () => Math.min(firstMinuteOfDay(gameDay(minute) + 1),
       ...city.residents.filter(p => p.task).map(p => p.task.end),

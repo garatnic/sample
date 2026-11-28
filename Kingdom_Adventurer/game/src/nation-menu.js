@@ -1,5 +1,8 @@
-import { actionNames, modeFor, refreshNationDemand } from './nation-simulation.js?v=52';
-import { nationSettings as config } from './nation-settings.js?v=50';
+import { actionNames, craftChance, modeFor, refreshNationDemand } from './nation-simulation.js?v=53';
+import { nationSettings as config } from './nation-settings.js?v=53';
+
+import { tradeGoods, tradeSettings } from './trade-settings.js?v=53';
+import { reservedProduction, stockQuantity } from './trade-stock.js?v=53';
 
 export function setupNationMenu(state, input, field) {
   const dialog = document.querySelector('#nation-menu');
@@ -21,7 +24,9 @@ export function setupNationMenu(state, input, field) {
       const woodWorkers = city.residents.filter(p => p.action === 'gatherWood' || p.carrying?.kind === 'wood').length;
       const builders = Number(Boolean(city.project));
       const wanderers = city.residents.filter(p => p.action === 'wander').length;
-      const other = population - foodWorkers - woodWorkers - builders - wanderers;
+      const processing = reservedProduction(nation);
+      const other = population - foodWorkers - woodWorkers - builders - wanderers - processing;
+      const crafting = craftChance(nation, demand);
       const percent = value => `${(value * 100).toFixed(1)}%`;
       const resourceRows = ['food', 'wood'].flatMap(kind => {
         const name = kind === 'food' ? '食料' : '木材';
@@ -32,7 +37,7 @@ export function setupNationMenu(state, input, field) {
         ];
       });
       const finance = nation.finance;
-      const income = finance && finance.food + finance.wood + finance.supplied;
+      const income = finance && finance.base + finance.imports + finance.tradeSales + finance.supplied;
       const needsWarehouse = demand.plans.get(city.id)?.kind === 'warehouse';
       const warehouseInProgress = city.project?.site.kind === 'warehouse';
       const expansionStatus = warehouseInProgress ? '建築中' : needsWarehouse
@@ -54,12 +59,14 @@ export function setupNationMenu(state, input, field) {
         ['建築用木材', `${demand.buildingWood}個`],
         ['保管状況', `${used} / ${total}個（${Math.floor(100 * used / total)}%）／ 必要 ${demand.requiredCapacity}個`],
         ['住民の役割', `専属採集 ${roles[0]} ／ 専属木こり ${roles[1]} ／ 一般 ${roles[2]}人`],
-        ['住民の行動', `採集・運搬 ${foodWorkers} ／ 伐採・運搬 ${woodWorkers} ／ 建築 ${builders} ／ 徘徊 ${wanderers} ／ その他 ${other}人`],
-        ['一般住民の抽選', `自由徘徊 ${percent(demand.leisure)} ／ 食料 ${percent((1 - demand.leisure) * demand.labor.food)} ／ 伐採 ${percent((1 - demand.leisure) * demand.labor.wood)}`],
+        ['住民の行動', `採集・運搬 ${foodWorkers} ／ 伐採・運搬 ${woodWorkers} ／ 建築 ${builders} ／ 加工 ${processing} ／ 徘徊 ${wanderers} ／ その他 ${other}人`],
+        ['一般住民の抽選', `自由徘徊 ${percent(demand.leisure - crafting)} ／ 加工 ${percent(crafting)} ／ 食料 ${percent((1 - demand.leisure) * demand.labor.food)} ／ 伐採 ${percent((1 - demand.leisure) * demand.labor.wood)}`],
+        ['交易所', `${tradeGoods.get(nation.trade.specialty)?.name ?? '特産品なし'} ／ 在庫 ${stockQuantity(nation.trade.stock)} / ${tradeSettings.capacity} ／ 累計生産 ${nation.trade.produced}`],
         ['国庫', `${nation.treasury.toLocaleString()}G`],
-        ['前日の収支', finance ? `収入 ${income}G ／ 支出 ${finance.bought}G ／ 純収支 ${income - finance.bought}G` : '精算前'],
+        ['前日の収支', finance ? `収入 ${income}G ／ 支出 ${finance.bought + finance.tradePurchases}G ／ 純収支 ${income - finance.bought - finance.tradePurchases}G` : '精算前'],
         ...(finance ? [
-          ['資源売却', `食料 ${finance.food}G ／ 木材 ${finance.wood}G`],
+          ['国家収入', `基礎 ${finance.base}G ／ 輸入品売却 ${finance.imports}G`],
+          ['交易所取引', `販売 ${finance.tradeSales}G ／ 買取 ${finance.tradePurchases}G`],
           ['商店精算', `供給 ${finance.supplied}G ／ 買取 ${finance.bought}G`],
         ] : []),
         ['建築', worker ? `${actionNames[worker.action]} ${progress}%` : '建築なし'],
