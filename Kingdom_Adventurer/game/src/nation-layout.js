@@ -12,7 +12,7 @@ function plot(id, x, row, kind) {
   return { id, x: x - 27, y: row - 67, w: 54, h: 42, door: { x, y: row }, kind };
 }
 
-export function createNationLayouts() {
+function createNationLayouts() {
   const columnsAvailable = Math.max(1, 1 + Math.floor((settings.mapWidth - config.sourceRadius - origin.x) / config.spacing.x));
   return Array.from({ length: config.count }, (_, index) => {
     const id = `nation-${index + 1}`;

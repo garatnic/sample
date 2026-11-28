@@ -2,10 +2,6 @@ const startTime = Date.UTC(4037, 8, 17, 8);
 const realSecondsPerGameHour = 75;
 const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
-export function gameMinutes(elapsedSeconds) {
-  return Math.floor(exactGameMinutes(elapsedSeconds));
-}
-
 export function exactGameMinutes(elapsedSeconds) {
   return elapsedSeconds * 60 / realSecondsPerGameHour;
 }

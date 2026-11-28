@@ -6,7 +6,7 @@ import { tradePrice } from './trade-settings.js?v=53';
 import { tradeRoom } from './trade-stock.js?v=53';
 
 const equipmentTabs = [...slots];
-export const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['materials', '素材'], ['misc', 'その他']];
+const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['materials', '素材'], ['misc', 'その他']];
 
 const tradeTab = ['trade', '交易品'];
 export const inventoryTabs = [...goodsTabs, tradeTab];

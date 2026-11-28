@@ -35,7 +35,7 @@ export function chunkAt(world, x, y) {
   return world.chunks[Math.floor(y / chunkSize) * columns + Math.floor(x / chunkSize)];
 }
 
-export function* chunksIn(world, left, top, right, bottom) {
+function* chunksIn(world, left, top, right, bottom) {
   for (let y = Math.max(0, Math.floor(top / chunkSize)); y <= Math.min(rows - 1, Math.floor(bottom / chunkSize)); y++) {
     for (let x = Math.max(0, Math.floor(left / chunkSize)); x <= Math.min(columns - 1, Math.floor(right / chunkSize)); x++) {
       yield world.chunks[y * columns + x];

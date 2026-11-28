@@ -14,12 +14,12 @@ export const actionNames = {
 
 export { capacity };
 
-function finishBuilding(nation, city, site) {
+function finishBuilding(city, site) {
   city.buildings.push(site);
   if (site.kind !== 'house') return;
   for (let i = 0; i < config.house.residents; i++) {
     city.residents.push({
-      id: `${site.id}-resident-${i + 1}`, nationId: nation.id, cityId: city.id,
+      id: `${site.id}-resident-${i + 1}`,
       homeId: site.id, ...site.door, action: 'idle', targetId: null, carrying: null, task: null,
     });
   }
@@ -41,7 +41,7 @@ export function createNationSimulation(minute = 0) {
       const specialty = [...tradeGoods].find(([, good]) => good.origin === layout.id)?.[0];
       nation.trade = { specialty, stock: new Map(), produced: 0, sales: 0, purchases: 0 };
       const kinds = Array(config.warehouse.initial).fill('warehouse').concat(Array(config.house.initial).fill('house'));
-      kinds.forEach((kind, index) => finishBuilding(nation, city, { ...layout.plots[index], kind }));
+      kinds.forEach((kind, index) => finishBuilding(city, { ...layout.plots[index], kind }));
       assignRoles(city);
       refreshNationDemand(nation, minute);
       return nation;
@@ -170,7 +170,7 @@ function completeTask(nation, city, resident, minute) {
     }
     case 'buildHouse':
     case 'buildWarehouse':
-      finishBuilding(nation, city, city.project.site);
+      finishBuilding(city, city.project.site);
       city.project = null;
       assignRoles(city);
       break;

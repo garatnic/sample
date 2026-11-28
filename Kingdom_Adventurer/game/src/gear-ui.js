@@ -46,7 +46,6 @@ export function setupGearMenus(state, input) {
       item.append(button);
     }
     list.append(item);
-    return item;
   }
 
   function filters(selector, tabs, onChange) {

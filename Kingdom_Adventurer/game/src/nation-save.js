@@ -173,7 +173,7 @@ export function restoreNations(data, minute) {
         requireValid(time(person.cooldown, 0, mobSettings.resident.interval));
         combatState.cooldown = person.cooldown;
       }
-      return { id, homeId, x, y, action, targetId, carrying: carrying && { ...carrying }, task: task && { ...task }, role, wanderUntil, gatherLimit, gatherGeneration, ...combatState, nationId: nation.id, cityId: city.id };
+      return { id, homeId, x, y, action, targetId, carrying: carrying && { ...carrying }, task: task && { ...task }, role, wanderUntil, gatherLimit, gatherGeneration, ...combatState };
     });
     requireValid(tradeRoom(nation) >= 0);
     requireValid(!city.project || city.residents.some(p => p.id === city.project.workerId && p.targetId === city.project.site.id));

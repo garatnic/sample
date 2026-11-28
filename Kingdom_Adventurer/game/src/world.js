@@ -56,7 +56,7 @@ function overlapDepth(b, x, y, radius) {
     y - b.y + radius, b.y + b.h + radius - y);
 }
 
-export function facilityAt({ x, y }) {
+function facilityAt({ x, y }) {
   return buildings.find(b => overlapDepth(b, x, y, settings.player.radius) > 0);
 }
 

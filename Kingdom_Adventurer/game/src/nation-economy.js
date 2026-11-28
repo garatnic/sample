@@ -4,7 +4,7 @@ import { nationSettings as config } from './nation-settings.js?v=53';
 import { tradeSettings } from './trade-settings.js?v=53';
 import { settleTrade } from './trade-stock.js?v=53';
 
-export const resources = ['food', 'wood'];
+const resources = ['food', 'wood'];
 
 const byResource = calculate => Object.fromEntries(resources.map(kind => [kind, calculate(kind)]));
 

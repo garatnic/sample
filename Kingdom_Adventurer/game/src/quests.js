@@ -50,7 +50,7 @@ export function refreshGuild(state, guildId, day) {
   return board;
 }
 
-export function acceptQuest(board, quest) {
+function acceptQuest(board, quest) {
   if (!board.quests.includes(quest) || quest.status !== 'offered') return false;
   quest.status = 'active';
   return true;
@@ -73,7 +73,7 @@ function ready(quest, inventory) {
   return Object.entries(quest.targets).every(([kind, count]) => (quest.progress[kind] ?? 0) >= count);
 }
 
-export function reportQuest(state, board, quest) {
+function reportQuest(state, board, quest) {
   const inventory = state.player.inventory;
   if (!board.quests.includes(quest) || !ready(quest, inventory) || board.gold < quest.reward) return false;
   if (quest.material) {

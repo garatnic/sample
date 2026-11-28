@@ -1,6 +1,6 @@
 import { settings } from './settings.js?v=49';
 
-export const growth = {
+const growth = {
   hpPerLevel: 10,
   damagePerLevel: 2,
 };
@@ -25,5 +25,4 @@ export function gainExperience(player, amount) {
     player.level += 1;
   }
   player.hp += maxHealth(player.level) - maxHealth(previousLevel);
-  return player.level > previousLevel;
 }
