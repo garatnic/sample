@@ -1,31 +1,33 @@
-import { discoverLocation, setupWorldMap } from './world-map.js?v=55';
+import { discoverLocation, setupWorldMap } from './world-map.js?v=56';
 import { createSkills } from './skills.js?v=49';
 import { setupSkillMenu } from './skill-menu.js?v=49';
 import { settings } from './settings.js?v=49';
 import { cave, field, guildDoors, innDoors, shopDoors, tradeDoors, movePlayer, portalRadius, start } from './world.js?v=55';
-import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=55';
+import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=56';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
 import { createInput } from './input.js?v=42';
-import { createRenderer } from './render.js?v=55';
+import { createRenderer } from './render.js?v=56';
 import { setupGearMenus } from './gear-ui.js?v=55';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=53';
 
 import { setupQuestMenus } from './quests.js?v=53';
 
-import { collectLoot } from './loot.js?v=53';
+import { collectLoot } from './loot.js?v=56';
 
 import { updateTrees } from './trees.js?v=53';
 import { items } from './equipment.js?v=53';
-import { areas, makeSave, restoreSave } from './save-data.js?v=55';
-import { setupSaveMenu } from './save-menu.js?v=55';
+import { areas, makeSave, restoreSave } from './save-data.js?v=56';
+import { setupSaveMenu } from './save-menu.js?v=56';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=53';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=55';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=56';
 import { inSettlement } from './nation-layout.js?v=53';
 import { setupNationMenu } from './nation-menu.js?v=53';
 
 import { createShopStock, settleShops, startingShopGold } from './shop.js?v=55';
+
+import { advanceAdventurers, createAdventurers } from './adventurers.js?v=56';
 
 let huntRequested = false;
 window.addEventListener('keydown', event => {
@@ -76,6 +78,7 @@ const state = {
   exploredChunks: new Set(),
   nations: createNationSimulation(),
   mobWorld: createMobWorld(0),
+  adventurers: createAdventurers(),
   centerContact: null,
   get encounters() { return areaStates.get(this.area).encounters; },
   get lootDrops() { return areaStates.get(this.area).lootDrops; },
@@ -101,6 +104,8 @@ function saveNotice(text) {
 }
 
 const retailDoors = { ...shopDoors, ...tradeDoors };
+const updateAdventurers = (minute, dt) => advanceAdventurers(state, areaStates.get(field).lootDrops,
+  minute, dt, settlementBuildings(state.nations));
 const settleNationShops = (nation, day, finance) => settleShops(state, nation, day, finance);
 
 let resting = false;
@@ -121,7 +126,7 @@ inn.querySelector('form').addEventListener('submit', async event => {
     await new Promise(resolve => setTimeout(resolve, 0));
     const budgetEnd = performance.now() + 10;
     do {
-      advanceMobWorld(state.mobWorld, state.nations, Math.min(morning, state.nations.minute + 4), null, Math.random, settleNationShops);
+      advanceMobWorld(state.mobWorld, state.nations, Math.min(morning, state.nations.minute + 4), null, Math.random, settleNationShops, updateAdventurers, state.adventurers.individuals);
     } while (state.nations.minute < morning && performance.now() < budgetEnd);
     clockBaseMinute = state.nations.minute;
     elapsedPlaySeconds = 0;
@@ -270,7 +275,7 @@ function frame(time) {
   if (!document.querySelector('dialog[open]') && state.player.hp > 0) {
     elapsedPlaySeconds += dt;
     advanceMobWorld(state.mobWorld, state.nations, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds),
-      state.area === field ? state.player : null, Math.random, settleNationShops);
+      state.area === field ? state.player : null, Math.random, settleNationShops, updateAdventurers, state.adventurers.individuals);
     update(dt);
   }
   const minute = currentGameMinute();

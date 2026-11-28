@@ -1,10 +1,10 @@
 import { animalTypes, mobTypes, settings } from './settings.js?v=49';
 import { playerAttack, recordWeaponHit } from './weapon-skill.js?v=49';
 import { field } from './world.js?v=55';
-import { mobsIn, moveNearbyMobs, removeMob } from './mob-world.js?v=55';
+import { mobsIn, moveNearbyMobs, removeMob } from './mob-world.js?v=56';
 import { attackInterval, defenseRating, items } from './equipment.js?v=53';
 import { recordDefeat } from './quests.js?v=53';
-import { dropLoot } from './loot.js?v=53';
+import { dropLoot } from './loot.js?v=56';
 
 export function physicalDamage(attack, defense, damageMultiplier) {
   const reductionBasisPoints = Math.min(8000, Math.max(0, defense) * 12);
@@ -60,7 +60,7 @@ export function markHuntedAnimal(world, x, y) {
 export function updateCombat(state, dt, hunt = false) {
   const { player } = state;
   const config = settings.enemy;
-  const { playerDamageMultiplier, enemyDamageMultiplier } = settings.difficulty;
+  const { enemyDamageMultiplier } = settings.difficulty;
   const outdoors = (state.area ?? field) === field;
   if (outdoors && state.mobWorld) moveNearbyMobs(state.mobWorld, player, dt);
   const encounters = [...localEncounters(state)];
@@ -120,20 +120,9 @@ export function updateCombat(state, dt, hunt = false) {
   }
   if (!nearest) return;
   const enemy = nearest.enemy;
-  player.cooldown = attackInterval(weapon);
-  state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
-  const attack = playerAttack(player, weapon);
   const levelBeforeHit = player.level;
-  const poisonDamage = player.pendingPoison ?? 0;
-  player.pendingPoison = 0;
-  const damage = physicalDamage(attack, mobTypes[enemy.kind].defense, playerDamageMultiplier);
-  enemy.hp -= damage + poisonDamage;
-  recordWeaponHit(player, weapon, damage);
-  enemy.flash = 0.18;
-  if (animalTypes[enemy.kind] && damage + poisonDamage > 0) {
-    enemy.hunted = true;
-    enemy.flee = 3;
-  }
+  state.strike = { x: enemy.x, y: enemy.y, remaining: 0.16 };
+  hitMob(player, enemy, true);
   if (enemy.hp <= 0) {
     if (!animalTypes[enemy.kind]) recordDefeat(state, enemy.kind);
     if (nearest.home) {
@@ -147,5 +136,22 @@ export function updateCombat(state, dt, hunt = false) {
   }
   if (player.level > levelBeforeHit) {
     state.notice = { text: `レベルアップ！ Lv.${player.level}`, remaining: 2.5, leveledUp: true };
+  }
+}
+
+export function hitMob(actor, enemy, playerHit = false) {
+  const weapon = items.get(actor.weaponId);
+  actor.cooldown = attackInterval(weapon);
+  const damage = physicalDamage(playerAttack(actor, weapon), mobTypes[enemy.kind].defense,
+    settings.difficulty.playerDamageMultiplier);
+  const total = damage + (actor.pendingPoison ?? 0);
+  actor.pendingPoison = 0;
+  enemy.hp -= total;
+  if (playerHit && total > 0) enemy.playerClaim = true;
+  recordWeaponHit(actor, weapon, damage);
+  enemy.flash = 0.18;
+  if (animalTypes[enemy.kind] && total > 0) {
+    enemy.hunted = true;
+    enemy.flee = 3;
   }
 }

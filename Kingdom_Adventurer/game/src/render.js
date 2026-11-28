@@ -1,4 +1,4 @@
-import { mobsIn } from './mob-world.js?v=55';
+import { mobsIn } from './mob-world.js?v=56';
 import { animalTypes, settings } from './settings.js?v=49';
 import { buildings, cave, field, terrainAt } from './world.js?v=55';
 
@@ -219,10 +219,20 @@ export function createRenderer(canvas) {
         }
       }
     }
+    if (outdoors) {
+      for (const adventurer of state.adventurers?.individuals ?? []) {
+        if (adventurer.sleepUntil !== null || !visible(adventurer)) continue;
+        drawResident(adventurer, false, adventurer.weaponClass === 'two-handed' ? '#b37037' : '#337d9b');
+        ctx.fillStyle = '#fff3d6';
+        ctx.textAlign = 'center';
+        ctx.font = '11px system-ui';
+        ctx.fillText(`冒険者 Lv.${adventurer.level}`, adventurer.x, adventurer.y - 24);
+      }
+    }
     drawPortal(outdoors ? cave.entrance : cave.exit, outdoors);
-    for (const { x, y, materials, equipment } of state.lootDrops) {
+    for (const { x, y, materials, equipment, contents } of state.lootDrops) {
       rect(x - 5, y - 5, 10, 10, '#654319');
-      rect(x - 4, y - 4, 8, 8, materials.length || equipment ? '#bc8a55' : '#f2bc35');
+      rect(x - 4, y - 4, 8, 8, materials.length || equipment || contents?.length ? '#bc8a55' : '#f2bc35');
       rect(x - 2, y - 3, 3, 2, '#fff1a0');
     }
     if (outdoors && state.mobWorld) {

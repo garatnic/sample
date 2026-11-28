@@ -1,4 +1,4 @@
-import { createMobWorld, indexSettlement } from './mob-world.js?v=55';
+import { createMobWorld, indexSettlement } from './mob-world.js?v=56';
 import { mobSettings } from './mob-settings.js?v=51';
 import { initialSkill, maxSkill, skillDefinitions } from './skills.js?v=49';
 import { cave, field, guildDoors, movePlayer, shopDoors } from './world.js?v=55';
@@ -14,8 +14,11 @@ import { captureNations, restoreNations } from './nation-save.js?v=53';
 
 import { acceptsItem, createShopStock } from './shop.js?v=55';
 
+import { createAdventurers, weaponClasses } from './adventurers.js?v=56';
+import { innDoors } from './world.js?v=55';
+
 const format = 'kingdom-adventurer';
-const version = 14;
+const version = 15;
 export class UnsupportedSaveVersion extends Error {}
 export const areas = [field, cave];
 
@@ -28,10 +31,11 @@ export function makeSave(state, areaStates, clock) {
       level: player.level, experience: player.experience, weaponId: player.weaponId,
       inventory: [...player.inventory], armor: [...player.armor], skills: [...player.skills],
       pendingPoison: player.pendingPoison, cooldown: player.cooldown },
+    adventurers: captureAdventurers(state.adventurers ?? createAdventurers()),
     exploredChunks: [...(state.exploredChunks ?? [])],
     mobs: { minute: world.minute, tick: world.tick, nextId: world.nextId,
-      individuals: [...world.mobs.values()].map(({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn }) =>
-        ({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn })) },
+      individuals: [...world.mobs.values()].map(({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn, playerClaim = false }) =>
+        ({ id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn, playerClaim })) },
     areas: areas.map(area => {
       const { encounters, lootDrops } = areaStates.get(area);
       return { id: area.id, lootDrops, encounters: encounters.map(({ home, enemy, remaining, generation }) => ({
@@ -101,6 +105,31 @@ function restorePlayer(data, area) {
   return player;
 }
 
+function captureAdventurers({ nextId, individuals }) {
+  return { nextId, individuals: individuals.map(({ flash, moving, ...actor }) => ({
+    ...actor, inventory: [...actor.inventory], armor: [...actor.armor], skills: [...actor.skills],
+  })) };
+}
+
+function restoreAdventurers(data, clock) {
+  const count = Object.keys(innDoors).length * weaponClasses.length;
+  check(integer(data?.nextId, count + 1) && Array.isArray(data.individuals) && data.individuals.length === count);
+  const ids = new Set();
+  return { nextId: data.nextId, individuals: data.individuals.map(saved => {
+    const { id, weaponClass, gold, sleepUntil, innId, destination } = saved;
+    const inn = innDoors[innId];
+    check(integer(id, 1, data.nextId - 1) && !ids.has(id) && weaponClasses.includes(weaponClass)
+      && items.get(saved.weaponId)?.skill === weaponClass && integer(gold) && Object.hasOwn(innDoors, innId)
+      && (destination === null || position(destination, field))
+      && (sleepUntil === null || number(sleepUntil, clock - 1, clock + 1440)
+        && saved.x === inn.x && saved.y === inn.y));
+    ids.add(id);
+    const actor = restorePlayer(saved, field);
+    check(actor.skills.get(weaponClass).value >= 25);
+    return { ...actor, id, weaponClass, gold, sleepUntil, innId, destination };
+  }) };
+}
+
 function restoreArea(data, area) {
   check(data?.id === area.id && Array.isArray(data.encounters) && data.encounters.length === area.spawns.length
     && Array.isArray(data.lootDrops));
@@ -119,10 +148,18 @@ function restoreArea(data, area) {
   const lootDrops = data.lootDrops.map(drop => {
     check(position(drop, area) && integer(drop.gold) && Array.isArray(drop.materials)
       && drop.materials.length <= 5 && drop.materials.every(id => items.get(id)?.category === 'materials'));
-    const { equipment } = drop;
+    const { equipment, contents, playerClaim } = drop;
+    check(playerClaim === undefined || typeof playerClaim === 'boolean');
+    if (contents !== undefined) {
+      const inventory = entries(contents);
+      check(inventory.size <= items.size);
+      for (const [id, count] of inventory) check(items.has(id) && integer(count, 1));
+    }
     check(equipment === undefined || Boolean(items.get(equipment)?.slot));
     return { x: drop.x, y: drop.y, gold: drop.gold, materials: [...drop.materials],
-      ...(equipment === undefined ? {} : { equipment }) };
+      ...(equipment === undefined ? {} : { equipment }),
+      ...(playerClaim === undefined ? {} : { playerClaim }),
+      ...(contents === undefined ? {} : { contents: structuredClone(contents) }) };
   });
   return { encounters, lootDrops };
 }
@@ -142,10 +179,10 @@ function restoreMobs(data, clock) {
       && Object.hasOwn(mobTypes, mob.kind) && position(mob, field) && mob.x < field.width && mob.y < field.height
       && number(mob.hp, Number.MIN_VALUE, mobTypes[mob.kind].maxHp) && number(mob.cooldown, 0, 10)
       && number(mob.flash, 0, 1) && number(mob.flee, 0, 3) && typeof mob.hunted === 'boolean'
-      && number(mob.angle, 0, 2 * Math.PI) && Number.isFinite(mob.turnIn) && mob.turnIn <= 60 && mob.turnIn >= -1);
+      && typeof mob.playerClaim === 'boolean' && number(mob.angle, 0, 2 * Math.PI) && Number.isFinite(mob.turnIn) && mob.turnIn <= 60 && mob.turnIn >= -1);
     ids.add(mob.id);
-    const { id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn } = mob;
-    return { id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn, maxHp: mobTypes[kind].maxHp };
+    const { id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn, playerClaim } = mob;
+    return { id, kind, x, y, hp, cooldown, flash, flee, hunted, angle, turnIn, ...(playerClaim ? { playerClaim } : {}), maxHp: mobTypes[kind].maxHp };
   });
   return createMobWorld(clock, { minute: data.minute, tick: data.tick, nextId: data.nextId, individuals });
 }
@@ -204,6 +241,7 @@ export function restoreSave(data) {
     }
     shopStock[shopId] = stock;
   }
+  const adventurers = restoreAdventurers(data.adventurers, data.clock);
   const nations = restoreNations(data.nations, data.clock);
   let harvest = null;
   if (data.harvest !== null) {
@@ -218,5 +256,5 @@ export function restoreSave(data) {
   check(Array.isArray(explored) && explored.length <= mobWorld.chunks.length
     && explored.every(id => integer(id, 0, mobWorld.chunks.length - 1)));
   const exploredChunks = new Set(explored);
-  return { player, area, areaStates, nations, mobWorld, exploredChunks, gold: data.gold, guilds, shopGold, shopStock, harvest, clock: data.clock };
+  return { player, area, areaStates, nations, mobWorld, adventurers, exploredChunks, gold: data.gold, guilds, shopGold, shopStock, harvest, clock: data.clock };
 }

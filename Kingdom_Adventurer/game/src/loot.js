@@ -17,7 +17,7 @@ export function dropLoot(state, enemy, type) {
   const gold = type.humanoid ? (type.gold ?? 0) : 0;
   const equipment = carriedEquipment(enemy, type);
   if (!materials.length && !gold && !equipment) return;
-  state.lootDrops.push({ x: enemy.x, y: enemy.y, materials, gold, ...(equipment ? { equipment } : {}) });
+  state.lootDrops.push({ x: enemy.x, y: enemy.y, materials, gold, ...(equipment ? { equipment } : {}), ...(enemy.playerClaim ? { playerClaim: true } : {}) });
 }
 
 export function collectLoot(state) {
@@ -27,12 +27,7 @@ export function collectLoot(state) {
   for (let i = lootDrops.length - 1; i >= 0; i--) {
     const drop = lootDrops[i];
     if (Math.hypot(player.x - drop.x, player.y - drop.y) > settings.currency.pickupRadius) continue;
-    const itemIds = drop.equipment ? [...drop.materials, drop.equipment] : drop.materials;
-    for (const id of itemIds) {
-      player.inventory.set(id, (player.inventory.get(id) ?? 0) + 1);
-      collected.set(id, (collected.get(id) ?? 0) + 1);
-    }
-    gold += drop.gold;
+    gold += takeDrop(player.inventory, drop, collected);
     lootDrops.splice(i, 1);
   }
   state.gold += gold;
@@ -41,4 +36,14 @@ export function collectLoot(state) {
   if (names.length && !state.notice?.leveledUp) {
     state.notice = { text: `${names.join('、')}を拾いました`, remaining: 1.7 };
   }
+}
+
+export function takeDrop(inventory, drop, collected = new Map()) {
+  const itemIds = drop.equipment ? [...drop.materials, drop.equipment] : drop.materials;
+  const contents = drop.contents ?? itemIds.map(id => [id, 1]);
+  for (const [id, count] of contents) {
+    inventory.set(id, (inventory.get(id) ?? 0) + count);
+    collected.set(id, (collected.get(id) ?? 0) + count);
+  }
+  return drop.gold;
 }

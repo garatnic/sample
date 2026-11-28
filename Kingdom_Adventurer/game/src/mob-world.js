@@ -1,5 +1,5 @@
 import { exactGameMinutes } from './clock.js?v=34';
-import { physicalDamage } from './combat.js?v=55';
+import { physicalDamage } from './combat.js?v=56';
 import { mobSettings as config } from './mob-settings.js?v=51';
 import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=53';
 import { animalTypes, mobTypes, settings } from './settings.js?v=49';
@@ -372,7 +372,7 @@ function residentCombat(world) {
   }
 }
 
-export function advanceMobWorld(world, nations, toMinute, player = null, random = Math.random, settleShops) {
+export function advanceMobWorld(world, nations, toMinute, player = null, random = Math.random, settleShops, onTick, adventurers = []) {
   indexSettlement(world, nations);
   if (!world.tick) {
     indexResidents(world, nations);
@@ -385,8 +385,19 @@ export function advanceMobWorld(world, nations, toMinute, player = null, random 
     indexSettlement(world, nations);
     indexResidents(world, nations);
     for (const mob of world.mobs.values()) {
-      if (!player || distanceSquared(mob, player) > config.nearDistance ** 2) moveMob(world, mob, null, tickSeconds, random);
+      if (player && distanceSquared(mob, player) <= config.nearDistance ** 2) continue;
+      let focus = null;
+      let closest = settings.enemy.aggro ** 2;
+      for (const actor of adventurers) {
+        if (actor.sleepUntil !== null) continue;
+        const gap = distanceSquared(mob, actor);
+        if (gap >= closest) continue;
+        focus = actor;
+        closest = gap;
+      }
+      moveMob(world, mob, focus, tickSeconds, random);
     }
+    onTick?.(world.minute, tickSeconds);
     residentCombat(world);
     if (nations.nations.some(nation => nation.nextMinute === world.minute)) {
       advanceNations(nations, world.minute, true, settleShops);
