@@ -416,3 +416,6 @@
 |---|---|---|
 | [2026-11-27 野外のチャンク管理とMOB](../history/2026-11-27-field-mobs.md) | [世界・マップ](02_world.md)、[ECO-001/002/005/007](09_ecosystem.md#eco-001) | CUR-WORLD-007、CUR-COMBAT-001〜006、CUR-SYS-004 |
 | [2026-11-28 フィールドMOBの発生密度と地域比率](../history/2026-11-28-field-mob-density.md) | [ECO-001](09_ecosystem.md#eco-001) | CUR-WORLD-007、CUR-COMBAT-001/006、CUR-SYS-004 |
+
+## 追加横断仕様の出典
+- [2026-11-28 交易・自由民](../history/2026-11-28-trade-free-people.md) → [TRADE-001〜006](TRADE_FREE_PEOPLE_SPECIFICATION.md)。既存版の集計対象外。
