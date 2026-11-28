@@ -14,7 +14,7 @@ import { captureNations, restoreNations } from './nation-save.js?v=53';
 
 import { acceptsItem, createShopStock } from './shop.js?v=55';
 
-import { createAdventurers, weaponClasses } from './adventurers.js?v=56';
+import { createAdventurers, weaponClasses } from './adventurers.js?v=57';
 import { innDoors } from './world.js?v=55';
 
 const format = 'kingdom-adventurer';

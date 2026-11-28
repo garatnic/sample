@@ -17,8 +17,8 @@ import { collectLoot } from './loot.js?v=56';
 
 import { updateTrees } from './trees.js?v=53';
 import { items } from './equipment.js?v=53';
-import { areas, makeSave, restoreSave } from './save-data.js?v=56';
-import { setupSaveMenu } from './save-menu.js?v=56';
+import { areas, makeSave, restoreSave } from './save-data.js?v=57';
+import { setupSaveMenu } from './save-menu.js?v=57';
 
 import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=53';
 import { advanceMobWorld, createMobWorld } from './mob-world.js?v=56';
@@ -27,7 +27,7 @@ import { setupNationMenu } from './nation-menu.js?v=53';
 
 import { createShopStock, settleShops, startingShopGold } from './shop.js?v=55';
 
-import { advanceAdventurers, createAdventurers } from './adventurers.js?v=56';
+import { advanceAdventurers, createAdventurers, moveAdventurers } from './adventurers.js?v=57';
 
 let huntRequested = false;
 window.addEventListener('keydown', event => {
@@ -104,8 +104,13 @@ function saveNotice(text) {
 }
 
 const retailDoors = { ...shopDoors, ...tradeDoors };
-const updateAdventurers = (minute, dt) => advanceAdventurers(state, areaStates.get(field).lootDrops,
-  minute, dt, settlementBuildings(state.nations));
+const fieldLoot = () => areaStates.get(field).lootDrops;
+const updateAdventurers = (minute, dt) => advanceAdventurers(state, fieldLoot(), minute, dt);
+const moveAdventurersFor = dt => moveAdventurers(state, fieldLoot(), dt, settlementBuildings(state.nations));
+function skipAdventurers(minute, dt) {
+  moveAdventurersFor(dt);
+  updateAdventurers(minute, dt);
+}
 const settleNationShops = (nation, day, finance) => settleShops(state, nation, day, finance);
 
 let resting = false;
@@ -126,7 +131,7 @@ inn.querySelector('form').addEventListener('submit', async event => {
     await new Promise(resolve => setTimeout(resolve, 0));
     const budgetEnd = performance.now() + 10;
     do {
-      advanceMobWorld(state.mobWorld, state.nations, Math.min(morning, state.nations.minute + 4), null, Math.random, settleNationShops, updateAdventurers, state.adventurers.individuals);
+      advanceMobWorld(state.mobWorld, state.nations, Math.min(morning, state.nations.minute + 4), null, Math.random, settleNationShops, skipAdventurers, state.adventurers.individuals);
     } while (state.nations.minute < morning && performance.now() < budgetEnd);
     clockBaseMinute = state.nations.minute;
     elapsedPlaySeconds = 0;
@@ -276,6 +281,7 @@ function frame(time) {
     elapsedPlaySeconds += dt;
     advanceMobWorld(state.mobWorld, state.nations, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds),
       state.area === field ? state.player : null, Math.random, settleNationShops, updateAdventurers, state.adventurers.individuals);
+    moveAdventurersFor(dt);
     update(dt);
   }
   const minute = currentGameMinute();

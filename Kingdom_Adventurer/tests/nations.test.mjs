@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { updateTrees } from '../game/src/trees.js?v=53';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=56';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=57';
 import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=55';
 import { createEncounters } from '../game/src/combat.js?v=56';
 import { createSkills } from '../game/src/skills.js?v=49';

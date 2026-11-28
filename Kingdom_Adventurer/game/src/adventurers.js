@@ -12,6 +12,7 @@ import { dropLoot, takeDrop } from './loot.js?v=56';
 import { acceptsItem, buyItem, salePrice, sellItem, sellableQuantity, shopInventory } from './shop.js?v=55';
 
 const range = 520;
+const travel = new WeakMap();
 export const weaponClasses = ['one-handed', 'two-handed'];
 const starters = ['iron-dagger', 'iron-hammer'];
 const towns = nationLayouts.map(layout => ({
@@ -64,18 +65,17 @@ function walkStep(actor, goal, dt, blockers) {
   }
 }
 
-function walk(actor, goal, dt, blockers) {
-  const steps = Math.ceil(dt * settings.player.speed / settings.player.radius);
-  for (let step = 0; step < steps; step++) walkStep(actor, goal, dt / steps, blockers);
-}
-
-function approachFacility(actor, town, facility, dt, blockers) {
-  const { door } = facility;
-  if (actor.y < door.y - 10) {
-    const across = Math.abs(actor.x - town.spine) > 6;
-    walk(actor, { x: town.spine, y: across ? actor.y : door.y }, dt, blockers);
-  } else {
-    walk(actor, door, dt, blockers);
+export function moveAdventurers(state, loot, dt, blockers) {
+  for (const actor of state.adventurers.individuals) {
+    const intent = travel.get(actor);
+    if (!intent || actor.sleepUntil !== null) continue;
+    const { target, mob, drop, spine } = intent;
+    if ((mob && state.mobWorld.mobs.get(target.id) !== target) || (drop && !loot.includes(target))) continue;
+    const waypoint = spine !== undefined && actor.y < target.y - 10
+      ? { x: spine, y: Math.abs(actor.x - spine) > 6 ? actor.y : target.y }
+      : target;
+    const steps = Math.ceil(dt * settings.player.speed / settings.player.radius);
+    for (let step = 0; step < steps; step++) walkStep(actor, waypoint, dt / steps, blockers);
   }
 }
 
@@ -110,7 +110,7 @@ function nearbyThreats(world, actor) {
   return [...mobsIn(world, actor.x - range, actor.y - range, actor.x + range, actor.y + range)];
 }
 
-function fight(actor, enemy, world, loot, dt, blockers) {
+function fight(actor, enemy, world, loot) {
   const gap = distance(actor, enemy);
   if (gap <= items.get(actor.weaponId).range && actor.cooldown === 0) {
     hitMob(actor, enemy);
@@ -119,14 +119,15 @@ function fight(actor, enemy, world, loot, dt, blockers) {
       dropLoot({ lootDrops: loot }, enemy, mobTypes[enemy.kind]);
     }
   } else {
-    walk(actor, enemy, dt, blockers);
+    travel.set(actor, { target: enemy, mob: true });
   }
 }
 
-export function advanceAdventurers(state, loot, minute, dt, blockers, random = Math.random) {
+export function advanceAdventurers(state, loot, minute, dt, random = Math.random) {
   const group = state.adventurers;
   const world = state.mobWorld;
   for (const [index, actor] of group.individuals.entries()) {
+    travel.delete(actor);
     if (actor.sleepUntil !== null) {
       if (minute < actor.sleepUntil) continue;
       actor.sleepUntil = null;
@@ -155,26 +156,28 @@ export function advanceAdventurers(state, loot, minute, dt, blockers, random = M
     const town = (retreat && towns.find(site => site.inn.id === actor.innId))
       || towns.find(site => site.inn.door === nearest(actor, towns.map(entry => entry.inn.door)));
     if (retreat && actor.gold >= settings.inn.price) {
-      approachFacility(actor, town, town.inn, dt, blockers);
       if (distance(actor, town.inn.door) <= 12) {
         actor.gold -= settings.inn.price;
         actor.innId = town.inn.id;
         actor.sleepUntil = nextMorningMinute(minute);
         Object.assign(actor, town.inn.door);
+      } else {
+        travel.set(actor, { target: town.inn.door, spine: town.spine });
       }
       continue;
     }
     if (nearbyEnemies.length >= 3) {
-      approachFacility(actor, town, town.inn, dt, blockers);
+      travel.set(actor, { target: town.inn.door, spine: town.spine });
       continue;
     }
     const drop = nearest(actor, loot.filter(entry => !entry.playerClaim), range);
     if (drop) {
-      walk(actor, drop, dt, blockers);
       if (distance(actor, drop) <= settings.currency.pickupRadius) {
         actor.gold += takeDrop(actor.inventory, drop);
         loot.splice(loot.indexOf(drop), 1);
         for (const id of actor.inventory.keys()) if (upgrade(actor, id)) equipItem(actor, id);
+      } else {
+        travel.set(actor, { target: drop, drop: true });
       }
       continue;
     }
@@ -186,13 +189,13 @@ export function advanceAdventurers(state, loot, minute, dt, blockers, random = M
       }) || location === town.gear && [...state.shopStock[location.id].keys()].some(id =>
         upgrade(actor, id) && actor.gold - settings.inn.price >= items.get(id).price));
     if (shop && !nearbyEnemies.length) {
-      approachFacility(actor, town, shop, dt, blockers);
       if (distance(actor, shop.door) <= 12) market(state, actor, shop, shop === town.gear);
+      else travel.set(actor, { target: shop.door, spine: town.spine });
       continue;
     }
     const target = nearest(actor, nearby, range);
     if (target) {
-      fight(actor, target, world, loot, dt, blockers);
+      fight(actor, target, world, loot);
       continue;
     }
     if (!actor.destination || distance(actor, actor.destination) < 32) {
@@ -204,6 +207,6 @@ export function advanceAdventurers(state, loot, minute, dt, blockers, random = M
       };
       actor.innId = town.inn.id;
     }
-    walk(actor, actor.destination, dt, blockers);
+    travel.set(actor, { target: actor.destination });
   }
 }

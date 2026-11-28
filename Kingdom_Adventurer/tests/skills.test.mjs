@@ -5,7 +5,7 @@ import { createSkills, gainSkillExperience, skillDefinitions } from '../game/src
 import { experienceToNextLevel, gainExperience } from '../game/src/growth.js?v=49';
 import { playerAttack, recordWeaponHit } from '../game/src/weapon-skill.js?v=49';
 import { createEncounters, markHuntedAnimal, updateCombat } from '../game/src/combat.js?v=56';
-import { areas, makeSave, restoreSave, UnsupportedSaveVersion } from '../game/src/save-data.js?v=56';
+import { areas, makeSave, restoreSave, UnsupportedSaveVersion } from '../game/src/save-data.js?v=57';
 import { cave, field, shopDoors, start } from '../game/src/world.js?v=55';
 import { items } from '../game/src/equipment.js?v=53';
 
