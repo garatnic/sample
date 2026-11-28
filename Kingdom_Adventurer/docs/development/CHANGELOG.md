@@ -1,5 +1,26 @@
 # 変更履歴 — Kingdom Adventurer
 
+## 2026-11-28 — 国家復元の再計算を削減（ver.61 / DEV-103）
+
+- 実装コミット [6e79d54f7e15e9ec66b335e37844bd426194d1a7](https://github.com/garatnic/sample/commit/6e79d54f7e15e9ec66b335e37844bd426194d1a7)。B05のみ実施。次回イベントの計算結果を保存検証と代入で共用。D01〜05は保留。CUR-SYS-004、CUR-NATION-002。
+- Node 36件合格。ESLint指摘0件。セーブ形式15。
+- [棚卸し](SOURCE_CODE_AUDIT.md)にブラウザ検証・集計・保留理由を追記。整理計画、現行仕様の版・基準、仕様・実装対応表、TODO、開発状況、ゲームREADMEを更新。ロードマップ・未決事項・原資料・統合仕様・テスト索引は工程・仕様・テストIDが変わらないため更新不要。
+
+## 2026-11-28 — 重複コードの整理（ver.60 / DEV-102）
+
+- 実装コミット [5a1b4b5e22f43724036a478e7cdabf6e98a11e16](https://github.com/garatnic/sample/commit/5a1b4b5e22f43724036a478e7cdabf6e98a11e16)。B01〜03。同一URLの import、装備枠の色指定、フレーム内の小数時刻と切り捨て時刻を整理。B04は見送り。CUR-SYS-003/004/005、CUR-ADV-001、CUR-ITEM-002、CUR-UI-005、CUR-INN-002。
+- Node 36件合格。ESLint指摘0件。セーブ形式15。
+
+## 2026-11-28 — 旧採集時間の削除（ver.59 / DEV-101）
+
+- 実装コミット [d65eb30a64ce370239f52e62442e7794fc122868](https://github.com/garatnic/sample/commit/d65eb30a64ce370239f52e62442e7794fc122868)。A04。旧採集時間の設定と復元時の読取りを削除。共有資源の次回採集時刻・枯渇・再生・運搬と、建築・加工に使う時間は現行どおり。CUR-NATION-002、CUR-SYS-004、CUR-WORLD-005。
+- Node 36件合格。ESLint指摘0件。セーブ形式15。
+
+## 2026-11-28 — 未使用コードの削除（ver.58 / DEV-100）
+
+- 実装コミット [937bc2a4f5f6224266a7f127a0f2917b998abd6d](https://github.com/garatnic/sample/commit/937bc2a4f5f6224266a7f127a0f2917b998abd6d)。A01〜03・A05〜06。未参照の時計関数と2つの返却値、8箇所の export、住民の未使用所属IDを削除。CUR-SYS-005、CUR-ITEM-002/003、CUR-GROWTH-001/002/003、CUR-WORLD-001/004/007、CUR-NATION-001/002/003、CUR-QUEST-001/002、CUR-SHOP-002、CUR-SYS-004。
+- Node 36件合格。ESLint指摘0件。セーブ形式15。
+
 ## 2026-11-28 — 全ソースコード棚卸し（DEV-099）
 
 - 資料コミット [29ec699f9712fb765a1c18eaa53fbbad3bc45558](https://github.com/garatnic/sample/commit/29ec699f9712fb765a1c18eaa53fbbad3bc45558)。現行45/45件を確認し、A6/B5/C7/D5/E7件。見込み純減7〜16行、削除候補ファイル0。旧セーブ移行の再確認は形式15、調査基準はver.57。
