@@ -4,6 +4,7 @@
 - [ROADMAP](ROADMAP.md)：4段階の開発Phase
 - [TODO](TODO.md)：累積型開発台帳
 - [DEVELOPMENT_STATUS](DEVELOPMENT_STATUS.md)：最新の引き継ぎ
+- [全ソースコード棚卸し](SOURCE_CODE_AUDIT.md)・[コード整理計画](SOURCE_CODE_CLEANUP_PLAN.md)
 - [OPEN_QUESTIONS](OPEN_QUESTIONS.md)：未決事項
 - [統合仕様](../specifications/README.md)：最終仕様
 - [履歴](../history/README.md)：原資料
