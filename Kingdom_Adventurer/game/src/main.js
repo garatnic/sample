@@ -6,7 +6,7 @@ import { cave, field, guildDoors, innDoors, shopDoors, tradeDoors, movePlayer, p
 import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=53';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
 import { createInput } from './input.js?v=42';
-import { createRenderer } from './render.js?v=53';
+import { createRenderer } from './render.js?v=53.1';
 import { setupGearMenus } from './gear-ui.js?v=53';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=53';

@@ -108,7 +108,7 @@ export function createRenderer(canvas) {
 
   function building({ x, y, w, h, kind, door }) {
     const inn = kind === 'inn';
-    const shop = kind.endsWith('-shop');
+    const shop = kind.endsWith('-shop') || kind === 'trade-post';
     rect(x + 3, y + 6, w + 4, h, '#363e30');
     rect(x, y + 14, w, h - 14, '#d1b087');
     const roof = { inn: '#85533e', center: '#575381', warehouse: '#7b5638', house: '#5c7451' };
