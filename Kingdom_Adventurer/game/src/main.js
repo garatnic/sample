@@ -125,7 +125,7 @@ inn.querySelector('form').addEventListener('submit', async event => {
   const buttons = [...inn.querySelectorAll('button')];
   for (const button of buttons) button.disabled = true;
   setText(innOffer, '翌朝まで休んでいます…');
-  const morning = nextMorningMinute(currentGameMinute());
+  const morning = nextMorningMinute(Math.floor(currentGameMinute()));
   // Break time skips into small steps so the dialog remains responsive on mobile.
   while (state.nations.minute < morning) {
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -173,7 +173,7 @@ function nearbyCenter() {
   });
 }
 
-function update(dt) {
+function update(dt, minute) {
   const hunt = huntRequested;
   huntRequested = false;
   const { player } = state;
@@ -242,7 +242,7 @@ function update(dt) {
   const enteringGuild = touchingGuild && touchingGuild !== state.guildContact;
   state.guildContact = touchingGuild;
   if (enteringGuild) {
-    openGuild(touchingGuild, gameDay(currentGameMinute()));
+    openGuild(touchingGuild, gameDay(minute));
     return;
   }
 
@@ -270,21 +270,23 @@ let elapsedPlaySeconds = 0;
 let clockBaseMinute = 0;
 
 function currentGameMinute() {
-  return Math.floor(clockBaseMinute + exactGameMinutes(elapsedPlaySeconds));
+  return clockBaseMinute + exactGameMinutes(elapsedPlaySeconds);
 }
 
 let previousClockMinute = -1;
 function frame(time) {
   const dt = Math.min((time - previous) / 1000, 0.04);
   previous = time;
-  if (!document.querySelector('dialog[open]') && state.player.hp > 0) {
-    elapsedPlaySeconds += dt;
-    advanceMobWorld(state.mobWorld, state.nations, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds),
+  const playing = !document.querySelector('dialog[open]') && state.player.hp > 0;
+  if (playing) elapsedPlaySeconds += dt;
+  const exactMinute = currentGameMinute();
+  const minute = Math.floor(exactMinute);
+  if (playing) {
+    advanceMobWorld(state.mobWorld, state.nations, exactMinute,
       state.area === field ? state.player : null, Math.random, settleNationShops, updateAdventurers, state.adventurers.individuals);
     moveAdventurersFor(dt);
-    update(dt);
+    update(dt, minute);
   }
-  const minute = currentGameMinute();
   if (minute !== previousClockMinute) {
     previousClockMinute = minute;
     const clock = gameDateTime(minute);
@@ -302,7 +304,7 @@ function frame(time) {
   const city = state.nations.nations.find(nation => inSettlement(nation.cities[0], state.player))?.cities[0];
   setText(locationLabel, state.area === cave ? cave.name : city?.name ?? '街道とその周辺');
   setText(notice, state.notice?.text ?? '');
-  if (!resting) render(state, time, clockBaseMinute + exactGameMinutes(elapsedPlaySeconds));
+  if (!resting) render(state, time, exactMinute);
   requestAnimationFrame(frame);
 }
 

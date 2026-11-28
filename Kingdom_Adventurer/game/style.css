@@ -175,6 +175,7 @@ button:disabled { opacity: .55; cursor: default; }
   padding: .25rem;
   text-align: center;
   background: #111f2eea;
+  color: inherit;
   border: 1px solid #8194a6;
   border-radius: .25rem;
   overflow-wrap: anywhere;
@@ -237,8 +238,6 @@ header .hud-mp { margin: 0; color: #b6dbef; font-variant-numeric: tabular-nums; 
   color: #201b12;
   background: #e2cf9c;
 }
-.equipment-slot { color: inherit; }
-.slot-weapon { color: #ffedc4; }
 .equipment-slot.is-equipped {
   color: #edfff0;
   background: #234c3d;
