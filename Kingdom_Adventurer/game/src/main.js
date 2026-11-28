@@ -7,7 +7,7 @@ import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './co
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
 import { createInput } from './input.js?v=42';
 import { createRenderer } from './render.js?v=53.1';
-import { setupGearMenus } from './gear-ui.js?v=53';
+import { setupGearMenus } from './gear-ui.js?v=54';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=53';
 

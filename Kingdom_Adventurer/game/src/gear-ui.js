@@ -93,11 +93,13 @@ export function setupGearMenus(state, input) {
     const balance = shopBalance(state, shopId);
     balanceLabel.textContent = `${tradeNation(state, shopId) ? '国庫' : '店の所持金'} ${balance}G`;
     const buying = shopMode === 'buy';
+    const stock = shopInventory(state, shopId);
     let focusTarget = buying ? buyButton : sellButton;
     for (const [id, item] of items) {
       if (!acceptsItem(shopId, item) || (shopFilter !== 'all' && shopFilter !== itemGroup(item))) continue;
-      const quantity = (buying ? shopInventory(state, shopId) : state.player.inventory).get(id) ?? 0;
-      if (!quantity) continue;
+      const inStock = stock.get(id) ?? 0;
+      const owned = state.player.inventory.get(id) ?? 0;
+      if (!(buying ? inStock : owned)) continue;
       const price = shopPrice(shopId, id, buying);
       const equipped = !buying && sellableQuantity(state.player, id) <= 0;
       const entry = document.createElement('li');
@@ -106,7 +108,8 @@ export function setupGearMenus(state, input) {
       disclosure.dataset.itemId = id;
       disclosure.open = expandedId === id;
       const summary = document.createElement('summary');
-      summary.textContent = `${item.name}（${buying ? "在庫" : "所持"} ${quantity}）`;
+      const ownedLabel = owned ? `、所持${owned}` : '';
+      summary.textContent = `${item.name}（在庫${inStock}${ownedLabel}）`;
       const facts = document.createElement('p');
       const group = shops[shopId].tabs.find(([key]) => key === itemGroup(item))[1];
       const stats = itemStats(item) || effectText(item.effect);
