@@ -1,11 +1,11 @@
 # 仕様・実装対応表 — Kingdom Adventurer
 
-基準: 2026-11-28 / ver.55 / DEV-097 / 実装コミット `e5cf27178cfa36728e7ff71cb9a1f29035c69cc8`。
-正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全52仕様・実装ファイル35件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
+基準: 2026-11-28 / ver.56 / DEV-092・DEV-093 / 実装コミット `a624766642992bc55bf93f2148aa2c735a6b5960`。
+正本: [現行仕様書](../specifications/current/CURRENT_SPECIFICATIONS.md)。全53仕様・実装ファイル36件。パスは `Kingdom_Adventurer/game/` 相対。主な処理・設定・呼出箇所・DOM/CSSの目印を示す。目標仕様IDの定義は[分野別統合仕様](../specifications/README.md)を参照。
 
 ## 検証の記録
 
-保存済みテスト32件（SKILL-01〜07、NATION-01〜08、MOB-01〜06、ECON-01〜07、TRADE-01〜04）。[テスト索引](../../tests/README.md)、[技能](../../tests/skills.test.mjs)、[国家](../../tests/nations.test.mjs)、[MOB](../../tests/mobs.test.mjs)、[国家経済](../../tests/economy.test.mjs)、[交易](../../tests/trade.test.mjs) を参照。
+保存済みテスト34件（SKILL-01〜07、NATION-01〜08、MOB-01〜06、ECON-01〜07、TRADE-01〜04、ADV-01〜02）。[テスト索引](../../tests/README.md)、[技能](../../tests/skills.test.mjs)、[国家](../../tests/nations.test.mjs)、[MOB](../../tests/mobs.test.mjs)、[国家経済](../../tests/economy.test.mjs)、[交易](../../tests/trade.test.mjs) を参照。
 
 - 保存済み自動テスト — 再実行できるテストのIDとファイルを登録する。
 - 単発実行 — Nodeの確認コードやブラウザ自動操作など、実行した方法と結果を記録する。保存済みテストIDは付けない。
@@ -70,6 +70,7 @@
 | `CUR-NATION-005` | 国庫・日次精算 | src/nation-economy.js: settleNationDay(), reserves(); src/nation-simulation.js: createNationSimulation(), advanceNations(); src/nation-settings.js: initialTreasury; src/trade-settings.js: dailyGoldPerResident; src/trade-stock.js: settleTrade(); src/shop.js: settleShops(); src/main.js: settleNationShops(); src/nation-save.js: captureNations(), restoreNations(); src/nation-menu.js: setupNationMenu() | CUR-NATION-003, CUR-NATION-004, CUR-SHOP-004, CUR-SYS-005 | NATION-016, TRADE-003 | ECON-02, ECON-03, ECON-04, ECON-05, ECON-07 |
 | `CUR-NATION-006` | 特産品加工と予約 | src/nation-simulation.js: craftChance(), assignWork(), completeTask(), removeResident(); src/nation-economy.js: reserves(); src/trade-stock.js: reservedProduction(), tradeRoom(); src/trade-settings.js: workMinutes, leisureShare, domesticProductionLimit; src/nation-save.js: restoreNations(); src/nation-menu.js: setupNationMenu() | CUR-NATION-002, CUR-NATION-003, CUR-NATION-004, CUR-SHOP-005, CUR-SYS-004 | TRADE-002 | TRADE-02, TRADE-04, NATION-02, ECON-07 |
 | `CUR-SHOP-005` | 交易所と国別価格 | src/trade-settings.js: tradeGoods, tradeSettings, tradePrice(); src/trade-stock.js: tradeRoom(), settleTrade(); src/nation-layout.js: facilityTypes; src/world.js: tradeDoors; src/main.js: retailDoors; src/shop.js: buyItem(), sellItem(), shopInventory(), shopBalance(), shopPrice(); src/equipment.js: items; src/gear-ui.js: setupGearMenus(); src/nation-save.js: captureNations(), restoreNations() | CUR-NATION-001, CUR-NATION-005, CUR-NATION-006, CUR-SHOP-003, CUR-SYS-004 | TRADE-001, TRADE-003 | TRADE-01〜04 |
+| `CUR-ADV-001` | 自由民の冒険者 | src/adventurers.js: createAdventurers(), advanceAdventurers(); src/main.js: updateAdventurers(); src/mob-world.js: advanceMobWorld(); src/combat.js: hitMob(); src/loot.js: takeDrop(), dropLoot(); src/save-data.js: captureAdventurers(), restoreAdventurers(); src/render.js: render(); src/shop.js: buyItem(), sellItem() | CUR-SYS-004, CUR-WORLD-007 | TRADE-005 | ADV-01, ADV-02 |
 
 ## ファイルから仕様を探す（逆引き）
 
@@ -77,17 +78,18 @@
 |---|---|
 | `index.html` | CUR-SYS-001, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-004, CUR-INPUT-001, CUR-INPUT-002, CUR-GROWTH-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-UI-001, CUR-UI-002, CUR-UI-005, CUR-UI-006, CUR-NATION-004 |
 | `package.json` | CUR-SYS-001 |
+| `src/adventurers.js` | CUR-ADV-001 |
 | `src/clock.js` | CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-INN-002, CUR-QUEST-001, CUR-SHOP-004, CUR-NATION-003 |
-| `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-006, CUR-INPUT-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-GROWTH-003, CUR-LIFE-001, CUR-QUEST-001, CUR-ITEM-003, CUR-ITEM-001, CUR-UI-004 |
+| `src/combat.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-004, CUR-WORLD-006, CUR-INPUT-002, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-GROWTH-003, CUR-LIFE-001, CUR-QUEST-001, CUR-ITEM-003, CUR-ITEM-001, CUR-UI-004, CUR-ADV-001 |
 | `src/consumables.js` | CUR-SYS-002, CUR-SYS-004, CUR-WORLD-005, CUR-LIFE-001, CUR-ITEM-003, CUR-UI-001 |
 | `src/equipment.js` | CUR-SYS-002, CUR-SYS-004, CUR-WORLD-005, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-007, CUR-GROWTH-003, CUR-QUEST-001, CUR-QUEST-002, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-ITEM-001, CUR-ITEM-002, CUR-SHOP-005 |
 | `src/gear-ui.js` | CUR-GROWTH-003, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-ITEM-001, CUR-ITEM-002, CUR-SHOP-005 |
 | `src/growth.js` | CUR-SYS-002, CUR-SYS-004, CUR-COMBAT-005, CUR-GROWTH-001, CUR-GROWTH-003, CUR-INN-002, CUR-LIFE-001, CUR-ITEM-003, CUR-ITEM-002, CUR-UI-001 |
 | `src/input.js` | CUR-SYS-003, CUR-INPUT-001, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-INN-001, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002 |
-| `src/loot.js` | CUR-SYS-003, CUR-WORLD-006, CUR-COMBAT-006, CUR-COMBAT-007 |
-| `src/main.js` | CUR-SYS-001, CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-004, CUR-WORLD-005, CUR-WORLD-006, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-GROWTH-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-SHOP-004, CUR-ITEM-001, CUR-UI-001, CUR-UI-004, CUR-UI-005, CUR-UI-006, CUR-NATION-003, CUR-NATION-004, CUR-NATION-005, CUR-SHOP-005 |
+| `src/loot.js` | CUR-SYS-003, CUR-WORLD-006, CUR-COMBAT-006, CUR-COMBAT-007, CUR-ADV-001 |
+| `src/main.js` | CUR-SYS-001, CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-004, CUR-WORLD-005, CUR-WORLD-006, CUR-INPUT-002, CUR-INPUT-003, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-GROWTH-001, CUR-GROWTH-002, CUR-INN-001, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-ITEM-003, CUR-SHOP-003, CUR-SHOP-004, CUR-ITEM-001, CUR-UI-001, CUR-UI-004, CUR-UI-005, CUR-UI-006, CUR-NATION-003, CUR-NATION-004, CUR-NATION-005, CUR-SHOP-005, CUR-ADV-001 |
 | `src/mob-settings.js` | CUR-SYS-004, CUR-WORLD-007, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003 |
-| `src/mob-world.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-006, CUR-WORLD-007, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-006, CUR-INN-002, CUR-UI-004, CUR-UI-006, CUR-NATION-002 |
+| `src/mob-world.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-002, CUR-WORLD-006, CUR-WORLD-007, CUR-COMBAT-001, CUR-COMBAT-002, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-006, CUR-INN-002, CUR-UI-004, CUR-UI-006, CUR-NATION-002, CUR-ADV-001 |
 | `src/nation-economy.js` | CUR-SHOP-004, CUR-NATION-002, CUR-NATION-003, CUR-NATION-005, CUR-NATION-006 |
 | `src/nation-layout.js` | CUR-WORLD-001, CUR-WORLD-002, CUR-WORLD-003, CUR-WORLD-004, CUR-SHOP-004, CUR-UI-001, CUR-NATION-001, CUR-NATION-002, CUR-SHOP-005 |
 | `src/nation-menu.js` | CUR-NATION-004, CUR-NATION-005, CUR-NATION-006 |
@@ -95,12 +97,12 @@
 | `src/nation-settings.js` | CUR-WORLD-005, CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-NATION-004, CUR-NATION-005 |
 | `src/nation-simulation.js` | CUR-SYS-002, CUR-SYS-003, CUR-SYS-005, CUR-SYS-004, CUR-WORLD-004, CUR-WORLD-005, CUR-MOVE-002, CUR-COMBAT-002, CUR-SHOP-004, CUR-NATION-001, CUR-NATION-002, CUR-NATION-003, CUR-NATION-004, CUR-NATION-005, CUR-NATION-006 |
 | `src/quests.js` | CUR-COMBAT-006, CUR-QUEST-001, CUR-QUEST-002 |
-| `src/render.js` | CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-003, CUR-WORLD-004, CUR-WORLD-005, CUR-WORLD-006, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-NATION-002, CUR-NATION-004 |
-| `src/save-data.js` | CUR-SYS-004, CUR-WORLD-005, CUR-SHOP-004, CUR-UI-006 |
+| `src/render.js` | CUR-SYS-003, CUR-WORLD-001, CUR-WORLD-003, CUR-WORLD-004, CUR-WORLD-005, CUR-WORLD-006, CUR-MOVE-001, CUR-COMBAT-001, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-001, CUR-INN-002, CUR-QUEST-001, CUR-SHOP-001, CUR-SHOP-002, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-NATION-002, CUR-NATION-004, CUR-ADV-001 |
+| `src/save-data.js` | CUR-SYS-004, CUR-WORLD-005, CUR-SHOP-004, CUR-UI-006, CUR-ADV-001 |
 | `src/save-menu.js` | CUR-SYS-004 |
 | `src/save-store.js` | CUR-SYS-004 |
 | `src/settings.js` | CUR-SYS-002, CUR-SYS-004, CUR-WORLD-001, CUR-WORLD-005, CUR-WORLD-006, CUR-MOVE-001, CUR-MOVE-002, CUR-COMBAT-001, CUR-COMBAT-003, CUR-COMBAT-004, CUR-COMBAT-005, CUR-COMBAT-006, CUR-COMBAT-007, CUR-INN-002, CUR-LIFE-001, CUR-QUEST-001, CUR-QUEST-002, CUR-UI-001, CUR-UI-002, CUR-UI-003, CUR-UI-004, CUR-NATION-001 |
-| `src/shop.js` | CUR-SYS-004, CUR-WORLD-005, CUR-COMBAT-007, CUR-SHOP-001, CUR-SHOP-002, CUR-SHOP-003, CUR-SHOP-004, CUR-ITEM-002, CUR-NATION-005, CUR-SHOP-005 |
+| `src/shop.js` | CUR-SYS-004, CUR-WORLD-005, CUR-COMBAT-007, CUR-SHOP-001, CUR-SHOP-002, CUR-SHOP-003, CUR-SHOP-004, CUR-ITEM-002, CUR-NATION-005, CUR-SHOP-005, CUR-ADV-001 |
 | `src/skill-menu.js` | CUR-GROWTH-002 |
 | `src/skills.js` | CUR-SYS-004, CUR-GROWTH-001, CUR-GROWTH-002, CUR-GROWTH-003 |
 | `src/trade-settings.js` | CUR-NATION-005, CUR-NATION-006, CUR-SHOP-005 |
