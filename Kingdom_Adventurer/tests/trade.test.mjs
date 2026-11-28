@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { firstMinuteOfDay, gameDay } from '../game/src/clock.js?v=34';
-import { advanceNations, createNationSimulation, removeResident } from '../game/src/nation-simulation.js?v=53';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=53';
-import { settleNationDay } from '../game/src/nation-economy.js?v=53';
-import { buyItem, sellItem, shopPrice, settleShops, createShopStock } from '../game/src/shop.js?v=55';
+import { advanceNations, createNationSimulation, removeResident } from '../game/src/nation-simulation.js?v=62';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=62';
+import { settleNationDay } from '../game/src/nation-economy.js?v=62';
+import { buyItem, sellItem, shopPrice, settleShops, createShopStock } from '../game/src/shop.js?v=62';
 import { tradeSettings } from '../game/src/trade-settings.js?v=53';
-import { reservedProduction, stockQuantity, tradeRoom } from '../game/src/trade-stock.js?v=53';
+import { reservedProduction, stockQuantity, tradeRoom } from '../game/src/trade-stock.js?v=62';
 import { shopDoors } from '../game/src/world.js?v=55';
 
 const door = nation => nation.cities[0].tradePost.id;

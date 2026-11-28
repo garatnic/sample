@@ -1,8 +1,8 @@
-import { actionNames, craftChance, modeFor, refreshNationDemand } from './nation-simulation.js?v=53';
+import { actionNames, craftChance, modeFor, refreshNationDemand } from './nation-simulation.js?v=62';
 import { nationSettings as config } from './nation-settings.js?v=53';
 
 import { tradeGoods, tradeSettings } from './trade-settings.js?v=53';
-import { reservedProduction, stockQuantity } from './trade-stock.js?v=53';
+import { reservedProduction, stockQuantity } from './trade-stock.js?v=62';
 
 export function setupNationMenu(state, input, field) {
   const dialog = document.querySelector('#nation-menu');

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { updateTrees } from '../game/src/trees.js?v=53';
-import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=57';
-import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=55';
-import { createEncounters } from '../game/src/combat.js?v=56';
+import { areas, makeSave, restoreSave } from '../game/src/save-data.js?v=62';
+import { buyItem, createShopStock, sellItem, settleShops, startingShopGold } from '../game/src/shop.js?v=62';
+import { createEncounters } from '../game/src/combat.js?v=62';
 import { createSkills } from '../game/src/skills.js?v=49';
 import { refreshGuild } from '../game/src/quests.js?v=53';
 import { settings } from '../game/src/settings.js?v=49';
@@ -11,8 +11,8 @@ import { nationSettings as config } from '../game/src/nation-settings.js?v=53';
 import { nationLayouts } from '../game/src/nation-layout.js?v=53';
 import { buildings, field, guildDoors, inTown, innDoors, movePlayer, shopDoors, start, terrainAt } from '../game/src/world.js?v=55';
 import { firstMinuteOfDay, gameDay, nextMorningMinute } from '../game/src/clock.js?v=34';
-import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=53';
-import { captureNations, restoreNations } from '../game/src/nation-save.js?v=53';
+import { advanceNations, capacity, createNationSimulation, modeFor, residentPosition, settlementBuildings } from '../game/src/nation-simulation.js?v=62';
+import { captureNations, restoreNations } from '../game/src/nation-save.js?v=62';
 
 const count = (city, kind) => city.buildings.filter(b => b.kind === kind).length;
 const copy = state => JSON.parse(JSON.stringify(captureNations(state)));

@@ -1,4 +1,4 @@
-import { UnsupportedSaveVersion } from './save-data.js?v=57';
+import { UnsupportedSaveVersion } from './save-data.js?v=62';
 import { readSave, writeSave, deleteSave } from './save-store.js?v=31';
 
 export function setupSaveMenu({ input, canSave, capture, decode, restore, notify }) {

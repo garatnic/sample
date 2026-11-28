@@ -1,16 +1,21 @@
 import { tradeGoods, tradePrice, tradeSettings } from './trade-settings.js?v=53';
 
 export function reservedProduction(nation) {
-  return nation.cities.reduce((sum, city) =>
-    sum + city.residents.filter(person => person.action === 'craftTrade').length, 0);
+  let reserved = 0;
+  for (const city of nation.cities) {
+    for (const person of city.residents) {
+      if (person.action === 'craftTrade') reserved++;
+    }
+  }
+  return reserved;
 }
 
 export function stockQuantity(stock) {
   return [...stock.values()].reduce((sum, count) => sum + count, 0);
 }
 
-export function tradeRoom(nation) {
-  return tradeSettings.capacity - stockQuantity(nation.trade.stock) - reservedProduction(nation);
+export function tradeRoom(nation, reserved = reservedProduction(nation)) {
+  return tradeSettings.capacity - stockQuantity(nation.trade.stock) - reserved;
 }
 
 export function settleTrade(nation, finance) {

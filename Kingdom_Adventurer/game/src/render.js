@@ -1,8 +1,8 @@
-import { mobsIn } from './mob-world.js?v=56';
+import { fieldTileTerrain, mobsIn } from './mob-world.js?v=62';
 import { animalTypes, settings } from './settings.js?v=49';
-import { buildings, cave, field, terrainAt } from './world.js?v=55';
+import { buildings, cave, field } from './world.js?v=55';
 
-import { modeFor, residentPosition } from './nation-simulation.js?v=53';
+import { modeFor, residentPosition } from './nation-simulation.js?v=62';
 
 import { harvestSeconds, sourceQuantity } from './trees.js?v=53';
 
@@ -61,7 +61,7 @@ export function createRenderer(canvas) {
     const variation = ((x * 37) ^ (y * 53)) & 15;
     const px = x * size;
     const py = y * size;
-    const terrain = terrainAt(px + size / 2, py + size / 2);
+    const terrain = fieldTileTerrain(x, y);
     rect(px, py, size, size, colors[terrain]);
     if (terrain === 'forest') {
       rect(px + 7, py + 17, 21, 12, '#31533e');

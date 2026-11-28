@@ -3,7 +3,7 @@ import { buildings, shopDoors } from './world.js?v=55';
 import { equippedId, items, ringSlots, slots } from './equipment.js?v=53';
 
 import { tradePrice } from './trade-settings.js?v=53';
-import { tradeRoom } from './trade-stock.js?v=53';
+import { tradeRoom } from './trade-stock.js?v=62';
 
 const equipmentTabs = [...slots];
 const goodsTabs = [['medicine', '薬'], ['food', '食べ物'], ['materials', '素材'], ['misc', 'その他']];

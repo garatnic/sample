@@ -1,11 +1,11 @@
 import { mobSettings } from './mob-settings.js?v=51';
 import { firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=53';
-import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=53';
+import { actionNames, assignRoles, capacity, createNationSimulation, gatherAction, nextPick, refreshNationDemand, taskSchedule, wanderPoints } from './nation-simulation.js?v=62';
 import { nationSettings as config } from './nation-settings.js?v=53';
 
 import { tradeGoods, tradeSettings } from './trade-settings.js?v=53';
-import { tradeRoom } from './trade-stock.js?v=53';
+import { tradeRoom } from './trade-stock.js?v=62';
 
 function requireValid(condition) {
   if (!condition) throw new Error('Invalid nation simulation data');

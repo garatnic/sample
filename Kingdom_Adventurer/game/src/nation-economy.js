@@ -2,7 +2,7 @@ import { nationLayouts } from './nation-layout.js?v=53';
 import { nationSettings as config } from './nation-settings.js?v=53';
 
 import { tradeSettings } from './trade-settings.js?v=53';
-import { settleTrade } from './trade-stock.js?v=53';
+import { settleTrade } from './trade-stock.js?v=62';
 
 const resources = ['food', 'wood'];
 

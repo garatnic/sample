@@ -1,7 +1,7 @@
 import { exactGameMinutes } from './clock.js?v=34';
-import { physicalDamage } from './combat.js?v=56';
+import { physicalDamage } from './combat.js?v=62';
 import { mobSettings as config } from './mob-settings.js?v=51';
-import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=53';
+import { advanceNations, removeResident, residentPosition } from './nation-simulation.js?v=62';
 import { animalTypes, mobTypes, settings } from './settings.js?v=49';
 import { buildings, cave, field, terrainAt } from './world.js?v=55';
 
@@ -33,6 +33,16 @@ const tilesByChunk = Array.from({ length: rows * columns }, (_, id) => {
 export function chunkAt(world, x, y) {
   if (x < 0 || y < 0 || x >= field.width || y >= field.height) return undefined;
   return world.chunks[Math.floor(y / chunkSize) * columns + Math.floor(x / chunkSize)];
+}
+
+// Coordinates are field tile indices, in the same row-major order as the spawn samples.
+export function fieldTileTerrain(x, y) {
+  const { chunkTiles } = config;
+  const chunkX = Math.floor(x / chunkTiles);
+  const chunkY = Math.floor(y / chunkTiles);
+  const left = chunkX * chunkTiles;
+  const stride = Math.min(chunkTiles, settings.mapTiles - left);
+  return tilesByChunk[chunkY * columns + chunkX].tiles[(y - chunkY * chunkTiles) * stride + x - left].terrain;
 }
 
 function* chunksIn(world, left, top, right, bottom) {

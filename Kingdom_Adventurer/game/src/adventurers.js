@@ -6,10 +6,10 @@ import { settings, animalTypes, mobTypes } from './settings.js?v=49';
 import { equipItem, items, defenseRating } from './equipment.js?v=53';
 import { field, movePlayer } from './world.js?v=55';
 import { nationLayouts } from './nation-layout.js?v=53';
-import { mobsIn, removeMob } from './mob-world.js?v=56';
-import { hitMob, physicalDamage } from './combat.js?v=56';
+import { mobsIn, removeMob } from './mob-world.js?v=62';
+import { hitMob, physicalDamage } from './combat.js?v=62';
 import { dropLoot, takeDrop } from './loot.js?v=56';
-import { acceptsItem, buyItem, salePrice, sellItem, sellableQuantity, shopInventory } from './shop.js?v=55';
+import { acceptsItem, buyItem, salePrice, sellItem, sellableQuantity, shopInventory } from './shop.js?v=62';
 
 const range = 520;
 const travel = new WeakMap();
@@ -170,9 +170,19 @@ export function advanceAdventurers(state, loot, minute, dt, random = Math.random
       travel.set(actor, { target: town.inn.door, spine: town.spine });
       continue;
     }
-    const drop = nearest(actor, loot.filter(entry => !entry.playerClaim), range);
+    let drop;
+    let closestDrop = range;
+    for (let i = 0; i < loot.length; i++) {
+      const entry = loot[i];
+      if (entry.playerClaim || Math.abs(actor.x - entry.x) >= range || Math.abs(actor.y - entry.y) >= range) continue;
+      const gap = distance(actor, entry);
+      if (gap < closestDrop) {
+        drop = entry;
+        closestDrop = gap;
+      }
+    }
     if (drop) {
-      if (distance(actor, drop) <= settings.currency.pickupRadius) {
+      if (closestDrop <= settings.currency.pickupRadius) {
         actor.gold += takeDrop(actor.inventory, drop);
         loot.splice(loot.indexOf(drop), 1);
         for (const id of actor.inventory.keys()) if (upgrade(actor, id)) equipItem(actor, id);

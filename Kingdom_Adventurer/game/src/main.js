@@ -1,13 +1,13 @@
-import { discoverLocation, setupWorldMap } from './world-map.js?v=56';
+import { discoverLocation, setupWorldMap } from './world-map.js?v=62';
 import { createSkills } from './skills.js?v=49';
 import { setupSkillMenu } from './skill-menu.js?v=49';
 import { settings } from './settings.js?v=49';
 import { cave, field, guildDoors, innDoors, shopDoors, tradeDoors, movePlayer, portalRadius, start } from './world.js?v=55';
-import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=56';
+import { createEncounters, inCombat, markHuntedAnimal, updateCombat } from './combat.js?v=62';
 import { experienceToNextLevel, maxHealth } from './growth.js?v=49';
 import { createInput } from './input.js?v=42';
-import { createRenderer } from './render.js?v=56';
-import { setupGearMenus } from './gear-ui.js?v=55';
+import { createRenderer } from './render.js?v=62';
+import { setupGearMenus } from './gear-ui.js?v=62';
 import { exactGameMinutes, gameDateTime, gameDay, nextMorningMinute } from './clock.js?v=34';
 import { maxMp } from './consumables.js?v=53';
 
@@ -17,17 +17,17 @@ import { collectLoot } from './loot.js?v=56';
 
 import { updateTrees } from './trees.js?v=53';
 import { items } from './equipment.js?v=53';
-import { areas, makeSave, restoreSave } from './save-data.js?v=57';
-import { setupSaveMenu } from './save-menu.js?v=57';
+import { areas, makeSave, restoreSave } from './save-data.js?v=62';
+import { setupSaveMenu } from './save-menu.js?v=62';
 
-import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=53';
-import { advanceMobWorld, createMobWorld } from './mob-world.js?v=56';
+import { createNationSimulation, settlementBuildings } from './nation-simulation.js?v=62';
+import { advanceMobWorld, createMobWorld } from './mob-world.js?v=62';
 import { inSettlement } from './nation-layout.js?v=53';
-import { setupNationMenu } from './nation-menu.js?v=53';
+import { setupNationMenu } from './nation-menu.js?v=62';
 
-import { createShopStock, settleShops, startingShopGold } from './shop.js?v=55';
+import { createShopStock, settleShops, startingShopGold } from './shop.js?v=62';
 
-import { advanceAdventurers, createAdventurers, moveAdventurers } from './adventurers.js?v=57';
+import { advanceAdventurers, createAdventurers, moveAdventurers } from './adventurers.js?v=62';
 
 let huntRequested = false;
 window.addEventListener('keydown', event => {
@@ -106,9 +106,8 @@ function saveNotice(text) {
 const retailDoors = { ...shopDoors, ...tradeDoors };
 const fieldLoot = () => areaStates.get(field).lootDrops;
 const updateAdventurers = (minute, dt) => advanceAdventurers(state, fieldLoot(), minute, dt);
-const moveAdventurersFor = dt => moveAdventurers(state, fieldLoot(), dt, settlementBuildings(state.nations));
 function skipAdventurers(minute, dt) {
-  moveAdventurersFor(dt);
+  moveAdventurers(state, fieldLoot(), dt, settlementBuildings(state.nations));
   updateAdventurers(minute, dt);
 }
 const settleNationShops = (nation, day, finance) => settleShops(state, nation, day, finance);
@@ -173,13 +172,13 @@ function nearbyCenter() {
   });
 }
 
-function update(dt, minute) {
+function update(dt, minute, blockers) {
   const hunt = huntRequested;
   huntRequested = false;
   const { player } = state;
   const direction = input.read();
   const { x, y } = player;
-  movePlayer(player, direction.x, direction.y, dt, state.area, state.area === field ? settlementBuildings(state.nations) : []);
+  movePlayer(player, direction.x, direction.y, dt, state.area, blockers);
   discoverLocation(state);
   player.moving = x !== player.x || y !== player.y;
   player.flash = Math.max(0, player.flash - dt);
@@ -284,8 +283,9 @@ function frame(time) {
   if (playing) {
     advanceMobWorld(state.mobWorld, state.nations, exactMinute,
       state.area === field ? state.player : null, Math.random, settleNationShops, updateAdventurers, state.adventurers.individuals);
-    moveAdventurersFor(dt);
-    update(dt, minute);
+    const blockers = settlementBuildings(state.nations);
+    moveAdventurers(state, fieldLoot(), dt, blockers);
+    update(dt, minute, blockers);
   }
   if (minute !== previousClockMinute) {
     previousClockMinute = minute;
@@ -296,13 +296,17 @@ function frame(time) {
   const { level, experience, hp: currentHp } = state.player;
   const maxHp = maxHealth(level);
   if (health.max !== maxHp) health.max = maxHp;
-  health.value = currentHp;
+  if (health.value !== currentHp) health.value = currentHp;
   setText(progress, `Lv.${level} · XP ${experience} / ${experienceToNextLevel(level)}`);
   setText(gold, `${state.gold}G`);
   setText(mp, `MP ${state.player.mp} / ${maxMp}`);
   setText(hp, `${Math.ceil(currentHp * 10) / 10} / ${maxHp}`);
-  const city = state.nations.nations.find(nation => inSettlement(nation.cities[0], state.player))?.cities[0];
-  setText(locationLabel, state.area === cave ? cave.name : city?.name ?? '街道とその周辺');
+  if (state.area === cave) {
+    setText(locationLabel, cave.name);
+  } else {
+    const city = state.nations.nations.find(nation => inSettlement(nation.cities[0], state.player))?.cities[0];
+    setText(locationLabel, city?.name ?? '街道とその周辺');
+  }
   setText(notice, state.notice?.text ?? '');
   if (!resting) render(state, time, exactMinute);
   requestAnimationFrame(frame);

@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { advanceAdventurers, createAdventurers, moveAdventurers } from '../game/src/adventurers.js?v=57';
-import { hitMob } from '../game/src/combat.js?v=56';
-import { createMobWorld } from '../game/src/mob-world.js?v=56';
+import { advanceAdventurers, createAdventurers, moveAdventurers } from '../game/src/adventurers.js?v=62';
+import { hitMob } from '../game/src/combat.js?v=62';
+import { createMobWorld } from '../game/src/mob-world.js?v=62';
 import { items } from '../game/src/equipment.js?v=53';
-import { createShopStock } from '../game/src/shop.js?v=55';
+import { createShopStock } from '../game/src/shop.js?v=62';
 import { innDoors, shopDoors } from '../game/src/world.js?v=55';
 import { nextMorningMinute } from '../game/src/clock.js?v=34';
 
@@ -129,4 +129,30 @@ test('ADV-04: chase, pickup, shop and retreat use frame movement with actions on
   assert.equal(actor.sleepUntil, nextMorningMinute(8));
   frames();
   assert.deepEqual({ x: actor.x, y: actor.y }, inn);
+});
+
+test('ADV-05: loot ties follow insertion order and a removed target stops movement', () => {
+  const state = setup();
+  const [actor] = state.adventurers.individuals;
+  state.adventurers.individuals = [actor];
+  Object.assign(actor, { x: 3000, y: 3000, destination: { x: 3200, y: 3000 } });
+  const claimed = { x: 3000, y: 3000, playerClaim: true };
+  const first = { x: 2900, y: 3000 };
+  const second = { x: 3100, y: 3000 };
+  const loot = [claimed, first, second];
+  advanceAdventurers(state, loot, 1, 0.5);
+  moveAdventurers(state, loot, 1 / 60, []);
+  assert.equal(actor.x, 2997);
+
+  loot.splice(1, 1);
+  moveAdventurers(state, loot, 1 / 60, []);
+  assert.equal(actor.x, 2997);
+  advanceAdventurers(state, loot, 2, 0.5);
+  moveAdventurers(state, loot, 1 / 60, []);
+  assert.equal(actor.x, 3000);
+
+  loot[1] = { x: 2480, y: 3000 };
+  advanceAdventurers(state, loot, 3, 0.5);
+  moveAdventurers(state, loot, 1 / 60, []);
+  assert.equal(actor.x, 3003);
 });

@@ -1,11 +1,11 @@
 import { harvestSeconds, harvestSource, sourceQuantity } from './trees.js?v=53';
 import { exactGameMinutes, firstMinuteOfDay, gameDay } from './clock.js?v=34';
 import { nationLayouts } from './nation-layout.js?v=53';
-import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=53';
+import { capacity, reserves, settleNationDay, storageRoom, updateNationDemand } from './nation-economy.js?v=62';
 import { nationSettings as config } from './nation-settings.js?v=53';
 
 import { tradeGoods, tradeSettings } from './trade-settings.js?v=53';
-import { reservedProduction, tradeRoom } from './trade-stock.js?v=53';
+import { reservedProduction, tradeRoom } from './trade-stock.js?v=62';
 
 export const actionNames = {
   idle: '待機', wander: '自由徘徊', gatherWood: '木材収集', gatherFood: '食料収集',
@@ -263,8 +263,9 @@ export function refreshNationDemand(nation, minute, targets) {
 }
 
 export function craftChance(nation, demand) {
+  if (!nation.trade.specialty) return 0;
   const reserved = reservedProduction(nation);
-  return nation.trade.specialty && tradeRoom(nation) > 0
+  return tradeRoom(nation, reserved) > 0
     && (nation.trade.stock.get(nation.trade.specialty) ?? 0) + reserved < tradeSettings.domesticProductionLimit
     && demand.surplus.food > reserved && demand.surplus.wood > reserved
     ? demand.leisure * tradeSettings.leisureShare : 0;
