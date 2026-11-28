@@ -144,7 +144,6 @@ export function restoreNations(data, minute) {
             requireValid(carrying === null || (carrying.kind === source.kind
               && integer(carrying.quantity, 1, max - 1)));
             target = source;
-            workMinutes = config.harvest[source.kind].minutes;
             claimed.add(targetId);
             requireValid(integer(gatherLimit, (carrying?.quantity ?? 0) + 1, max)
               && time(gatherGeneration, 0, task.depart));

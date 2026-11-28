@@ -7,7 +7,7 @@ export const nationSettings = {
   warehouse: { initial: 1, max: 4, capacity: 120, cost: 32, minutes: 64 },
   sourcesPerResource: 12,
   sourceRadius: 448,
-  harvest: { wood: { yield: 8, minutes: 5, regrow: 30 }, food: { yield: 8, minutes: 4, regrow: 25 } },
+  harvest: { wood: { yield: 8, regrow: 30 }, food: { yield: 8, regrow: 25 } },
   carry: 8,
   dailyPerResident: { food: 2, wood: 2 },
   minimumDays: 2,
